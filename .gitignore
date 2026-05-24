@@ -1,0 +1,21 @@
+gitignore
+# Python
+__pycache__/
+*.py[cod]
+
+# IDE
+.idea/
+
+# Виртуальное окружение
+venv/
+env/
+.venv/
+
+# Логи и базы
+*.log
+*.db
+*.sqlite
+
+# Системные
+.DS_Store
+Thumbs.db
