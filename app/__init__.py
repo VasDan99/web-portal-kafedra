@@ -1,11 +1,17 @@
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from config import Config
+
+db = SQLAlchemy()
 
 
 def create_app():
     app = Flask(__name__)
+    app.config.from_object(Config)
 
-    @app.route('/')
-    def index():
-        return '<h1>Портал кафедры информационных систем</h1><p>Flask работает!</p>'
+    db.init_app(app)
+
+    from app.main import bp as main_bp
+    app.register_blueprint(main_bp)
 
     return app
