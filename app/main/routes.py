@@ -88,3 +88,8 @@ def feedback():
         flash('Ваше сообщение отправлено! Спасибо за обратную связь.', 'success')
         return redirect(url_for('main.feedback'))
     return render_template('feedback.html', breadcrumb_title=breadcrumb_title, form=form)
+@bp.route('/admin')
+def admin():
+    breadcrumb_title = 'Админ-панель'
+    messages = Feedback.query.order_by(Feedback.created_at.desc()).all()
+    return render_template('admin/index.html', breadcrumb_title=breadcrumb_title, messages=messages)
