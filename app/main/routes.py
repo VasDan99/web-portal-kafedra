@@ -1,5 +1,8 @@
-from flask import render_template
+from flask import render_template, redirect, url_for, flash
 from app.main import bp
+from app.forms import FeedbackForm
+from app.models import Feedback
+from app import db
 
 @bp.route('/')
 def index():
@@ -68,7 +71,20 @@ def contacts():
     breadcrumb_title = 'Контакты'
     return render_template('contacts.html', breadcrumb_title=breadcrumb_title)
 
-@bp.route('/feedback')
+@bp.route('/feedback', methods=['GET', 'POST'])
 def feedback():
     breadcrumb_title = 'Обратная связь'
-    return render_template('feedback.html', breadcrumb_title=breadcrumb_title)
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        # Сохраняем в базу данных
+        feedback_entry = Feedback(
+            name=form.name.data,
+            email=form.email.data,
+            subject=form.subject.data,
+            message=form.message.data
+        )
+        db.session.add(feedback_entry)
+        db.session.commit()
+        flash('Ваше сообщение отправлено! Спасибо за обратную связь.', 'success')
+        return redirect(url_for('main.feedback'))
+    return render_template('feedback.html', breadcrumb_title=breadcrumb_title, form=form)
