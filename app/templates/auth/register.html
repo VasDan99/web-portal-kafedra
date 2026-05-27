@@ -1,10 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<h2>Регистрация</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div style="margin-bottom: 15px;">
+        {{ form.username.label }}<br>
+        {{ form.username(size=50) }}
+    </div>
+    <div style="margin-bottom: 15px;">
+        {{ form.email.label }}<br>
+        {{ form.email(size=50) }}
+    </div>
+    <div style="margin-bottom: 15px;">
+        {{ form.password.label }}<br>
+        {{ form.password(size=50) }}
+    </div>
+    <div style="margin-bottom: 15px;">
+        {{ form.password2.label }}<br>
+        {{ form.password2(size=50) }}
+    </div>
+    <div style="margin-bottom: 15px;">
+        {{ form.role.label }}<br>
+        {{ form.role() }}
+    </div>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+<p>Уже есть аккаунт? <a href="{{ url_for('auth.login') }}">Войти</a></p>
+{% endblock %}
 </body>
 </html>
