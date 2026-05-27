@@ -218,12 +218,20 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="top-bar">
-        <div class="container">
-            <span>Московский университет имени Витте | Факультет информационных технологий</span>
-            <a href="#" class="cabinet-btn">👤 Личный кабинет</a>
+   <div class="top-bar">
+    <div class="container">
+        <span>Московский университет имени Витте | Факультет информационных технологий</span>
+        <div>
+            {% if current_user.is_authenticated %}
+                <span style="margin-right: 15px;">{{ current_user.username }} ({{ current_user.role }})</span>
+                <a href="{{ url_for('auth.logout') }}" class="cabinet-btn">🚪 Выход</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="cabinet-btn">🔐 Вход</a>
+                <a href="{{ url_for('auth.register') }}" class="cabinet-btn" style="margin-left: 10px;">📝 Регистрация</a>
+            {% endif %}
         </div>
     </div>
+</div>
 
     <div class="header">
         <div class="container">
