@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<h2>Вход в личный кабинет</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div style="margin-bottom: 15px;">
+        {{ form.username.label }}<br>
+        {{ form.username(size=50) }}
+    </div>
+    <div style="margin-bottom: 15px;">
+        {{ form.password.label }}<br>
+        {{ form.password(size=50) }}
+    </div>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+<p>Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a></p>
+{% endblock %}
+</body>
+</html>
