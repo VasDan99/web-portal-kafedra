@@ -9,22 +9,29 @@
 
 {% block content %}
 <div style="display: flex; gap: 20px;">
-    <div style="width: 250px; background: #f5f5f5; padding: 20px; border-radius: 8px;">
-        <div style="text-align: center;">
+    <!-- Боковое меню -->
+    <div style="width: 280px; background: #f5f5f5; padding: 20px; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 20px;">
             <img src="{{ student.avatar or '/static/images/default-avatar.png' }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
-            <h3>{{ student.full_name }}</h3>
-            <p>{{ student.group_name }}, {{ student.course }} курс</p>
+            <h3 style="margin: 10px 0 5px;">{{ student.full_name }}</h3>
+            <p style="color: #666;">{{ student.group_name }}, {{ student.course }} курс</p>
+            <p style="color: #003366; font-weight: bold;">Студент</p>
         </div>
-        <hr>
+        <hr style="margin: 15px 0;">
         <ul style="list-style: none; padding: 0;">
-            <li><a href="{{ url_for('main.student_profile') }}" style="display: block; padding: 8px; color: #003366;">📋 Мой профиль</a></li>
-            <li><a href="{{ url_for('main.student_grades') }}" style="display: block; padding: 8px; color: #003366;">📊 Мои оценки</a></li>
-            <li><a href="{{ url_for('main.student_schedule') }}" style="display: block; padding: 8px; color: #003366;">📅 Расписание</a></li>
-            <li><a href="{{ url_for('main.student_documents') }}" style="display: block; padding: 8px; color: #003366;">📁 Мои документы</a></li>
-            <li><a href="{{ url_for('main.student_settings') }}" style="display: block; padding: 8px; color: #003366;">⚙️ Настройки</a></li>
+            <li><a href="{{ url_for('main.student_profile') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📋 Мой профиль</a></li>
+            <li><a href="{{ url_for('main.student_grades') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📊 Мои оценки</a></li>
+            <li><a href="{{ url_for('main.student_schedule') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📅 Расписание</a></li>
+            <li><a href="{{ url_for('main.student_works') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📄 Мои работы</a></li>
+            <li><a href="{{ url_for('main.student_achievements') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">🏆 Мои достижения</a></li>
+            <li><a href="{{ url_for('main.student_teachers') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">👨‍🏫 Мои преподаватели</a></li>
+            <li><a href="{{ url_for('main.student_documents') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📁 Мои документы</a></li>
+            <li><a href="{{ url_for('main.student_settings') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">⚙️ Настройки</a></li>
         </ul>
     </div>
-    <div style="flex: 1;">
+
+    <!-- Основной контент -->
+    <div style="flex: 1; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
         {% block cabinet_content %}{% endblock %}
     </div>
 </div>
