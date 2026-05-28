@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends "cabinet/student_base.html" %}
+
+{% block title %}Мои работы{% endblock %}
+
+{% block cabinet_content %}
+<h2>Мои учебные работы</h2>
+
+<h3>Курсовые работы</h3>
+<ul>
+    <li><a href="#">Курсовая по программированию (2025) - Оценка: 5</a></li>
+    <li><a href="#">Курсовая по базам данных (2026) - Оценка: 4</a></li>
+</ul>
+
+<h3>Лабораторные работы</h3>
+<ul>
+    <li><a href="#">ЛР №1: Основы Python</a></li>
+    <li><a href="#">ЛР №2: Работа с базами данных</a></li>
+    <li><a href="#">ЛР №3: Web-приложение на Flask</a></li>
+</ul>
+
+<h3>Проекты</h3>
+<ul>
+    <li><a href="#">Веб-портал кафедры ИТ (ВКР)</a></li>
+</ul>
+{% endblock %}
+</body>
+</html>
