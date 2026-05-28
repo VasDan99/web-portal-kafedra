@@ -189,3 +189,26 @@ def teacher_settings():
         abort(403)
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     return render_template('cabinet/teacher/settings.html', breadcrumb_title='Настройки', teacher=teacher)
+@bp.route('/cabinet/student/works')
+@login_required
+def student_works():
+    if current_user.role != 'student':
+        abort(403)
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы', student=student)
+
+@bp.route('/cabinet/student/achievements')
+@login_required
+def student_achievements():
+    if current_user.role != 'student':
+        abort(403)
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    return render_template('cabinet/student_achievements.html', breadcrumb_title='Мои достижения', student=student)
+
+@bp.route('/cabinet/student/teachers')
+@login_required
+def student_teachers():
+    if current_user.role != 'student':
+        abort(403)
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    return render_template('cabinet/student_teachers.html', breadcrumb_title='Мои преподаватели', student=student)
