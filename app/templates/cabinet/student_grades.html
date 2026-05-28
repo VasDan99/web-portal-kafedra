@@ -1,10 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/student_base.html" %}
+
+{% block title %}Мои оценки{% endblock %}
+
+{% block cabinet_content %}
+<h2>Мои оценки</h2>
+{% if grades %}
+<table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+    <tr style="background: #003366; color: white;">
+        <th>Дисциплина</th>
+        <th>Оценка</th>
+        <th>Тип</th>
+        <th>Дата</th>
+    </tr>
+    {% for grade in grades %}
+    <tr>
+        <td>{{ grade.discipline.name }}</td>
+        <td style="text-align: center; font-weight: bold; color: {% if grade.grade_value >= 4 %}green{% else %}red{% endif %};">{{ grade.grade_value }}</td>
+        <td>{{ grade.grade_type }}</td>
+        <td>{{ grade.date.strftime('%d.%m.%Y') }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>У вас пока нет оценок.</p>
+{% endif %}
+{% endblock %}
 </body>
 </html>
