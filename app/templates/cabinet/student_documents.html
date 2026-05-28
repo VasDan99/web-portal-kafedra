@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/student_base.html" %}
+
+{% block title %}Мои документы{% endblock %}
+
+{% block cabinet_content %}
+<h2>Мои документы</h2>
+<ul>
+    <li><a href="#">Зачётная книжка (PDF)</a></li>
+    <li><a href="#">Справка об обучении (DOCX)</a></li>
+    <li><a href="#">Расписание экзаменов (XLSX)</a></li>
+</ul>
+<p style="color: #999;">Функционал загрузки документов в разработке.</p>
+{% endblock %}
 </body>
 </html>
