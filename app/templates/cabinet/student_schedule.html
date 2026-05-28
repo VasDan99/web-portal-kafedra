@@ -1,10 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/student_base.html" %}
+
+{% block title %}Моё расписание{% endblock %}
+
+{% block cabinet_content %}
+<h2>Моё расписание</h2>
+{% if schedule %}
+<table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+    <tr style="background: #003366; color: white;">
+        <th>День недели</th>
+        <th>Время</th>
+        <th>Дисциплина</th>
+        <th>Аудитория</th>
+        <th>Преподаватель</th>
+    </tr>
+    {% for item in schedule %}
+    <tr>
+        <td>{% if item.day_of_week == 1 %}Пн{% elif item.day_of_week == 2 %}Вт{% elif item.day_of_week == 3 %}Ср{% elif item.day_of_week == 4 %}Чт{% elif item.day_of_week == 5 %}Пт{% else %}Сб{% endif %}</td>
+        <td>{{ item.lesson_time }}</td>
+        <td>{{ item.discipline.name }}</td>
+        <td>{{ item.classroom }}</td>
+        <td>{{ item.teacher.full_name if item.teacher else '—' }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>Расписание не загружено.</p>
+{% endif %}
+{% endblock %}
 </body>
 </html>
