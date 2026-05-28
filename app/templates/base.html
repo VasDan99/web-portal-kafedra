@@ -69,7 +69,7 @@
             font-size: 14px;
         }
 
-        /* Главное меню - как на скриншоте */
+        /* Главное меню */
         .main-menu {
             background: #003366;
             position: sticky;
@@ -114,56 +114,13 @@
             color: #999;
         }
 
-        /* Основной контент */
-        .content {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .sidebar {
-            width: 280px;
-            flex-shrink: 0;
-        }
-
-        .sidebar-box {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .sidebar-box h3 {
-            color: #003366;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #003366;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-        }
-
-        .sidebar-menu li a {
-            display: block;
-            padding: 8px 0;
-            color: #333;
-            text-decoration: none;
-            border-bottom: 1px solid #eee;
-        }
-
-        .sidebar-menu li a:hover {
-            color: #003366;
-            padding-left: 5px;
-        }
-
+        /* Основной контент - без боковой панели */
         .main-content {
-            flex: 1;
             background: white;
             border-radius: 8px;
             padding: 25px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            width: 100%;
         }
 
         /* Подвал */
@@ -204,14 +161,6 @@
         @media (max-width: 768px) {
             .main-menu ul {
                 flex-direction: column;
-            }
-
-            .content {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
             }
         }
     </style>
@@ -277,23 +226,6 @@
         </div>
 
         <div class="content">
-            <aside class="sidebar">
-                <div class="sidebar-box">
-                    <h3>Навигация</h3>
-                    <ul class="sidebar-menu">
-                        <li><a href="{{ url_for('main.index') }}">Главная</a></li>
-                        <li><a href="{{ url_for('main.about') }}">О факультете</a></li>
-                        <li><a href="{{ url_for('main.team') }}">Команда факультета</a></li>
-                        <li><a href="{{ url_for('main.departments') }}">Кафедры</a></li>
-                        <li><a href="{{ url_for('main.teachers') }}">Преподаватели</a></li>
-                        <li><a href="{{ url_for('main.disciplines') }}">Дисциплины</a></li>
-                        <li><a href="{{ url_for('main.schedule') }}">Расписание</a></li>
-                        <li><a href="{{ url_for('main.science_works') }}">Научные работы</a></li>
-                        <li><a href="{{ url_for('main.feedback') }}">Обратная связь</a></li>
-                    </ul>
-                </div>
-            </aside>
-
             <main class="main-content">
                 {% block content %}{% endblock %}
             </main>
