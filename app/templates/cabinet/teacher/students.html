@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/teacher_base.html" %}
+
+{% block title %}Студенты{% endblock %}
+
+{% block teacher_content %}
+<h2>Мои студенты</h2>
+<ul>
+    {% for student in students %}
+    <li>{{ student.full_name }} — {{ student.group_name }}</li>
+    {% else %}
+    <li>Студенты не найдены.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
 </body>
 </html>

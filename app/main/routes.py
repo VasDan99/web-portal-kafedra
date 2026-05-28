@@ -1,7 +1,8 @@
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, abort
+from flask_login import login_required, current_user
 from app.main import bp
 from app.forms import FeedbackForm
-from app.models import Feedback
+from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule
 from app import db
 
 @bp.route('/')
@@ -93,3 +94,98 @@ def admin():
     breadcrumb_title = 'Админ-панель'
     messages = Feedback.query.order_by(Feedback.created_at.desc()).all()
     return render_template('admin/index.html', breadcrumb_title=breadcrumb_title, messages=messages)
+# Личный кабинет студента
+@bp.route('/cabinet/student/profile')
+@login_required
+def student_profile():
+    if current_user.role != 'student':
+        abort(403)
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if not student:
+        # Создаём профиль студента, если его нет
+        student = Student(user_id=current_user.id, full_name=current_user.username, group_name='ИС-01', course=1)
+        db.session.add(student)
+        db.session.commit()
+    return render_template('cabinet/student_profile.html', breadcrumb_title='Мой профиль', student=student)
+
+@bp.route('/cabinet/student/grades')
+@login_required
+def student_grades():
+    if current_user.role != 'student':
+        abort(403)
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    grades = Grade.query.filter_by(student_id=student.id).all() if student else []
+    return render_template('cabinet/student_grades.html', breadcrumb_title='Мои оценки', grades=grades, student=student)
+
+@bp.route('/cabinet/student/schedule')
+@login_required
+def student_schedule():
+    if current_user.role != 'student':
+        abort(403)
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    schedule = Schedule.query.filter_by(group_name=student.group_name).all() if student else []
+    return render_template('cabinet/student_schedule.html', breadcrumb_title='Моё расписание', schedule=schedule, student=student)
+
+@bp.route('/cabinet/student/documents')
+@login_required
+def student_documents():
+    if current_user.role != 'student':
+        abort(403)
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    return render_template('cabinet/student_documents.html', breadcrumb_title='Мои документы', student=student)
+
+@bp.route('/cabinet/student/settings')
+@login_required
+def student_settings():
+    if current_user.role != 'student':
+        abort(403)
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    return render_template('cabinet/student_settings.html', breadcrumb_title='Настройки', student=student)
+
+
+# Личный кабинет преподавателя
+@bp.route('/cabinet/teacher/profile')
+@login_required
+def teacher_profile():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    if not teacher:
+        teacher = Teacher(user_id=current_user.id, full_name=current_user.username, department='ИТ', position='Преподаватель')
+        db.session.add(teacher)
+        db.session.commit()
+    return render_template('cabinet/teacher/profile.html', breadcrumb_title='Мой профиль', teacher=teacher)
+
+@bp.route('/cabinet/teacher/disciplines')
+@login_required
+def teacher_disciplines():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    disciplines = Discipline.query.filter_by(teacher_id=teacher.id).all() if teacher else []
+    return render_template('cabinet/teacher/disciplines.html', breadcrumb_title='Мои дисциплины', disciplines=disciplines, teacher=teacher)
+
+@bp.route('/cabinet/teacher/students')
+@login_required
+def teacher_students():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    students = Student.query.all()
+    return render_template('cabinet/teacher/students.html', breadcrumb_title='Студенты', students=students, teacher=teacher)
+
+@bp.route('/cabinet/teacher/reports')
+@login_required
+def teacher_reports():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    return render_template('cabinet/teacher/reports.html', breadcrumb_title='Отчёты', teacher=teacher)
+
+@bp.route('/cabinet/teacher/settings')
+@login_required
+def teacher_settings():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    return render_template('cabinet/teacher/settings.html', breadcrumb_title='Настройки', teacher=teacher)

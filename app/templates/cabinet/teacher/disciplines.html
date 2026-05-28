@@ -2,9 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/teacher_base.html" %}
+
+{% block title %}Мои дисциплины{% endblock %}
+
+{% block teacher_content %}
+<h2>Мои дисциплины</h2>
+<ul>
+    {% for discipline in disciplines %}
+    <li>{{ discipline.name }} ({{ discipline.hours }} часов)</li>
+    {% else %}
+    <li>У вас пока нет дисциплин.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
 </body>
 </html>

@@ -1,10 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/teacher_base.html" %}
+
+{% block title %}Отчёты{% endblock %}
+
+{% block teacher_content %}
+<h2>Генерация отчётов</h2>
+<ul>
+    <li><a href="#">Сформировать ведомость (DOCX)</a></li>
+    <li><a href="#">Экспорт списка студентов (XLSX)</a></li>
+</ul>
+{% endblock %}
 </body>
 </html>
