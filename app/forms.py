@@ -1,10 +1,13 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField
-from wtforms.validators import DataRequired, Email, Length
+from wtforms import StringField, TextAreaField, SubmitField, FileField
+from wtforms.validators import DataRequired, Length, Email, Optional
 
-class FeedbackForm(FlaskForm):
-    name = StringField('Ваше имя', validators=[DataRequired(), Length(min=2, max=100)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    subject = StringField('Тема', validators=[DataRequired(), Length(min=3, max=200)])
-    message = TextAreaField('Сообщение', validators=[DataRequired(), Length(min=10, max=1000)])
-    submit = SubmitField('Отправить')
+class StudentProfileForm(FlaskForm):
+    full_name = StringField('ФИО', validators=[DataRequired(), Length(min=2, max=150)])
+    group_name = StringField('Группа', validators=[DataRequired(), Length(min=2, max=50)])
+    course = StringField('Курс', validators=[DataRequired()])
+    phone = StringField('Телефон', validators=[Optional()])
+    telegram = StringField('Telegram', validators=[Optional()])
+    bio = TextAreaField('О себе', validators=[Optional()])
+    avatar = FileField('Фото профиля')
+    submit = SubmitField('Сохранить изменения')
