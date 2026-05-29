@@ -1,7 +1,31 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField, FileField
-from wtforms.validators import DataRequired, Length, Email, Optional
+from wtforms import StringField, TextAreaField, SubmitField, SelectField, FileField
+from wtforms.validators import DataRequired, Email, Length, Optional
 
+# Форма обратной связи
+class FeedbackForm(FlaskForm):
+    name = StringField('Ваше имя', validators=[DataRequired(), Length(min=2, max=100)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    subject = StringField('Тема', validators=[DataRequired(), Length(min=3, max=200)])
+    message = TextAreaField('Сообщение', validators=[DataRequired(), Length(min=10, max=1000)])
+    submit = SubmitField('Отправить')
+
+# Форма регистрации
+class RegistrationForm(FlaskForm):
+    username = StringField('Логин', validators=[DataRequired(), Length(min=3, max=80)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = StringField('Пароль', validators=[DataRequired(), Length(min=6)])
+    password2 = StringField('Повторите пароль', validators=[DataRequired(), Length(min=6)])
+    role = SelectField('Роль', choices=[('student', 'Студент'), ('teacher', 'Преподаватель')])
+    submit = SubmitField('Зарегистрироваться')
+
+# Форма входа
+class LoginForm(FlaskForm):
+    username = StringField('Логин или Email', validators=[DataRequired()])
+    password = StringField('Пароль', validators=[DataRequired()])
+    submit = SubmitField('Войти')
+
+# Форма редактирования профиля студента
 class StudentProfileForm(FlaskForm):
     full_name = StringField('ФИО', validators=[DataRequired(), Length(min=2, max=150)])
     group_name = StringField('Группа', validators=[DataRequired(), Length(min=2, max=50)])
@@ -11,3 +35,22 @@ class StudentProfileForm(FlaskForm):
     bio = TextAreaField('О себе', validators=[Optional()])
     avatar = FileField('Фото профиля')
     submit = SubmitField('Сохранить изменения')
+
+    # Форма загрузки работы
+    class WorkUploadForm(FlaskForm):
+        title = StringField('Название работы', validators=[DataRequired(), Length(min=3, max=200)])
+        file = FileField('Файл (PDF)', validators=[DataRequired()])
+        submit = SubmitField('Загрузить')
+
+    # Форма загрузки документа
+    class DocumentUploadForm(FlaskForm):
+        title = StringField('Название документа', validators=[DataRequired(), Length(min=3, max=200)])
+        file = FileField('Файл', validators=[DataRequired()])
+        submit = SubmitField('Загрузить')
+
+    # Форма смены пароля
+    class ChangePasswordForm(FlaskForm):
+        current_password = StringField('Текущий пароль', validators=[DataRequired()])
+        new_password = StringField('Новый пароль', validators=[DataRequired(), Length(min=6)])
+        confirm_password = StringField('Подтвердите пароль', validators=[DataRequired()])
+        submit = SubmitField('Сменить пароль')
