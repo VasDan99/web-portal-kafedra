@@ -11,7 +11,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.String(20), default='student')  # admin, teacher, student
+    role = db.Column(db.String(20), default='student')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
@@ -28,12 +28,15 @@ class User(UserMixin, db.Model):
 class Student(db.Model):
     __tablename__ = 'students'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
     full_name = db.Column(db.String(150), nullable=False)
     group_name = db.Column(db.String(50), nullable=False)
     course = db.Column(db.Integer, nullable=False)
     student_card_number = db.Column(db.String(20), unique=True)
     phone = db.Column(db.String(20))
+    avatar = db.Column(db.String(200), default='/static/images/default-avatar.png')
+    bio = db.Column(db.Text)
+    telegram = db.Column(db.String(100))
 
     user = db.relationship('User', backref='student_profile', uselist=False)
 
@@ -42,12 +45,13 @@ class Student(db.Model):
 class Teacher(db.Model):
     __tablename__ = 'teachers'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
     full_name = db.Column(db.String(150), nullable=False)
     department = db.Column(db.String(100), nullable=False)
     position = db.Column(db.String(100))
     degree = db.Column(db.String(100))
     phone = db.Column(db.String(20))
+    avatar = db.Column(db.String(200), default='/static/images/default-avatar.png')
 
     user = db.relationship('User', backref='teacher_profile', uselist=False)
 
@@ -112,7 +116,7 @@ class Feedback(db.Model):
     subject = db.Column(db.String(200), nullable=False)
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(20), default='new')  # new, read, replied
+    status = db.Column(db.String(20), default='new')
 
 
 # Таблица 9: Оценки
@@ -121,8 +125,8 @@ class Grade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
     discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'), nullable=False)
-    grade_value = db.Column(db.Integer, nullable=False)  # 2-5
-    grade_type = db.Column(db.String(50))  # exam, credit, test
+    grade_value = db.Column(db.Integer, nullable=False)
+    grade_type = db.Column(db.String(50))
     date = db.Column(db.DateTime, default=datetime.utcnow)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
 
@@ -136,21 +140,9 @@ class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'), nullable=False)
     group_name = db.Column(db.String(50), nullable=False)
-    day_of_week = db.Column(db.Integer, nullable=False)  # 1-6 (пн-сб)
+    day_of_week = db.Column(db.Integer, nullable=False)
     lesson_time = db.Column(db.String(20), nullable=False)
     classroom = db.Column(db.String(50))
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
 
     discipline = db.relationship('Discipline', backref='schedule')
-    class Student(db.Model):
-        __tablename__ = 'students'
-        id = db.Column(db.Integer, primary_key=True)
-        user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
-        full_name = db.Column(db.String(150), nullable=False)
-        group_name = db.Column(db.String(50), nullable=False)
-        course = db.Column(db.Integer, nullable=False)
-        student_card_number = db.Column(db.String(20), unique=True)
-        phone = db.Column(db.String(20))
-        avatar = db.Column(db.String(200), default='/static/images/default-avatar.png')
-        bio = db.Column(db.Text)  # О себе
-        telegram = db.Column(db.String(100))  # Telegram для связи
