@@ -142,3 +142,15 @@ class Schedule(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
 
     discipline = db.relationship('Discipline', backref='schedule')
+    class Student(db.Model):
+        __tablename__ = 'students'
+        id = db.Column(db.Integer, primary_key=True)
+        user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+        full_name = db.Column(db.String(150), nullable=False)
+        group_name = db.Column(db.String(50), nullable=False)
+        course = db.Column(db.Integer, nullable=False)
+        student_card_number = db.Column(db.String(20), unique=True)
+        phone = db.Column(db.String(20))
+        avatar = db.Column(db.String(200), default='/static/images/default-avatar.png')
+        bio = db.Column(db.Text)  # О себе
+        telegram = db.Column(db.String(100))  # Telegram для связи
