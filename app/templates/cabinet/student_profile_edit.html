@@ -1,10 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/student_base.html" %}
+
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block cabinet_content %}
+<h2>Редактирование профиля</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div style="margin-bottom: 15px;">
+        <label>ФИО</label><br>
+        {{ form.full_name(size=50) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label>Группа</label><br>
+        {{ form.group_name(size=30) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label>Курс</label><br>
+        {{ form.course(size=10) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label>Телефон</label><br>
+        {{ form.phone(size=30) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label>Telegram</label><br>
+        {{ form.telegram(size=30) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label>О себе</label><br>
+        {{ form.bio(rows=5, cols=50) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label>Фото профиля</label><br>
+        {{ form.avatar() }}
+    </div>
+
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock %}
 </body>
 </html>
