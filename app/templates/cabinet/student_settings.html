@@ -11,8 +11,82 @@
 
 {% block cabinet_content %}
 <h2>Настройки профиля</h2>
-<p>Здесь можно будет изменить пароль, загрузить аватар, обновить контактные данные.</p>
-<p style="color: #999;">Функционал в разработке.</p>
+
+<div style="display: flex; gap: 30px;">
+    <!-- Редактирование профиля -->
+    <div style="flex: 1;">
+        <h3>Редактирование профиля</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {{ profile_form.hidden_tag() }}
+
+            <div style="margin-bottom: 15px;">
+                <label>ФИО</label><br>
+                {{ profile_form.full_name(size=40) }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Группа</label><br>
+                {{ profile_form.group_name(size=20) }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Курс</label><br>
+                {{ profile_form.course(size=10) }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Телефон</label><br>
+                {{ profile_form.phone(size=30) }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Telegram</label><br>
+                {{ profile_form.telegram(size=30) }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>О себе</label><br>
+                {{ profile_form.bio(rows=4, cols=45) }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Фото профиля</label><br>
+                {{ profile_form.avatar() }}
+            </div>
+
+            <div>
+                {{ profile_form.submit() }}
+            </div>
+        </form>
+    </div>
+
+    <!-- Смена пароля -->
+    <div style="flex: 1;">
+        <h3>Смена пароля</h3>
+        <form method="POST">
+            {{ password_form.hidden_tag() }}
+
+            <div style="margin-bottom: 15px;">
+                <label>Текущий пароль</label><br>
+                {{ password_form.current_password(size=30, type="password") }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Новый пароль</label><br>
+                {{ password_form.new_password(size=30, type="password") }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Подтвердите пароль</label><br>
+                {{ password_form.confirm_password(size=30, type="password") }}
+            </div>
+
+            <div>
+                {{ password_form.submit() }}
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 </body>
 </html>

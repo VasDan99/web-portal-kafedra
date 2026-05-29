@@ -10,25 +10,48 @@
 {% block title %}Мои работы{% endblock %}
 
 {% block cabinet_content %}
-<h2>Мои учебные работы</h2>
+<h2>Мои работы</h2>
 
-<h3>Курсовые работы</h3>
-<ul>
-    <li><a href="#">Курсовая по программированию (2025) - Оценка: 5</a></li>
-    <li><a href="#">Курсовая по базам данных (2026) - Оценка: 4</a></li>
-</ul>
+<h3>Загрузить новую работу</h3>
+<form method="POST" enctype="multipart/form-data" style="margin-bottom: 30px;">
+    {{ form.hidden_tag() }}
+    <div style="margin-bottom: 10px;">
+        {{ form.title.label }}<br>
+        {{ form.title(size=50) }}
+    </div>
+    <div style="margin-bottom: 10px;">
+        {{ form.file.label }}<br>
+        {{ form.file() }}
+    </div>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
 
-<h3>Лабораторные работы</h3>
-<ul>
-    <li><a href="#">ЛР №1: Основы Python</a></li>
-    <li><a href="#">ЛР №2: Работа с базами данных</a></li>
-    <li><a href="#">ЛР №3: Web-приложение на Flask</a></li>
-</ul>
+<hr>
 
-<h3>Проекты</h3>
-<ul>
-    <li><a href="#">Веб-портал кафедры ИТ (ВКР)</a></li>
-</ul>
+<h3>Мои загруженные работы</h3>
+{% if works %}
+<table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+    <tr style="background: #003366; color: white;">
+        <th>Название</th>
+        <th>Дата загрузки</th>
+        <th>Действия</th>
+    </tr>
+    {% for work in works %}
+    <tr>
+        <td>{{ work.title }}</td>
+        <td>{{ work.uploaded_at.strftime('%d.%m.%Y') }}</td>
+        <td>
+            <a href="{{ work.file_path }}">📥 Скачать</a> |
+            <a href="{{ url_for('main.student_work_delete', work_id=work.id) }}" onclick="return confirm('Удалить работу?')">🗑️ Удалить</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>У вас пока нет загруженных работ.</p>
+{% endif %}
 {% endblock %}
 </body>
 </html>

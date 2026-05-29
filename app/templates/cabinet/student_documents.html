@@ -11,12 +11,50 @@
 
 {% block cabinet_content %}
 <h2>Мои документы</h2>
-<ul>
-    <li><a href="#">Зачётная книжка (PDF)</a></li>
-    <li><a href="#">Справка об обучении (DOCX)</a></li>
-    <li><a href="#">Расписание экзаменов (XLSX)</a></li>
-</ul>
-<p style="color: #999;">Функционал загрузки документов в разработке.</p>
+
+<h3>Загрузить новый документ</h3>
+<form method="POST" enctype="multipart/form-data" style="margin-bottom: 30px;">
+    {{ form.hidden_tag() }}
+    <div style="margin-bottom: 10px;">
+        {{ form.title.label }}<br>
+        {{ form.title(size=50) }}
+    </div>
+    <div style="margin-bottom: 10px;">
+        {{ form.file.label }}<br>
+        {{ form.file() }}
+    </div>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+
+<hr>
+
+<h3>Мои документы</h3>
+{% if documents %}
+<table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+    <tr style="background: #003366; color: white;">
+        <th>Название</th>
+        <th>Дата загрузки</th>
+        <th>Действия</th>
+    </tr>
+    {% for doc in documents %}
+    <tr>
+        <td>{{ doc.title }}</td>
+        <td>{{ doc.uploaded_at.strftime('%d.%m.%Y') }}</td>
+        <td>
+            <a href="{{ doc.file_path }}">📥 Скачать</a> |
+            <a href="{{ url_for('main.student_document_delete', doc_id=doc.id) }}" onclick="return confirm('Удалить документ?')">🗑️ Удалить</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>У вас пока нет загруженных документов.</p>
+{% endif %}
+
+<h3>Сгенерировать справку</h3>
+<p><a href="{{ url_for('main.generate_certificate') }}" class="cabinet-btn" style="background: #003366; display: inline-block;">📄 Справка об обучении (DOCX)</a></p>
 {% endblock %}
 </body>
 </html>
