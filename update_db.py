@@ -1,9 +1,16 @@
 from app import create_app, db
-from app.models import User, Student, Teacher, Discipline, News, Event, Document, Feedback, Grade, Schedule
+from app.models import Document
+import sqlite3
 
 app = create_app()
 
 with app.app_context():
-    db.create_all()
-    print("База данных обновлена!")
-    print("Таблицы:", list(db.metadata.tables.keys()))
+    # Добавляем колонку file_type, если её нет
+    try:
+        db.session.execute('ALTER TABLE documents ADD COLUMN file_type VARCHAR(20) DEFAULT "pdf"')
+        db.session.commit()
+        print('Поле file_type добавлено')
+    except:
+        print('Поле file_type уже существует')
+
+    print('База данных обновлена')
