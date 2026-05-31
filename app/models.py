@@ -105,7 +105,17 @@ class Document(db.Model):
     uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'))
     is_public = db.Column(db.Boolean, default=False)
-
+    __tablename__ = 'documents'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    filename = db.Column(db.String(200), nullable=False)
+    file_path = db.Column(db.String(300), nullable=False)
+    file_type = db.Column(db.String(20), default='pdf')  # pdf, docx, xlsx
+    file_size = db.Column(db.Integer)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'))
+    is_public = db.Column(db.Boolean, default=False)
 
 # Таблица 8: Обратная связь
 class Feedback(db.Model):
