@@ -10,14 +10,28 @@
 {% block title %}Студенты{% endblock %}
 
 {% block teacher_content %}
-<h2>Мои студенты</h2>
-<ul>
+<h2>Студенты</h2>
+
+{% if students %}
+<table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+    <tr style="background: #003366; color: white;">
+        <th>ФИО</th>
+        <th>Группа</th>
+        <th>Курс</th>
+        <th>Email</th>
+    </tr>
     {% for student in students %}
-    <li>{{ student.full_name }} — {{ student.group_name }}</li>
-    {% else %}
-    <li>Студенты не найдены.</li>
+    <tr>
+        <td>{{ student.full_name }}</td>
+        <td>{{ student.group_name }}</td>
+        <td>{{ student.course }}</td>
+        <td>{{ student.user.email if student.user else '—' }}</td>
+    </tr>
     {% endfor %}
-</ul>
+</table>
+{% else %}
+<p>Нет студентов.</p>
+{% endif %}
 {% endblock %}
 </body>
 </html>
