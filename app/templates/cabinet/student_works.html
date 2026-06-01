@@ -1,10 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
 {% extends "cabinet/student_base.html" %}
 
 {% block title %}Мои работы{% endblock %}
@@ -13,21 +6,25 @@
 <h2>Мои работы</h2>
 
 <h3>Загрузить новую работу</h3>
-<form method="POST" enctype="multipart/form-data" style="margin-bottom: 30px;">
+<form method="POST" enctype="multipart/form-data" action="{{ url_for('main.student_works_upload') }}">
     {{ form.hidden_tag() }}
+
     <div style="margin-bottom: 10px;">
         {{ form.title.label }}<br>
         {{ form.title(size=50) }}
     </div>
+
     <div style="margin-bottom: 10px;">
-        {{ form.teacher_id.label }}<br>
-        {{ form.teacher_id() }}
+        {{ form.discipline_id.label }}<br>
+        {{ form.discipline_id() }}
     </div>
+
     <div style="margin-bottom: 10px;">
         {{ form.file.label }}<br>
         {{ form.file() }}
         <small style="color: #666;">Поддерживаемые форматы: PDF, DOCX, XLSX</small>
     </div>
+
     <div>
         {{ form.submit() }}
     </div>
@@ -40,6 +37,7 @@
 <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
     <tr style="background: #003366; color: white;">
         <th>Название</th>
+        <th>Дисциплина</th>
         <th>Преподаватель</th>
         <th>Тип файла</th>
         <th>Дата загрузки</th>
@@ -49,8 +47,18 @@
     <tr>
         <td>{{ work.title }}</td>
         <td>
-            {% set teacher = Teacher.query.get(work.discipline_id) %}
-            {{ teacher.full_name if teacher else 'Не указан' }}
+            {% for discipline in disciplines %}
+                {% if discipline.id == work.discipline_id %}
+                    {{ discipline.name }}
+                {% endif %}
+            {% endfor %}
+        </td>
+        <td>
+            {% for discipline in disciplines %}
+                {% if discipline.id == work.discipline_id %}
+                    {{ discipline.teacher.full_name if discipline.teacher else 'Не указан' }}
+                {% endif %}
+            {% endfor %}
         </td>
         <td>
             {% if work.file_type == 'pdf' %}
@@ -70,10 +78,7 @@
         </td>
     </tr>
     {% endfor %}
-</table>
-{% else %}
+<br>uelse
 <p>У вас пока нет загруженных работ.</p>
 {% endif %}
 {% endblock %}
-</body>
-</html>

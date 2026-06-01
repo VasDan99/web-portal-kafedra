@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-{% extends "cabinet/teacher_base.html" %}
+{% extends "cabinet/teacher/teacher_base.html" %}
 
 {% block title %}Мой профиль{% endblock %}
 
@@ -13,33 +13,15 @@
 <h2>Мой профиль</h2>
 
 <table style="width: 100%; border-collapse: collapse;">
-    <tr style="border-bottom: 1px solid #ddd;">
-        <td style="padding: 10px; font-weight: bold; width: 150px;">ФИО:</td>
-        <td style="padding: 10px;">{{ teacher.full_name }}</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #ddd;">
-        <td style="padding: 10px; font-weight: bold;">Кафедра:</td>
-        <td style="padding: 10px;">{{ teacher.department }}</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #ddd;">
-        <td style="padding: 10px; font-weight: bold;">Должность:</td>
-        <td style="padding: 10px;">{{ teacher.position or '—' }}</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #ddd;">
-        <td style="padding: 10px; font-weight: bold;">Учёная степень:</td>
-        <td style="padding: 10px;">{{ teacher.degree or '—' }}</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #ddd;">
-        <td style="padding: 10px; font-weight: bold;">Телефон:</td>
-        <td style="padding: 10px;">{{ teacher.phone or '—' }}</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #ddd;">
-        <td style="padding: 10px; font-weight: bold;">Email:</td>
-        <td style="padding: 10px;">{{ current_user.email }}</td>
-    </tr>
+    <tr><td style="padding: 8px;"><strong>ФИО:</strong></td><td>{{ teacher.full_name }}</td></tr>
+    <tr><td style="padding: 8px;"><strong>Кафедра:</strong></td><td>{{ teacher.department }}</td></tr>
+    <tr><td style="padding: 8px;"><strong>Должность:</strong></td><td>{{ teacher.position }}</td></tr>
+    <tr><td style="padding: 8px;"><strong>Учёная степень:</strong></td><td>{{ teacher.degree or '—' }}</td></tr>
+    <tr><td style="padding: 8px;"><strong>Телефон:</strong></td><td>{{ teacher.phone or '—' }}</td></tr>
+    <tr><td style="padding: 8px;"><strong>Email:</strong></td><td>{{ current_user.email }}</td></tr>
 </table>
 
-<h3 style="margin-top: 30px;">Информация</h3>
+<h3>Информация</h3>
 <p>{{ teacher.bio or 'Информация о преподавателе не заполнена.' }}</p>
 {% endblock %}
 </body>

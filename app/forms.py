@@ -44,7 +44,7 @@ class StudentProfileForm(FlaskForm):
 # Форма загрузки работы
 class WorkUploadForm(FlaskForm):
     title = StringField('Название работы', validators=[DataRequired(), Length(min=3, max=200)])
-    teacher_id = SelectField('Преподаватель', choices=[], coerce=int, validators=[DataRequired()])
+    discipline_id = SelectField('Дисциплина', choices=[], coerce=int, validators=[DataRequired()])
     file = FileField('Файл (PDF, DOCX, XLSX)', validators=[DataRequired()])
     submit = SubmitField('Загрузить')
 

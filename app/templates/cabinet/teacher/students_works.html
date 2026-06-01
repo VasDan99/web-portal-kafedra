@@ -23,15 +23,9 @@
     </tr>
     {% for work in works %}
     <tr>
-        <td>
-            {% set student = Student.query.get(work.uploaded_by) %}
-            {{ student.full_name if student else 'Неизвестно' }}
-        </td>
+        <td>{{ work.student_name }}</td>
         <td>{{ work.title }}</td>
-        <td>
-            {% set discipline = Discipline.query.get(work.discipline_id) %}
-            {{ discipline.name if discipline else '—' }}
-        </td>
+        <td>{{ work.discipline_name }}</td>
         <td>{{ work.uploaded_at.strftime('%d.%m.%Y %H:%M') }}</td>
         <td>
             <a href="{{ work.file_path }}" target="_blank">📥 Скачать</a>

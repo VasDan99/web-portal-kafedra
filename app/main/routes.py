@@ -180,10 +180,10 @@ def student_works():
     student = Student.query.filter_by(user_id=current_user.id).first()
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
     form = WorkUploadForm()
-    teachers = Teacher.query.all()
-    form.teacher_id.choices = [(t.id, t.full_name) for t in teachers]
+    disciplines = Discipline.query.all()
+    form.discipline_id.choices = [(d.id, d.name) for d in disciplines]
     return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы',
-                         student=student, form=form, works=works, teachers=teachers)
+                         student=student, form=form, works=works, disciplines=disciplines)
 
 @bp.route('/cabinet/student/works/upload', methods=['GET', 'POST'])
 @login_required
@@ -193,8 +193,8 @@ def student_works_upload():
     student = Student.query.filter_by(user_id=current_user.id).first()
     form = WorkUploadForm()
 
-    teachers = Teacher.query.all()
-    form.teacher_id.choices = [(t.id, t.full_name) for t in teachers]
+    disciplines = Discipline.query.all()
+    form.discipline_id.choices = [(d.id, d.name) for d in disciplines]
 
     if form.validate_on_submit():
         file = form.file.data
@@ -215,7 +215,7 @@ def student_works_upload():
             file_path=f'/static/uploads/works/{filename}',
             file_type=file_type,
             uploaded_by=current_user.id,
-            discipline_id=form.teacher_id.data,
+            discipline_id=form.discipline_id.data,
             is_public=False
         )
         db.session.add(work)
@@ -224,7 +224,8 @@ def student_works_upload():
         return redirect(url_for('main.student_works'))
 
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
-    return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы', student=student, form=form, works=works, teachers=teachers)
+    return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы',
+                         student=student, form=form, works=works, disciplines=disciplines)
 
 @bp.route('/cabinet/student/work/delete/<int:work_id>')
 @login_required
