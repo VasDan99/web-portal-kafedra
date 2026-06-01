@@ -62,3 +62,14 @@ class ChangePasswordForm(FlaskForm):
     new_password = PasswordField('Новый пароль', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Подтвердите пароль', validators=[DataRequired(), EqualTo('new_password')])
     submit = SubmitField('Сменить пароль')
+
+    # Форма профеля преподавателя
+    class TeacherProfileForm(FlaskForm):
+        full_name = StringField('ФИО', validators=[DataRequired(), Length(min=2, max=150)])
+        department = StringField('Кафедра', validators=[DataRequired(), Length(min=2, max=100)])
+        position = StringField('Должность', validators=[Optional(), Length(max=100)])
+        degree = StringField('Учёная степень', validators=[Optional(), Length(max=100)])
+        phone = StringField('Телефон', validators=[Optional(), Length(max=20)])
+        bio = TextAreaField('О себе', validators=[Optional()])
+        avatar = FileField('Фото профиля')
+        submit = SubmitField('Сохранить изменения')
