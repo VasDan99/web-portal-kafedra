@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash, abort, request, send_file
 from flask_login import login_required, current_user
 from app.main import bp
-from app.forms import FeedbackForm, StudentProfileForm, WorkUploadForm, DocumentUploadForm, ChangePasswordForm
+from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, ChangePasswordForm
 from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document
 from app import db
 import os
@@ -525,3 +525,40 @@ def teacher_settings():
         abort(403)
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     return render_template('cabinet/teacher/settings.html', breadcrumb_title='Настройки', teacher=teacher)
+
+@bp.route('/cabinet/teacher/profile/edit', methods=['GET', 'POST'])
+@login_required
+def teacher_profile_edit():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    form = TeacherProfileForm()
+
+    if form.validate_on_submit():
+        teacher.full_name = form.full_name.data
+        teacher.department = form.department.data
+        teacher.position = form.position.data
+        teacher.degree = form.degree.data
+        teacher.phone = form.phone.data
+        teacher.bio = form.bio.data
+
+        if form.avatar.data:
+            avatar_file = form.avatar.data
+            filename = f'teacher_avatar_{current_user.id}.jpg'
+            os.makedirs('app/static/uploads/avatars', exist_ok=True)
+            filepath = os.path.join('app/static/uploads/avatars', filename)
+            avatar_file.save(filepath)
+            teacher.avatar = f'/static/uploads/avatars/{filename}'
+
+        db.session.commit()
+        flash('Профиль обновлён!', 'success')
+        return redirect(url_for('main.teacher_profile'))
+
+    form.full_name.data = teacher.full_name
+    form.department.data = teacher.department
+    form.position.data = teacher.position
+    form.degree.data = teacher.degree
+    form.phone.data = teacher.phone
+    form.bio.data = teacher.bio
+
+    return render_template('cabinet/teacher/profile_edit.html', breadcrumb_title='Редактирование профиля', form=form, teacher=teacher)
