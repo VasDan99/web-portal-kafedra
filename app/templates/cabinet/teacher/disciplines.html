@@ -11,13 +11,16 @@
 
 {% block teacher_content %}
 <h2>Мои дисциплины</h2>
+
+{% if disciplines %}
 <ul>
     {% for discipline in disciplines %}
-    <li>{{ discipline.name }} ({{ discipline.hours }} часов)</li>
-    {% else %}
-    <li>У вас пока нет дисциплин.</li>
+    <li><strong>{{ discipline.name }}</strong> — {{ discipline.hours or '—' }} часов</li>
     {% endfor %}
 </ul>
+{% else %}
+<p>У вас пока нет дисциплин.</p>
+{% endif %}
 {% endblock %}
 </body>
 </html>
