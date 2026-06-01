@@ -11,20 +11,40 @@
 
 {% block cabinet_content %}
 <h2>Мои оценки</h2>
+
 {% if grades %}
+{% set total = namespace(value=0) %}
+{% for grade in grades %}
+    {% set total.value = total.value + grade.grade_value %}
+{% endfor %}
+{% set average = (total.value / grades|length) if grades|length > 0 else 0 %}
+
+<div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Средний балл:</strong>
+        <span style="font-size: 24px; font-weight: bold; color: {% if average >= 4 %}green{% elif average >= 3 %}orange{% else %}red{% endif %};">
+            {{ "%.2f"|format(average) }}
+        </span>
+    </p>
+    <p><strong>Всего оценок:</strong> {{ grades|length }}</p>
+</div>
+
 <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
     <tr style="background: #003366; color: white;">
         <th>Дисциплина</th>
         <th>Оценка</th>
         <th>Тип</th>
+        <th>Преподаватель</th>
         <th>Дата</th>
     </tr>
     {% for grade in grades %}
     <tr>
-        <td>{{ grade.discipline.name }}</td>
-        <td style="text-align: center; font-weight: bold; color: {% if grade.grade_value >= 4 %}green{% else %}red{% endif %};">{{ grade.grade_value }}</td>
-        <td>{{ grade.grade_type }}</td>
-        <td>{{ grade.date.strftime('%d.%m.%Y') }}</td>
+        <td>{{ grade.discipline.name if grade.discipline else '—' }}</td>
+        <td style="text-align: center; font-weight: bold; color: {% if grade.grade_value >= 4 %}green{% elif grade.grade_value >= 3 %}orange{% else %}red{% endif %};">
+            {{ grade.grade_value }}
+        </td>
+        <td style="padding: 8px;">{{ grade.grade_type or '—' }}</td>
+        <td style="padding: 8px;">{{ grade.teacher.full_name if grade.teacher else '—' }}</td>
+        <td style="padding: 8px;">{{ grade.date.strftime('%d.%m.%Y') if grade.date else '—' }}</td>
     </tr>
     {% endfor %}
 </table>
