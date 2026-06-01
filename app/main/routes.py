@@ -17,48 +17,40 @@ def index():
     breadcrumb_title = None
     return render_template('index.html', breadcrumb_title=breadcrumb_title)
 
-
 @bp.route('/about')
 def about():
     breadcrumb_title = 'О факультете ИТ'
     return render_template('about.html', breadcrumb_title=breadcrumb_title)
-
 
 @bp.route('/history')
 def history():
     breadcrumb_title = 'История факультета'
     return render_template('history.html', breadcrumb_title=breadcrumb_title)
 
-
 @bp.route('/mission')
 def mission():
     breadcrumb_title = 'Миссия и цели'
     return render_template('mission.html', breadcrumb_title=breadcrumb_title)
-
 
 @bp.route('/team')
 def team():
     breadcrumb_title = 'Команда факультета'
     return render_template('team.html', breadcrumb_title=breadcrumb_title)
 
-
 @bp.route('/departments')
 def departments():
     breadcrumb_title = 'Кафедры факультета'
     return render_template('departments.html', breadcrumb_title=breadcrumb_title)
-
 
 @bp.route('/teachers')
 def teachers():
     breadcrumb_title = 'Преподаватели'
     return render_template('teachers.html', breadcrumb_title=breadcrumb_title)
 
-
 @bp.route('/disciplines')
 def disciplines():
     breadcrumb_title = 'Дисциплины'
     return render_template('disciplines.html', breadcrumb_title=breadcrumb_title)
-
 
 @bp.route('/discipline/<int:disc_id>')
 def discipline_detail(disc_id):
@@ -72,24 +64,20 @@ def discipline_detail(disc_id):
     breadcrumb_title = disc['name']
     return render_template('discipline_detail.html', breadcrumb_title=breadcrumb_title, discipline=disc)
 
-
 @bp.route('/schedule')
 def schedule():
     breadcrumb_title = 'Расписание занятий'
     return render_template('schedule.html', breadcrumb_title=breadcrumb_title)
-
 
 @bp.route('/science-works')
 def science_works():
     breadcrumb_title = 'Научные работы'
     return render_template('science_works.html', breadcrumb_title=breadcrumb_title)
 
-
 @bp.route('/contacts')
 def contacts():
     breadcrumb_title = 'Контакты'
     return render_template('contacts.html', breadcrumb_title=breadcrumb_title)
-
 
 @bp.route('/feedback', methods=['GET', 'POST'])
 def feedback():
@@ -107,7 +95,6 @@ def feedback():
         flash('Ваше сообщение отправлено! Спасибо за обратную связь.', 'success')
         return redirect(url_for('main.feedback'))
     return render_template('feedback.html', breadcrumb_title=breadcrumb_title, form=form)
-
 
 @bp.route('/admin')
 def admin():
@@ -129,7 +116,6 @@ def student_profile():
         db.session.add(student)
         db.session.commit()
     return render_template('cabinet/student_profile.html', breadcrumb_title='Мой профиль', student=student)
-
 
 @bp.route('/cabinet/student/profile/edit', methods=['GET', 'POST'])
 @login_required
@@ -168,7 +154,6 @@ def student_profile_edit():
 
     return render_template('cabinet/student_profile_edit.html', breadcrumb_title='Редактирование профиля', form=form, student=student)
 
-
 @bp.route('/cabinet/student/grades')
 @login_required
 def student_grades():
@@ -177,7 +162,6 @@ def student_grades():
     student = Student.query.filter_by(user_id=current_user.id).first()
     grades = Grade.query.filter_by(student_id=student.id).all() if student else []
     return render_template('cabinet/student_grades.html', breadcrumb_title='Мои оценки', grades=grades, student=student)
-
 
 @bp.route('/cabinet/student/schedule')
 @login_required
@@ -188,7 +172,6 @@ def student_schedule():
     schedule = Schedule.query.filter_by(group_name=student.group_name).all() if student else []
     return render_template('cabinet/student_schedule.html', breadcrumb_title='Моё расписание', schedule=schedule, student=student)
 
-
 @bp.route('/cabinet/student/works')
 @login_required
 def student_works():
@@ -197,8 +180,9 @@ def student_works():
     student = Student.query.filter_by(user_id=current_user.id).first()
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
     form = WorkUploadForm()
+    teachers = Teacher.query.all()
+    form.teacher_id.choices = [(t.id, t.full_name) for t in teachers]
     return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы', student=student, form=form, works=works)
-
 
 @bp.route('/cabinet/student/works/upload', methods=['GET', 'POST'])
 @login_required
@@ -208,6 +192,9 @@ def student_works_upload():
     student = Student.query.filter_by(user_id=current_user.id).first()
     form = WorkUploadForm()
 
+    teachers = Teacher.query.all()
+    form.teacher_id.choices = [(t.id, t.full_name) for t in teachers]
+
     if form.validate_on_submit():
         file = form.file.data
         filename = f'work_{current_user.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
@@ -215,11 +202,19 @@ def student_works_upload():
         filepath = os.path.join('app/static/uploads/works', filename)
         file.save(filepath)
 
+        file_type = 'pdf'
+        if filename.endswith('.docx'):
+            file_type = 'docx'
+        elif filename.endswith('.xlsx'):
+            file_type = 'xlsx'
+
         work = Document(
             title=form.title.data,
             filename=filename,
             file_path=f'/static/uploads/works/{filename}',
+            file_type=file_type,
             uploaded_by=current_user.id,
+            discipline_id=form.teacher_id.data,
             is_public=False
         )
         db.session.add(work)
@@ -229,7 +224,6 @@ def student_works_upload():
 
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
     return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы', student=student, form=form, works=works)
-
 
 @bp.route('/cabinet/student/work/delete/<int:work_id>')
 @login_required
@@ -246,7 +240,6 @@ def student_work_delete(work_id):
         flash('Работа удалена!', 'success')
     return redirect(url_for('main.student_works'))
 
-
 @bp.route('/cabinet/student/achievements')
 @login_required
 def student_achievements():
@@ -254,7 +247,6 @@ def student_achievements():
         abort(403)
     student = Student.query.filter_by(user_id=current_user.id).first()
     return render_template('cabinet/student_achievements.html', breadcrumb_title='Мои достижения', student=student)
-
 
 @bp.route('/cabinet/student/teachers')
 @login_required
@@ -264,7 +256,6 @@ def student_teachers():
     student = Student.query.filter_by(user_id=current_user.id).first()
     teachers = Teacher.query.all()
     return render_template('cabinet/student_teachers.html', breadcrumb_title='Мои преподаватели', teachers=teachers, student=student)
-
 
 @bp.route('/cabinet/student/ask_teacher/<int:teacher_id>', methods=['GET', 'POST'])
 @login_required
@@ -292,7 +283,6 @@ def ask_teacher(teacher_id):
 
     return render_template('cabinet/ask_teacher.html', breadcrumb_title='Задать вопрос', teacher=teacher, student=student)
 
-
 @bp.route('/cabinet/student/documents')
 @login_required
 def student_documents():
@@ -302,7 +292,6 @@ def student_documents():
     documents = Document.query.filter_by(uploaded_by=current_user.id).all()
     form = DocumentUploadForm()
     return render_template('cabinet/student_documents.html', breadcrumb_title='Мои документы', student=student, form=form, documents=documents)
-
 
 @bp.route('/cabinet/student/documents/upload', methods=['GET', 'POST'])
 @login_required
@@ -334,7 +323,6 @@ def student_documents_upload():
     documents = Document.query.filter_by(uploaded_by=current_user.id).all()
     return render_template('cabinet/student_documents.html', breadcrumb_title='Мои документы', student=student, form=form, documents=documents)
 
-
 @bp.route('/cabinet/student/document/delete/<int:doc_id>')
 @login_required
 def student_document_delete(doc_id):
@@ -349,7 +337,6 @@ def student_document_delete(doc_id):
         db.session.commit()
         flash('Документ удалён!', 'success')
     return redirect(url_for('main.student_documents'))
-
 
 @bp.route('/cabinet/student/generate/certificate')
 @login_required
@@ -371,7 +358,6 @@ def generate_certificate():
     byte_io.seek(0)
 
     return send_file(byte_io, as_attachment=True, download_name=f'spravka_{student.student_card_number}.docx')
-
 
 @bp.route('/cabinet/student/settings', methods=['GET', 'POST'])
 @login_required
@@ -439,7 +425,6 @@ def teacher_profile():
         db.session.commit()
     return render_template('cabinet/teacher/profile.html', breadcrumb_title='Мой профиль', teacher=teacher)
 
-
 @bp.route('/cabinet/teacher/disciplines')
 @login_required
 def teacher_disciplines():
@@ -448,7 +433,6 @@ def teacher_disciplines():
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     disciplines = Discipline.query.filter_by(teacher_id=teacher.id).all() if teacher else []
     return render_template('cabinet/teacher/disciplines.html', breadcrumb_title='Мои дисциплины', disciplines=disciplines, teacher=teacher)
-
 
 @bp.route('/cabinet/teacher/students')
 @login_required
@@ -459,6 +443,22 @@ def teacher_students():
     students = Student.query.all()
     return render_template('cabinet/teacher/students.html', breadcrumb_title='Студенты', students=students, teacher=teacher)
 
+@bp.route('/cabinet/teacher/students-works')
+@login_required
+def teacher_students_works():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    works = Document.query.join(Discipline).filter(Discipline.teacher_id == teacher.id).all()
+    return render_template('cabinet/teacher/students_works.html', breadcrumb_title='Работы студентов', teacher=teacher, works=works)
+
+@bp.route('/cabinet/teacher/grades')
+@login_required
+def teacher_grades():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    return render_template('cabinet/teacher/grades.html', breadcrumb_title='Выставление оценок', teacher=teacher)
 
 @bp.route('/cabinet/teacher/reports')
 @login_required
@@ -467,7 +467,6 @@ def teacher_reports():
         abort(403)
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     return render_template('cabinet/teacher/reports.html', breadcrumb_title='Отчёты', teacher=teacher)
-
 
 @bp.route('/cabinet/teacher/settings')
 @login_required
