@@ -1,10 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/teacher_base.html" %}
+
+{% block title %}Работы студентов{% endblock %}
+
+{% block teacher_content %}
+<h2>Работы студентов</h2>
+
+{% if works %}
+<table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+    <tr style="background: #003366; color: white;">
+        <th>Студент</th>
+        <th>Название работы</th>
+        <th>Дисциплина</th>
+        <th>Дата загрузки</th>
+        <th>Действия</th>
+    </tr>
+    {% for work in works %}
+    <tr>
+        <td>{{ work.student.full_name if work.student else '—' }}</td>
+        <td>{{ work.title }}</td>
+        <td>{{ work.discipline.name if work.discipline else '—' }}</td>
+        <td>{{ work.uploaded_at.strftime('%d.%m.%Y') }}</td>
+        <td>
+            <a href="{{ work.file_path }}">📥 Скачать</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>Нет загруженных работ.</p>
+{% endif %}
+{% endblock %}
 </body>
 </html>
