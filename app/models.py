@@ -45,13 +45,14 @@ class Student(db.Model):
 class Teacher(db.Model):
     __tablename__ = 'teachers'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # nullable=True
     full_name = db.Column(db.String(150), nullable=False)
     department = db.Column(db.String(100), nullable=False)
     position = db.Column(db.String(100))
     degree = db.Column(db.String(100))
     phone = db.Column(db.String(20))
     avatar = db.Column(db.String(200), default='/static/images/default-avatar.png')
+    bio = db.Column(db.Text)
 
     user = db.relationship('User', backref='teacher_profile', uselist=False)
 
@@ -100,22 +101,13 @@ class Document(db.Model):
     title = db.Column(db.String(200), nullable=False)
     filename = db.Column(db.String(200), nullable=False)
     file_path = db.Column(db.String(300), nullable=False)
-    file_size = db.Column(db.Integer)
-    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
-    uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'))
-    discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'))
-    is_public = db.Column(db.Boolean, default=False)
-    __tablename__ = 'documents'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    filename = db.Column(db.String(200), nullable=False)
-    file_path = db.Column(db.String(300), nullable=False)
     file_type = db.Column(db.String(20), default='pdf')  # pdf, docx, xlsx
     file_size = db.Column(db.Integer)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
     uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'))
     is_public = db.Column(db.Boolean, default=False)
+
 
 # Таблица 8: Обратная связь
 class Feedback(db.Model):

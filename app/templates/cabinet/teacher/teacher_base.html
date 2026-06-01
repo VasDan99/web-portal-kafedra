@@ -10,29 +10,23 @@
 {% block content %}
 <div style="display: flex; gap: 20px;">
     <!-- Боковое меню -->
-    <div style="width: 280px; background: #f5f5f5; padding: 20px; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <img src="{{ teacher.avatar or '/static/images/default-avatar.png' }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
-            <h3>{{ teacher.full_name }}</h3>
-            <p>{{ teacher.position }}</p>
-            <p style="color: #666;">{{ teacher.department }}</p>
-        </div>
-        <hr>
-        <ul style="list-style: none; padding: 0;">
-            <li><a href="{{ url_for('main.teacher_profile') }}" style="display: block; padding: 8px; color: #003366;">📋 Мой профиль</a></li>
-            <li><a href="{{ url_for('main.teacher_disciplines') }}" style="display: block; padding: 8px; color: #003366;">📚 Мои дисциплины</a></li>
-            <li><a href="{{ url_for('main.teacher_students_works') }}" style="display: block; padding: 8px; color: #003366;">📄 Работы студентов</a></li>
-            <li><a href="{{ url_for('main.teacher_students') }}" style="display: block; padding: 8px; color: #003366;">👨‍🎓 Студенты</a></li>
-            <li><a href="{{ url_for('main.teacher_grades') }}" style="display: block; padding: 8px; color: #003366;">📊 Выставление оценок</a></li>
-            <li><a href="{{ url_for('main.teacher_reports') }}" style="display: block; padding: 8px; color: #003366;">📑 Отчёты</a></li>
-            <li><a href="{{ url_for('main.teacher_settings') }}" style="display: block; padding: 8px; color: #003366;">⚙️ Настройки</a></li>
-        </ul>
+<div style="width: 280px; background: #f5f5f5; padding: 20px; border-radius: 8px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="{{ teacher.avatar or '/static/images/default-avatar.png' }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
+        <h3>{{ teacher.full_name }}</h3>
+        <p>{{ teacher.position }}</p>
+        <p style="color: #666;">{{ teacher.department }}</p>
     </div>
-
-    <!-- Основной контент -->
-    <div style="flex: 1; background: white; padding: 25px; border-radius: 8px;">
-        {% block teacher_content %}{% endblock %}
-    </div>
+    <hr>
+    <ul style="list-style: none; padding: 0;">
+        <li><a href="{{ url_for('main.teacher_profile') }}" style="display: block; padding: 8px; color: #003366;">📋 Мой профиль</a></li>
+        <li><a href="{{ url_for('main.teacher_disciplines') }}" style="display: block; padding: 8px; color: #003366;">📚 Мои дисциплины</a></li>
+        <li><a href="{{ url_for('main.teacher_students_works') }}" style="display: block; padding: 8px; color: #003366;">📄 Работы студентов</a></li>
+        <li><a href="{{ url_for('main.teacher_students') }}" style="display: block; padding: 8px; color: #003366;">👨‍🎓 Студенты</a></li>
+        <li><a href="{{ url_for('main.teacher_grades') }}" style="display: block; padding: 8px; color: #003366;">📊 Выставление оценок</a></li>
+        <li><a href="{{ url_for('main.teacher_reports') }}" style="display: block; padding: 8px; color: #003366;">📑 Отчёты</a></li>
+        <li><a href="{{ url_for('main.teacher_settings') }}" style="display: block; padding: 8px; color: #003366;">⚙️ Настройки</a></li>
+    </ul>
 </div>
 {% endblock %}
 </body>

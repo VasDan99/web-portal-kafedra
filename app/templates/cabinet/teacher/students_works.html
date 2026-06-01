@@ -12,6 +12,13 @@
 {% block teacher_content %}
 <h2>Работы студентов</h2>
 
+{% extends "cabinet/teacher_base.html" %}
+
+{% block title %}Работы студентов{% endblock %}
+
+{% block teacher_content %}
+<h2>Работы студентов</h2>
+
 {% if works %}
 <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
     <tr style="background: #003366; color: white;">

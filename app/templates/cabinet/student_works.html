@@ -20,8 +20,13 @@
         {{ form.title(size=50) }}
     </div>
     <div style="margin-bottom: 10px;">
+        {{ form.teacher_id.label }}<br>
+        {{ form.teacher_id() }}
+    </div>
+    <div style="margin-bottom: 10px;">
         {{ form.file.label }}<br>
         {{ form.file() }}
+        <small style="color: #666;">Поддерживаемые форматы: PDF, DOCX, XLSX</small>
     </div>
     <div>
         {{ form.submit() }}
@@ -35,12 +40,29 @@
 <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
     <tr style="background: #003366; color: white;">
         <th>Название</th>
+        <th>Преподаватель</th>
+        <th>Тип файла</th>
         <th>Дата загрузки</th>
         <th>Действия</th>
     </tr>
     {% for work in works %}
     <tr>
         <td>{{ work.title }}</td>
+        <td>
+            {% set teacher = Teacher.query.get(work.discipline_id) %}
+            {{ teacher.full_name if teacher else 'Не указан' }}
+        </td>
+        <td>
+            {% if work.file_type == 'pdf' %}
+                📄 PDF
+            {% elif work.file_type == 'docx' %}
+                📝 DOCX
+            {% elif work.file_type == 'xlsx' %}
+                📊 XLSX
+            {% else %}
+                📎 {{ work.file_type|upper }}
+            {% endif %}
+        </td>
         <td>{{ work.uploaded_at.strftime('%d.%m.%Y') }}</td>
         <td>
             <a href="{{ work.file_path }}">📥 Скачать</a> |
