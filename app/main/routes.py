@@ -452,13 +452,45 @@ def teacher_students_works():
     works = Document.query.join(Discipline).filter(Discipline.teacher_id == teacher.id).all()
     return render_template('cabinet/teacher/students_works.html', breadcrumb_title='Работы студентов', teacher=teacher, works=works)
 
+
 @bp.route('/cabinet/teacher/grades')
 @login_required
 def teacher_grades():
     if current_user.role != 'teacher':
         abort(403)
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
-    return render_template('cabinet/teacher/grades.html', breadcrumb_title='Выставление оценок', teacher=teacher)
+    students = Student.query.all()
+    disciplines = Discipline.query.filter_by(teacher_id=teacher.id).all()
+    grades = Grade.query.join(Discipline).filter(Discipline.teacher_id == teacher.id).all()
+    return render_template('cabinet/teacher/grades.html', breadcrumb_title='Выставление оценок',
+                           teacher=teacher, students=students, disciplines=disciplines, grades=grades)
+
+
+@bp.route('/cabinet/teacher/add-grade', methods=['POST'])
+@login_required
+def teacher_add_grade():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+
+    student_id = request.form.get('student_id')
+    discipline_id = request.form.get('discipline_id')
+    grade_value = request.form.get('grade_value')
+    grade_type = request.form.get('grade_type')
+
+    if student_id and discipline_id and grade_value:
+        grade = Grade(
+            student_id=student_id,
+            discipline_id=discipline_id,
+            grade_value=int(grade_value),
+            grade_type=grade_type,
+            teacher_id=teacher.id
+        )
+        db.session.add(grade)
+        db.session.commit()
+        flash('Оценка выставлена!', 'success')
+
+    return redirect(url_for('main.teacher_grades'))
 
 @bp.route('/cabinet/teacher/reports')
 @login_required
