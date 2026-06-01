@@ -12,17 +12,27 @@
 {% block teacher_content %}
 <h2>Мой профиль</h2>
 
-<table style="width: 100%; border-collapse: collapse;">
-    <tr><td style="padding: 8px;"><strong>ФИО:</strong></td><td>{{ teacher.full_name }}</td></tr>
-    <tr><td style="padding: 8px;"><strong>Кафедра:</strong></td><td>{{ teacher.department }}</td></tr>
-    <tr><td style="padding: 8px;"><strong>Должность:</strong></td><td>{{ teacher.position }}</td></tr>
-    <tr><td style="padding: 8px;"><strong>Учёная степень:</strong></td><td>{{ teacher.degree or '—' }}</td></tr>
-    <tr><td style="padding: 8px;"><strong>Телефон:</strong></td><td>{{ teacher.phone or '—' }}</td></tr>
-    <tr><td style="padding: 8px;"><strong>Email:</strong></td><td>{{ current_user.email }}</td></tr>
-</table>
+<div style="display: flex; gap: 20px;">
+    <div>
+        <img src="{{ teacher.avatar or '/static/images/default-avatar.png' }}"
+             style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">
+    </div>
+    <div>
+        <p><strong>ФИО:</strong> {{ teacher.full_name }}</p>
+        <p><strong>Кафедра:</strong> {{ teacher.department }}</p>
+        <p><strong>Должность:</strong> {{ teacher.position or '—' }}</p>
+        <p><strong>Учёная степень:</strong> {{ teacher.degree or '—' }}</p>
+        <p><strong>Телефон:</strong> {{ teacher.phone or '—' }}</p>
+        <p><strong>Email:</strong> {{ current_user.email }}</p>
+    </div>
+</div>
 
-<h3>Информация</h3>
+<h3>О себе</h3>
 <p>{{ teacher.bio or 'Информация о преподавателе не заполнена.' }}</p>
+
+<div style="margin-top: 20px;">
+    <a href="{{ url_for('main.teacher_profile_edit') }}" class="cabinet-btn" style="background: #003366;">✏️ Редактировать профиль</a>
+</div>
 {% endblock %}
 </body>
 </html>

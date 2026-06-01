@@ -1,10 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/teacher/teacher_base.html" %}
+
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block teacher_content %}
+<h2>Редактирование профиля</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div style="margin-bottom: 15px;">
+        {{ form.full_name.label }}<br>
+        {{ form.full_name(size=50) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        {{ form.department.label }}<br>
+        {{ form.department(size=50) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        {{ form.position.label }}<br>
+        {{ form.position(size=50) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        {{ form.degree.label }}<br>
+        {{ form.degree(size=50) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        {{ form.phone.label }}<br>
+        {{ form.phone(size=50) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        {{ form.bio.label }}<br>
+        {{ form.bio(rows=5, cols=50) }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        {{ form.avatar.label }}<br>
+        {{ form.avatar() }}
+        {% if teacher.avatar %}
+            <p><img src="{{ teacher.avatar }}" style="max-width: 100px; border-radius: 50%;"></p>
+        {% endif %}
+    </div>
+
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock %}
 </body>
 </html>
