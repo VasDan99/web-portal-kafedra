@@ -182,7 +182,8 @@ def student_works():
     form = WorkUploadForm()
     teachers = Teacher.query.all()
     form.teacher_id.choices = [(t.id, t.full_name) for t in teachers]
-    return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы', student=student, form=form, works=works)
+    return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы',
+                         student=student, form=form, works=works, teachers=teachers)
 
 @bp.route('/cabinet/student/works/upload', methods=['GET', 'POST'])
 @login_required
@@ -223,7 +224,7 @@ def student_works_upload():
         return redirect(url_for('main.student_works'))
 
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
-    return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы', student=student, form=form, works=works)
+    return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы', student=student, form=form, works=works, teachers=teachers)
 
 @bp.route('/cabinet/student/work/delete/<int:work_id>')
 @login_required
@@ -448,10 +449,27 @@ def teacher_students():
 def teacher_students_works():
     if current_user.role != 'teacher':
         abort(403)
-    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
-    works = Document.query.join(Discipline).filter(Discipline.teacher_id == teacher.id).all()
-    return render_template('cabinet/teacher/students_works.html', breadcrumb_title='Работы студентов', teacher=teacher, works=works)
 
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+
+    works_query = Document.query.join(Discipline).filter(Discipline.teacher_id == teacher.id).all()
+
+    works_data = []
+    for work in works_query:
+        student = Student.query.get(work.uploaded_by)
+        discipline = Discipline.query.get(work.discipline_id)
+
+        works_data.append({
+            'title': work.title,
+            'file_path': work.file_path,
+            'uploaded_at': work.uploaded_at,
+            'student_name': student.full_name if student else 'Неизвестно',
+            'discipline_name': discipline.name if discipline else '—'
+        })
+
+    return render_template('cabinet/teacher/students_works.html',
+                           teacher=teacher,
+                           works=works_data)
 
 @bp.route('/cabinet/teacher/grades')
 @login_required
@@ -463,8 +481,7 @@ def teacher_grades():
     disciplines = Discipline.query.filter_by(teacher_id=teacher.id).all()
     grades = Grade.query.join(Discipline).filter(Discipline.teacher_id == teacher.id).all()
     return render_template('cabinet/teacher/grades.html', breadcrumb_title='Выставление оценок',
-                           teacher=teacher, students=students, disciplines=disciplines, grades=grades)
-
+                         teacher=teacher, students=students, disciplines=disciplines, grades=grades)
 
 @bp.route('/cabinet/teacher/add-grade', methods=['POST'])
 @login_required
