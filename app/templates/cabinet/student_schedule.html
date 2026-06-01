@@ -11,27 +11,30 @@
 
 {% block cabinet_content %}
 <h2>Моё расписание</h2>
+<p><strong>Группа:</strong> {{ student.group_name }}</p>
+
 {% if schedule %}
 <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
     <tr style="background: #003366; color: white;">
         <th>День недели</th>
         <th>Время</th>
         <th>Дисциплина</th>
-        <th>Аудитория</th>
         <th>Преподаватель</th>
+        <th>Аудитория</th>
     </tr>
+    {% set days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'] %}
     {% for item in schedule %}
     <tr>
-        <td>{% if item.day_of_week == 1 %}Пн{% elif item.day_of_week == 2 %}Вт{% elif item.day_of_week == 3 %}Ср{% elif item.day_of_week == 4 %}Чт{% elif item.day_of_week == 5 %}Пт{% else %}Сб{% endif %}</td>
-        <td>{{ item.lesson_time }}</td>
-        <td>{{ item.discipline.name }}</td>
-        <td>{{ item.classroom }}</td>
-        <td>{{ item.teacher.full_name if item.teacher else '—' }}</td>
+        <td style="padding: 8px;">{{ days[item.day_of_week - 1] if item.day_of_week <= 6 else '—' }}</td>
+        <td style="padding: 8px;">{{ item.lesson_time }}</td>
+        <td style="padding: 8px;">{{ item.discipline.name if item.discipline else '—' }}</td>
+        <td style="padding: 8px;">{{ item.teacher.full_name if item.teacher else '—' }}</td>
+        <td style="padding: 8px;">{{ item.classroom or '—' }}</td>
     </tr>
     {% endfor %}
 </table>
 {% else %}
-<p>Расписание не загружено.</p>
+<p>Расписание не найдено для группы {{ student.group_name }}.</p>
 {% endif %}
 {% endblock %}
 </body>
