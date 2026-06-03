@@ -808,3 +808,86 @@ def admin_student_delete(student_id):
 
     flash('Студент удалён!', 'success')
     return redirect(url_for('main.admin_students'))
+
+
+@bp.route('/admin/teacher/add', methods=['GET', 'POST'])
+@login_required
+def admin_teacher_add():
+    if current_user.role != 'admin':
+        abort(403)
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        full_name = request.form.get('full_name')
+        department = request.form.get('department')
+        position = request.form.get('position')
+        degree = request.form.get('degree')
+        phone = request.form.get('phone')
+
+        if User.query.filter_by(username=username).first():
+            flash('Пользователь с таким логином уже существует!', 'danger')
+            return redirect(url_for('main.admin_teacher_add'))
+
+        user = User(username=username, email=email, role='teacher')
+        user.set_password(password)
+        db.session.add(user)
+        db.session.flush()
+
+        teacher = Teacher(
+            user_id=user.id,
+            full_name=full_name,
+            department=department,
+            position=position,
+            degree=degree,
+            phone=phone
+        )
+        db.session.add(teacher)
+        db.session.commit()
+
+        flash('Преподаватель успешно добавлен!', 'success')
+        return redirect(url_for('main.admin_teachers'))
+
+    return render_template('admin/teacher_add.html', breadcrumb_title='Добавление преподавателя')
+
+
+@bp.route('/admin/teacher/edit/<int:teacher_id>', methods=['GET', 'POST'])
+@login_required
+def admin_teacher_edit(teacher_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    teacher = Teacher.query.get_or_404(teacher_id)
+
+    if request.method == 'POST':
+        teacher.full_name = request.form.get('full_name')
+        teacher.department = request.form.get('department')
+        teacher.position = request.form.get('position')
+        teacher.degree = request.form.get('degree')
+        teacher.phone = request.form.get('phone')
+
+        if request.form.get('password'):
+            teacher.user.set_password(request.form.get('password'))
+
+        db.session.commit()
+        flash('Преподаватель обновлён!', 'success')
+        return redirect(url_for('main.admin_teachers'))
+
+    return render_template('admin/teacher_edit.html', breadcrumb_title='Редактирование преподавателя', teacher=teacher)
+
+
+@bp.route('/admin/teacher/delete/<int:teacher_id>')
+@login_required
+def admin_teacher_delete(teacher_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    teacher = Teacher.query.get_or_404(teacher_id)
+    user = teacher.user
+    db.session.delete(teacher)
+    db.session.delete(user)
+    db.session.commit()
+
+    flash('Преподаватель удалён!', 'success')
+    return redirect(url_for('main.admin_teachers'))
