@@ -45,7 +45,7 @@ class Student(db.Model):
 class Teacher(db.Model):
     __tablename__ = 'teachers'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # nullable=True
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     full_name = db.Column(db.String(150), nullable=False)
     department = db.Column(db.String(100), nullable=False)
     position = db.Column(db.String(100))
@@ -101,7 +101,7 @@ class Document(db.Model):
     title = db.Column(db.String(200), nullable=False)
     filename = db.Column(db.String(200), nullable=False)
     file_path = db.Column(db.String(300), nullable=False)
-    file_type = db.Column(db.String(20), default='pdf')  # pdf, docx, xlsx
+    file_type = db.Column(db.String(20), default='pdf')
     file_size = db.Column(db.Integer)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
     uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -149,18 +149,30 @@ class Schedule(db.Model):
 
     discipline = db.relationship('Discipline', backref='schedule')
 
-    # Таблица 11: Сообщения по работам
-    class WorkMessage(db.Model):
-        __tablename__ = 'work_messages'
-        id = db.Column(db.Integer, primary_key=True)
-        work_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=False)
-        from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-        to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-        message = db.Column(db.Text, nullable=False)
-        file_path = db.Column(db.String(300))
-        created_at = db.Column(db.DateTime, default=datetime.utcnow)
-        is_read = db.Column(db.Boolean, default=False)
 
-        work = db.relationship('Document', backref='messages')
-        from_user = db.relationship('User', foreign_keys=[from_user_id], backref='sent_messages')
-        to_user = db.relationship('User', foreign_keys=[to_user_id], backref='received_messages')
+# Таблица 11: Сообщения по работам
+class WorkMessage(db.Model):
+    __tablename__ = 'work_messages'
+    id = db.Column(db.Integer, primary_key=True)
+    work_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=False)
+    from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    file_path = db.Column(db.String(300))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
+
+    work = db.relationship('Document', backref='messages')
+    from_user = db.relationship('User', foreign_keys=[from_user_id], backref='sent_messages')
+    to_user = db.relationship('User', foreign_keys=[to_user_id], backref='received_messages')
+
+    class News(db.Model):
+        __tablename__ = 'news'
+        id = db.Column(db.Integer, primary_key=True)
+        title = db.Column(db.String(200), nullable=False)
+        content = db.Column(db.Text, nullable=False)
+        image_url = db.Column(db.String(300))
+        created_at = db.Column(db.DateTime, default=datetime.utcnow)
+        author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+        author = db.relationship('User', backref='news')
