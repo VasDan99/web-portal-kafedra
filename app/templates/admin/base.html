@@ -5,32 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-{% extends "admin/base.html" %}
-
-{% block title %}Админ-панель{% endblock %}
-
-{% block admin_content %}
-<h2>Добро пожаловать в админ-панель</h2>
-
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-    <div style="background: #003366; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-        <div style="font-size: 36px;">{{ students_count }}</div>
-        <div>Студентов</div>
-    </div>
-    <div style="background: #005599; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-        <div style="font-size: 36px;">{{ teachers_count }}</div>
-        <div>Преподавателей</div>
-    </div>
-    <div style="background: #0077cc; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-        <div style="font-size: 36px;">{{ disciplines_count }}</div>
-        <div>Дисциплин</div>
-    </div>
-    <div style="background: #0099ee; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-        <div style="font-size: 36px;">{{ works_count }}</div>
-        <div>Работ</div>
-    </div>
-</div>
-{% endblock %}{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <div style="display: flex; gap: 20px;">
@@ -42,12 +17,12 @@
         </div>
         <hr>
         <ul style="list-style: none; padding: 0;">
-            <li><a href="{{ url_for('main.admin_dashboard') }}" style="display: block; padding: 8px; color: #003366; text-decoration: none;">📊 Главная</a></li>
-            <li><a href="{{ url_for('main.admin_students') }}" style="display: block; padding: 8px; color: #003366; text-decoration: none;">🧑‍🎓 Студенты</a></li>
-            <li><a href="{{ url_for('main.admin_teachers') }}" style="display: block; padding: 8px; color: #003366; text-decoration: none;">👨‍🏫 Преподаватели</a></li>
-            <li><a href="{{ url_for('main.admin_schedule') }}" style="display: block; padding: 8px; color: #003366; text-decoration: none;">📅 Расписание</a></li>
-            <li><a href="{{ url_for('main.admin_news') }}" style="display: block; padding: 8px; color: #003366; text-decoration: none;">📰 Новости</a></li>
-            <li><a href="{{ url_for('main.admin_feedback') }}" style="display: block; padding: 8px; color: #003366; text-decoration: none;">💬 Сообщения</a></li>
+            <li><a href="{{ url_for('main.admin_dashboard') }}">📊 Главная</a></li>
+            <li><a href="{{ url_for('main.admin_students') }}">🧑‍🎓 Студенты</a></li>
+            <li><a href="{{ url_for('main.admin_teachers') }}">👨‍🏫 Преподаватели</a></li>
+            <li><a href="{{ url_for('main.admin_schedule') }}">📅 Расписание</a></li>
+            <li><a href="{{ url_for('main.admin_news') }}">📰 Новости</a></li>
+            <li><a href="{{ url_for('main.admin_feedback') }}">💬 Сообщения</a></li>
         </ul>
     </div>
 
