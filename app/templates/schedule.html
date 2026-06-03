@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block title %}Расписание занятий{% endblock %}
+
+{% block content %}
+<style>
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .day-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    .day-card:hover {
+        transform: translateY(-5px);
+    }
+    .day-header {
+        background: linear-gradient(135deg, #003366 0%, #005599 100%);
+        color: white;
+        padding: 15px;
+        text-align: center;
+    }
+    .day-header h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+    .day-header p {
+        margin: 5px 0 0;
+        font-size: 12px;
+        opacity: 0.8;
+    }
+    .lesson-item {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s;
+    }
+    .lesson-item:hover {
+        background: #f8f9fa;
+    }
+    .lesson-time {
+        font-weight: bold;
+        color: #003366;
+        font-size: 13px;
+    }
+    .lesson-name {
+        font-weight: 600;
+        margin: 5px 0;
+        color: #333;
+    }
+    .lesson-teacher {
+        font-size: 12px;
+        color: #666;
+    }
+    .lesson-room {
+        font-size: 12px;
+        color: #28a745;
+        margin-top: 5px;
+    }
+    .empty-day {
+        padding: 30px;
+        text-align: center;
+        color: #999;
+    }
+    @media (max-width: 768px) {
+        .calendar {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<h2 style="color: #003366; margin-bottom: 10px;">📅 Расписание занятий</h2>
+<p style="color: #666; margin-bottom: 20px;">Весенний семестр 2026 года</p>
+
+<div class="calendar">
+    {% set days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'] %}
+    {% set short_days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'] %}
+
+    {% for i in range(6) %}
+    <div class="day-card">
+        <div class="day-header">
+            <h3>{{ days[i] }}</h3>
+            <p>{{ short_days[i] }}</p>
+        </div>
+        <div>
+            {% set lessons = schedule|selectattr('day_of_week', 'equalto', i+1)|list %}
+            {% if lessons %}
+                {% for lesson in lessons %}
+                <div class="lesson-item">
+                    <div class="lesson-time">⏰ {{ lesson.lesson_time }}</div>
+                    <div class="lesson-name">📖 {{ lesson.discipline.name if lesson.discipline else '—' }}</div>
+                    <div class="lesson-teacher">👨‍🏫 {{ lesson.teacher.full_name if lesson.teacher else '—' }}</div>
+                    <div class="lesson-room">📍 Ауд. {{ lesson.classroom or '—' }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-day">
+                    🎉<br>Выходной
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="margin-top: 30px; background: #f0f7ff; padding: 15px; border-radius: 8px; text-align: center;">
+    <p style="color: #666;">⚠️ Расписание может быть изменено. Актуальную информацию уточняйте у преподавателей.</p>
+</div>
+{% endblock %}
+</body>
+</html>
