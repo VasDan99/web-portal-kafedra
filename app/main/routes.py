@@ -702,9 +702,63 @@ def admin_schedule():
         abort(403)
 
     schedule = Schedule.query.all()
+    disciplines = Discipline.query.all()
+    groups = ['ИС-01', 'ИС-02', 'ИС-03', 'ПИ-01', 'ПИ-02']
+    days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
+    times = ['09:00-10:30', '10:45-12:15', '12:30-14:00', '14:15-15:45', '16:00-17:30']
+
     return render_template('admin/schedule.html',
                            breadcrumb_title='Расписание',
-                           schedule=schedule)
+                           schedule=schedule,
+                           disciplines=disciplines,
+                           groups=groups,
+                           days=days,
+                           times=times)
+
+
+@bp.route('/admin/schedule/add', methods=['POST'])
+@login_required
+def admin_schedule_add():
+    if current_user.role != 'admin':
+        abort(403)
+
+    discipline_id = request.form.get('discipline_id')
+    group_name = request.form.get('group_name')
+    day_of_week = request.form.get('day_of_week')
+    lesson_time = request.form.get('lesson_time')
+    classroom = request.form.get('classroom')
+
+    # Преобразуем день недели в число
+    days_map = {'Понедельник': 1, 'Вторник': 2, 'Среда': 3, 'Четверг': 4, 'Пятница': 5, 'Суббота': 6}
+    day_num = days_map.get(day_of_week, 1)
+
+    schedule_item = Schedule(
+        discipline_id=discipline_id,
+        group_name=group_name,
+        day_of_week=day_num,
+        lesson_time=lesson_time,
+        classroom=classroom,
+        teacher_id=Discipline.query.get(discipline_id).teacher_id
+    )
+    db.session.add(schedule_item)
+    db.session.commit()
+
+    flash('Занятие добавлено!', 'success')
+    return redirect(url_for('main.admin_schedule'))
+
+
+@bp.route('/admin/schedule/delete/<int:schedule_id>')
+@login_required
+def admin_schedule_delete(schedule_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    schedule_item = Schedule.query.get_or_404(schedule_id)
+    db.session.delete(schedule_item)
+    db.session.commit()
+
+    flash('Занятие удалено!', 'success')
+    return redirect(url_for('main.admin_schedule'))
 
 
 @bp.route('/admin/news')
