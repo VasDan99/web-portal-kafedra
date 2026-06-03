@@ -1,96 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
 {% extends "base.html" %}
 
 {% block title %}Календарный план{% endblock %}
 
 {% block content %}
 <style>
-    .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .calendar-card {
+    .calendar-container {
         background: white;
         border-radius: 16px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
         overflow: hidden;
-        transition: transform 0.3s;
-    }
-    .calendar-card:hover {
-        transform: translateY(-5px);
     }
     .month-header {
         background: linear-gradient(135deg, #003366 0%, #005599 100%);
         color: white;
-        padding: 15px;
-        text-align: center;
+        padding: 18px 25px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.3s;
+    }
+    .month-header:hover {
+        background: linear-gradient(135deg, #004488 0%, #0066aa 100%);
     }
     .month-header h3 {
         margin: 0;
         font-size: 20px;
     }
-    .month-header p {
-        margin: 5px 0 0;
-        font-size: 12px;
-        opacity: 0.8;
+    .month-header .arrow {
+        font-size: 24px;
+        transition: transform 0.3s;
+    }
+    .month-header.active .arrow {
+        transform: rotate(180deg);
+    }
+    .month-content {
+        display: none;
+        padding: 20px;
+        background: #f9f9f9;
+        border-top: 1px solid #eee;
+    }
+    .month-content.show {
+        display: block;
     }
     .calendar-table {
         width: 100%;
         border-collapse: collapse;
     }
     .calendar-table th {
-        background: #e8f0f8;
-        padding: 8px;
+        background: #003366;
+        color: white;
+        padding: 12px;
         text-align: center;
-        font-size: 12px;
-        color: #003366;
     }
     .calendar-table td {
-        border: 1px solid #eee;
-        padding: 6px;
+        border: 1px solid #ddd;
+        padding: 8px;
         vertical-align: top;
-        height: 70px;
-        font-size: 12px;
+        height: 80px;
+        background: white;
     }
-    .day-num {
+    .day-number {
         font-weight: bold;
-        color: #666;
-        margin-bottom: 3px;
-    }
-    .today {
-        background: #e3f2fd;
-    }
-    .today .day-num {
         color: #003366;
-        font-size: 14px;
+        margin-bottom: 5px;
     }
     .event {
-        font-size: 9px;
-        padding: 2px 4px;
-        margin: 1px 0;
-        border-radius: 3px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 11px;
+        padding: 3px 5px;
+        margin: 2px 0;
+        border-radius: 4px;
     }
-    .lecture { background: #e8f4fd; color: #0066cc; border-left: 2px solid #0066cc; }
-    .practice { background: #fff3e0; color: #e67e22; border-left: 2px solid #e67e22; }
-    .exam { background: #fce4e4; color: #c0392b; border-left: 2px solid #c0392b; }
-    .deadline { background: #e8f8f5; color: #27ae60; border-left: 2px solid #27ae60; }
-    .holiday { background: #f5f5f5; color: #999; border-left: 2px solid #999; }
-
+    .lecture { background: #e8f4fd; color: #0066cc; border-left: 3px solid #0066cc; }
+    .practice { background: #fff3e0; color: #e67e22; border-left: 3px solid #e67e22; }
+    .exam { background: #fce4e4; color: #c0392b; border-left: 3px solid #c0392b; }
+    .deadline { background: #e8f8f5; color: #27ae60; border-left: 3px solid #27ae60; }
+    .holiday { background: #f5f5f5; color: #999; border-left: 3px solid #999; }
     .legend {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 15px;
         justify-content: center;
         margin: 20px 0;
         padding: 15px;
@@ -116,17 +106,17 @@
         text-align: center;
         margin-top: 20px;
     }
-    .info-panel p {
-        margin: 5px 0;
-    }
-    @media (max-width: 900px) {
-        .calendar-grid {
-            grid-template-columns: repeat(2, 1fr);
+    @media (max-width: 768px) {
+        .calendar-table td {
+            font-size: 10px;
+            padding: 4px;
+            height: 60px;
         }
-    }
-    @media (max-width: 600px) {
-        .calendar-grid {
-            grid-template-columns: 1fr;
+        .event {
+            font-size: 8px;
+        }
+        .month-header h3 {
+            font-size: 16px;
         }
     }
 </style>
@@ -142,112 +132,123 @@
     <div class="legend-item"><div class="legend-color holiday"></div><span>🎉 Каникулы</span></div>
 </div>
 
-<div class="calendar-grid">
-    <!-- Март 2026 -->
-    <div class="calendar-card">
-        <div class="month-header">
-            <h3>Март 2026</h3>
-            <p>🌱 Весна</p>
-        </div>
+<!-- Март 2026 -->
+<div class="calendar-container">
+    <div class="month-header" onclick="toggleMonth(this)">
+        <h3>🌱 Март 2026</h3>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="month-content">
         <table class="calendar-table">
             <thead><tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr></thead>
             <tbody>
-                <tr><td><div class="day-num">2</div><div class="event lecture">Лекция Программирование</div></td><td><div class="day-num">3</div><div class="event practice">Практика Web</div></td><td><div class="day-num">4</div></td><td><div class="day-num">5</div><div class="event lecture">Лекция БД</div></td><td><div class="day-num">6</div></td><td><div class="day-num">7</div></td><td><div class="day-num">8</div></td></tr>
-                <tr><td><div class="day-num">9</div></td><td><div class="day-num">10</div><div class="event lecture">Лекция Web</div></td><td><div class="day-num">11</div><div class="event practice">Практика Python</div></td><td><div class="day-num">12</div></td><td><div class="day-num">13</div><div class="event lecture">Лекция ИИ</div></td><td><div class="day-num">14</div></td><td><div class="day-num">15</div></td></tr>
-                <tr><td><div class="day-num">16</div><div class="event deadline">📌 Сдача лабораторных</div></td><td><div class="day-num">17</div></td><td><div class="day-num">18</div><div class="event lecture">Лекция БД</div></td><td><div class="day-num">19</div><div class="event practice">Практика Web</div></td><td><div class="day-num">20</div></td><td><div class="day-num">21</div></td><td><div class="day-num">22</div></td></tr>
-                <tr><td><div class="day-num">23</div></td><td><div class="day-num">24</div><div class="event lecture">Лекция Программирование</div></td><td><div class="day-num">25</div></td><td><div class="day-num">26</div><div class="event deadline">📌 Курсовая работа</div></td><td><div class="day-num">27</div><div class="event practice">Практика Python</div></td><td><div class="day-num">28</div></td><td><div class="day-num">29</div></td></tr>
-                <tr><td><div class="day-num">30</div><div class="event lecture">Лекция ИИ</div></td><td><div class="day-num">31</div></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td>1</td></tr>
+                <tr><td>2<div class="event lecture">Лекция Программирование</div></td><td>3<div class="event practice">Практика Web</div></td><td>4</td><td>5<div class="event lecture">Лекция БД</div></td><td>6</td><td>7</td><td>8</td></tr>
+                <tr><td>9</td><td>10<div class="event lecture">Лекция Web</div></td><td>11<div class="event practice">Практика Python</div></td><td>12</td><td>13<div class="event lecture">Лекция ИИ</div></td><td>14</td><td>15</td></tr>
+                <tr><td>16<div class="event deadline">📌 Сдача лабораторных</div></td><td>17</td><td>18<div class="event lecture">Лекция БД</div></td><td>19<div class="event practice">Практика Web</div></td><td>20</td><td>21</td><td>22</td></tr>
+                <tr><td>23</td><td>24<div class="event lecture">Лекция Программирование</div></td><td>25</td><td>26<div class="event deadline">📌 Курсовая работа</div></td><td>27<div class="event practice">Практика Python</div></td><td>28</td><td>29</td></tr>
+                <tr><td>30<div class="event lecture">Лекция ИИ</div></td><td>31</td><td></td><td></td><td></td><td></td><td></td></tr>
             </tbody>
         </table>
     </div>
+</div>
 
-    <!-- Апрель 2026 -->
-    <div class="calendar-card">
-        <div class="month-header">
-            <h3>Апрель 2026</h3>
-            <p>🌸 Цветение</p>
-        </div>
+<!-- Апрель 2026 -->
+<div class="calendar-container">
+    <div class="month-header" onclick="toggleMonth(this)">
+        <h3>🌸 Апрель 2026</h3>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="month-content">
         <table class="calendar-table">
             <thead><tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr></thead>
             <tbody>
-                <tr><td></td><td></td><td><div class="day-num">1</div></td><td><div class="day-num">2</div><div class="event practice">Практика Web</div></td><td><div class="day-num">3</div></td><td><div class="day-num">4</div></td><td><div class="day-num">5</div></td></tr>
-                <tr><td><div class="day-num">6</div><div class="event lecture">Лекция БД</div></td><td><div class="day-num">7</div></td><td><div class="day-num">8</div><div class="event lecture">Лекция Программирование</div></td><td><div class="day-num">9</div></td><td><div class="day-num">10</div><div class="event deadline">📌 Контрольная работа</div></td><td><div class="day-num">11</div></td><td><div class="day-num">12</div></td></tr>
-                <tr><td><div class="day-num">13</div></td><td><div class="day-num">14</div><div class="event practice">Практика Python</div></td><td><div class="day-num">15</div><div class="event lecture">Лекция Web</div></td><td><div class="day-num">16</div></td><td><div class="day-num">17</div><div class="event lecture">Лекция ИИ</div></td><td><div class="day-num">18</div></td><td><div class="day-num">19</div></td></tr>
-                <tr><td><div class="day-num">20</div></td><td><div class="day-num">21</div><div class="event deadline">📌 Защита курсовых</div></td><td><div class="day-num">22</div></td><td><div class="day-num">23</div><div class="event practice">Практика Web</div></td><td><div class="day-num">24</div></td><td><div class="day-num">25</div></td><td><div class="day-num">26</div></td></tr>
-                <tr><td><div class="day-num">27</div><div class="event lecture">Лекция БД</div></td><td><div class="day-num">28</div></td><td><div class="day-num">29</div><div class="event lecture">Лекция Программирование</div></td><td><div class="day-num">30</div></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td>1</td><td>2<div class="event practice">Практика Web</div></td><td>3</td><td>4</td><td>5</td></tr>
+                <tr><td>6<div class="event lecture">Лекция БД</div></td><td>7</td><td>8<div class="event lecture">Лекция Программирование</div></td><td>9</td><td>10<div class="event deadline">📌 Контрольная работа</div></td><td>11</td><td>12</td></tr>
+                <tr><td>13</td><td>14<div class="event practice">Практика Python</div></td><td>15<div class="event lecture">Лекция Web</div></td><td>16</td><td>17<div class="event lecture">Лекция ИИ</div></td><td>18</td><td>19</td></tr>
+                <tr><td>20</td><td>21<div class="event deadline">📌 Защита курсовых</div></td><td>22</td><td>23<div class="event practice">Практика Web</div></td><td>24</td><td>25</td><td>26</td></tr>
+                <tr><td>27<div class="event lecture">Лекция БД</div></td><td>28</td><td>29<div class="event lecture">Лекция Программирование</div></td><td>30</td><td></td><td></td><td></td></tr>
             </tbody>
         </table>
     </div>
+</div>
 
-    <!-- Май 2026 -->
-    <div class="calendar-card">
-        <div class="month-header">
-            <h3>Май 2026</h3>
-            <p>🌼 Праздники</p>
-        </div>
+<!-- Май 2026 -->
+<div class="calendar-container">
+    <div class="month-header" onclick="toggleMonth(this)">
+        <h3>🌼 Май 2026</h3>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="month-content">
         <table class="calendar-table">
             <thead><tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr></thead>
             <tbody>
-                <tr><td></td><td></td><td></td><td></td><td><div class="day-num">1</div><div class="event holiday">🎉 Праздник Весны</div></td><td><div class="day-num">2</div></td><td><div class="day-num">3</div></td></tr>
-                <tr><td><div class="day-num">4</div><div class="event lecture">Лекция Web</div></td><td><div class="day-num">5</div><div class="event practice">Практика Python</div></td><td><div class="day-num">6</div></td><td><div class="day-num">7</div><div class="event lecture">Лекция БД</div></td><td><div class="day-num">8</div></td><td><div class="day-num">9</div></td><td><div class="day-num">10</div></td></tr>
-                <tr><td><div class="day-num">11</div><div class="event deadline">📌 Сдача проектов</div></td><td><div class="day-num">12</div></td><td><div class="day-num">13</div><div class="event lecture">Лекция Программирование</div></td><td><div class="day-num">14</div></td><td><div class="day-num">15</div><div class="event practice">Практика Web</div></td><td><div class="day-num">16</div></td><td><div class="day-num">17</div></td></tr>
-                <tr><td><div class="day-num">18</div></td><td><div class="day-num">19</div><div class="event exam">📝 Зачётная неделя</div></td><td><div class="day-num">20</div><div class="event exam">📝 Экзамен</div></td><td><div class="day-num">21</div></td><td><div class="day-num">22</div></td><td><div class="day-num">23</div></td><td><div class="day-num">24</div></td></tr>
-                <tr><td><div class="day-num">25</div></td><td><div class="day-num">26</div><div class="event exam">📝 Экзамен ИИ</div></td><td><div class="day-num">27</div></td><td><div class="day-num">28</div></td><td><div class="day-num">29</div></td><td><div class="day-num">30</div></td><td><div class="day-num">31</div></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td>1<div class="event holiday">🎉 Праздник Весны</div></td><td>2</td><td>3</td></tr>
+                <tr><td>4<div class="event lecture">Лекция Web</div></td><td>5<div class="event practice">Практика Python</div></td><td>6</td><td>7<div class="event lecture">Лекция БД</div></td><td>8</td><td>9</td><td>10</td></tr>
+                <tr><td>11<div class="event deadline">📌 Сдача проектов</div></td><td>12</td><td>13<div class="event lecture">Лекция Программирование</div></td><td>14</td><td>15<div class="event practice">Практика Web</div></td><td>16</td><td>17</td></tr>
+                <tr><td>18</td><td>19<div class="event exam">📝 Зачётная неделя</div></td><td>20<div class="event exam">📝 Экзамен</div></td><td>21</td><td>22</td><td>23</td><td>24</td></tr>
+                <tr><td>25</td><td>26<div class="event exam">📝 Экзамен ИИ</div></td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td></tr>
             </tbody>
         </table>
     </div>
+</div>
 
-    <!-- Июнь 2026 -->
-    <div class="calendar-card">
-        <div class="month-header">
-            <h3>Июнь 2026</h3>
-            <p>☀️ Лето</p>
-        </div>
+<!-- Июнь 2026 -->
+<div class="calendar-container">
+    <div class="month-header" onclick="toggleMonth(this)">
+        <h3>☀️ Июнь 2026</h3>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="month-content">
         <table class="calendar-table">
             <thead><tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr></thead>
             <tbody>
-                <tr><td><div class="day-num">1</div><div class="event exam">📝 Экзамен БД</div></td><td><div class="day-num">2</div><div class="event exam">📝 Экзамен Web</div></td><td><div class="day-num">3</div></td><td><div class="day-num">4</div></td><td><div class="day-num">5</div><div class="event exam">📝 Экзамен Программирование</div></td><td><div class="day-num">6</div></td><td><div class="day-num">7</div></td></tr>
-                <tr><td><div class="day-num">8</div></td><td><div class="day-num">9</div></td><td><div class="day-num">10</div></td><td><div class="day-num">11</div></td><td><div class="day-num">12</div></td><td><div class="day-num">13</div></td><td><div class="day-num">14</div></td></tr>
-                <tr><td><div class="day-num">15</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">16</div><div class="event practice">💻 Практика</div></td><td class="today"><div class="day-num">17</div><div class="event deadline">🎓 Защита ВКР</div></td><td><div class="day-num">18</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">19</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">20</div></td><td><div class="day-num">21</div></td></tr>
-                <tr><td><div class="day-num">22</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">23</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">24</div></td><td><div class="day-num">25</div></td><td><div class="day-num">26</div></td><td><div class="day-num">27</div></td><td><div class="day-num">28</div></td></tr>
-                <tr><td><div class="day-num">29</div></td><td><div class="day-num">30</div></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>1<div class="event exam">📝 Экзамен БД</div></td><td>2<div class="event exam">📝 Экзамен Web</div></td><td>3</td><td>4</td><td>5<div class="event exam">📝 Экзамен Программирование</div></td><td>6</td><td>7</td></tr>
+                <tr><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td></tr>
+                <tr><td>15<div class="event practice">💻 Практика</div></td><td>16<div class="event practice">💻 Практика</div></td><td class="today">17<div class="event deadline">🎓 Защита ВКР</div></td><td>18<div class="event practice">💻 Практика</div></td><td>19<div class="event practice">💻 Практика</div></td><td>20</td><td>21</td></tr>
+                <tr><td>22<div class="event practice">💻 Практика</div></td><td>23<div class="event practice">💻 Практика</div></td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td></tr>
+                <tr><td>29</td><td>30</td><td></td><td></td><td></td><td></td><td></td></tr>
             </tbody>
         </table>
     </div>
+</div>
 
-    <!-- Июль 2026 -->
-    <div class="calendar-card">
-        <div class="month-header">
-            <h3>Июль 2026</h3>
-            <p>🏖️ Летний отдых</p>
-        </div>
+<!-- Июль 2026 -->
+<div class="calendar-container">
+    <div class="month-header" onclick="toggleMonth(this)">
+        <h3>🏖️ Июль 2026</h3>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="month-content">
         <table class="calendar-table">
             <thead><tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr></thead>
             <tbody>
-                <tr><td></td><td></td><td><div class="day-num">1</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">2</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">3</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">4</div></td><td><div class="day-num">5</div></td></tr>
-                <tr><td><div class="day-num">6</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">7</div><div class="event practice">💻 Практика</div></td><td><div class="day-num">8</div></td><td><div class="day-num">9</div></td><td><div class="day-num">10</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">11</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">12</div><div class="event holiday">🎉 Каникулы</div></td></tr>
-                <tr><td><div class="day-num">13</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">14</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">15</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">16</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">17</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">18</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">19</div><div class="event holiday">🎉 Каникулы</div></td></tr>
-                <tr><td><div class="day-num">20</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">21</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">22</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">23</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">24</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">25</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">26</div><div class="event holiday">🎉 Каникулы</div></td></tr>
-                <tr><td><div class="day-num">27</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">28</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">29</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">30</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">31</div><div class="event holiday">🎉 Каникулы</div></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td>1<div class="event practice">💻 Практика</div></td><td>2<div class="event practice">💻 Практика</div></td><td>3<div class="event practice">💻 Практика</div></td><td>4</td><td>5</td></tr>
+                <tr><td>6<div class="event practice">💻 Практика</div></td><td>7<div class="event practice">💻 Практика</div></td><td>8</td><td>9</td><td>10<div class="event holiday">🎉 Каникулы</div></td><td>11<div class="event holiday">🎉 Каникулы</div></td><td>12<div class="event holiday">🎉 Каникулы</div></td></tr>
+                <tr><td>13<div class="event holiday">🎉 Каникулы</div></td><td>14<div class="event holiday">🎉 Каникулы</div></td><td>15<div class="event holiday">🎉 Каникулы</div></td><td>16<div class="event holiday">🎉 Каникулы</div></td><td>17<div class="event holiday">🎉 Каникулы</div></td><td>18<div class="event holiday">🎉 Каникулы</div></td><td>19<div class="event holiday">🎉 Каникулы</div></td></tr>
+                <tr><td>20<div class="event holiday">🎉 Каникулы</div></td><td>21<div class="event holiday">🎉 Каникулы</div></td><td>22<div class="event holiday">🎉 Каникулы</div></td><td>23<div class="event holiday">🎉 Каникулы</div></td><td>24<div class="event holiday">🎉 Каникулы</div></td><td>25<div class="event holiday">🎉 Каникулы</div></td><td>26<div class="event holiday">🎉 Каникулы</div></td></tr>
+                <tr><td>27<div class="event holiday">🎉 Каникулы</div></td><td>28<div class="event holiday">🎉 Каникулы</div></td><td>29<div class="event holiday">🎉 Каникулы</div></td><td>30<div class="event holiday">🎉 Каникулы</div></td><td>31<div class="event holiday">🎉 Каникулы</div></td><td></td><td></td></tr>
             </tbody>
         </table>
     </div>
+</div>
 
-    <!-- Август 2026 -->
-    <div class="calendar-card">
-        <div class="month-header">
-            <h3>Август 2026</h3>
-            <p>🍂 Подготовка</p>
-        </div>
+<!-- Август 2026 -->
+<div class="calendar-container">
+    <div class="month-header" onclick="toggleMonth(this)">
+        <h3>🍂 Август 2026</h3>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="month-content">
         <table class="calendar-table">
             <thead><tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr></thead>
             <tbody>
-                <tr><td></td><td></td><td></td><td></td><td></td><td><div class="day-num">1</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">2</div><div class="event holiday">🎉 Каникулы</div></td></tr>
-                <tr><td><div class="day-num">3</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">4</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">5</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">6</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">7</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">8</div><div class="event holiday">🎉 Каникулы</div></td><td><div class="day-num">9</div><div class="event holiday">🎉 Каникулы</div></td></tr>
-                <tr><td><div class="day-num">10</div></td><td><div class="day-num">11</div></td><td><div class="day-num">12</div></td><td><div class="day-num">13</div></td><td><div class="day-num">14</div></td><td><div class="day-num">15</div></td><td><div class="day-num">16</div></td></tr>
-                <tr><td><div class="day-num">17</div></td><td><div class="day-num">18</div></td><td><div class="day-num">19</div></td><td><div class="day-num">20</div></td><td><div class="day-num">21</div></td><td><div class="day-num">22</div></td><td><div class="day-num">23</div></td></tr>
-                <tr><td><div class="day-num">24</div><div class="event lecture">📖 Начало семестра</div></td><td><div class="day-num">25</div><div class="event lecture">📖 Лекции</div></td><td><div class="day-num">26</div><div class="event lecture">📖 Лекции</div></td><td><div class="day-num">27</div><div class="event lecture">📖 Лекции</div></td><td><div class="day-num">28</div><div class="event lecture">📖 Лекции</div></td><td><div class="day-num">29</div></td><td><div class="day-num">30</div></td></tr>
-                <tr><td><div class="day-num">31</div></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td>1<div class="event holiday">🎉 Каникулы</div></td><td>2<div class="event holiday">🎉 Каникулы</div></td></tr>
+                <tr><td>3<div class="event holiday">🎉 Каникулы</div></td><td>4<div class="event holiday">🎉 Каникулы</div></td><td>5<div class="event holiday">🎉 Каникулы</div></td><td>6<div class="event holiday">🎉 Каникулы</div></td><td>7<div class="event holiday">🎉 Каникулы</div></td><td>8<div class="event holiday">🎉 Каникулы</div></td><td>9<div class="event holiday">🎉 Каникулы</div></td></tr>
+                <tr><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td></tr>
+                <tr><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td></tr>
+                <tr><td>24<div class="event lecture">📖 Начало семестра</div></td><td>25<div class="event lecture">📖 Лекции</div></td><td>26<div class="event lecture">📖 Лекции</div></td><td>27<div class="event lecture">📖 Лекции</div></td><td>28<div class="event lecture">📖 Лекции</div></td><td>29</td><td>30</td></tr>
+                <tr><td>31</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
             </tbody>
         </table>
     </div>
@@ -262,6 +263,27 @@
     <p>🎉 <strong>Каникулы:</strong> июль - август 2026</p>
     <p>📖 <strong>Начало осеннего семестра:</strong> 24 августа 2026</p>
 </div>
+
+<script>
+    function toggleMonth(header) {
+        const content = header.nextElementSibling;
+        content.classList.toggle('show');
+        header.classList.toggle('active');
+    }
+
+    // По умолчанию открываем только текущий месяц (июнь)
+    const currentMonth = new Date().getMonth();
+    const containers = document.querySelectorAll('.calendar-container');
+    // Июнь = 5 (0-янв, 1-фев, 2-мар, 3-апр, 4-май, 5-июн)
+    if (currentMonth === 5) {
+        containers[3].querySelector('.month-content').classList.add('show');
+        containers[3].querySelector('.month-header').classList.add('active');
+    } else {
+        // Открываем первый месяц по умолчанию (март)
+        if (containers[0]) {
+            containers[0].querySelector('.month-content').classList.add('show');
+            containers[0].querySelector('.month-header').classList.add('active');
+        }
+    }
+</script>
 {% endblock %}
-</body>
-</html>
