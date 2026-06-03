@@ -2,14 +2,14 @@ from flask import render_template, redirect, url_for, flash, abort, request, sen
 from flask_login import login_required, current_user
 from app.main import bp
 from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, ChangePasswordForm, WorkMessageForm
-from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News
+from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News, User
 from app import db
 import os
-from werkzeug.utils import secure_filename
 from datetime import datetime
 from io import BytesIO
 from docx import Document as DocxDocument
-import markdown
+from flask_mail import Message
+from app import mail
 
 # ==================== Публичные страницы ====================
 
@@ -747,6 +747,58 @@ def admin_schedule_add():
 
     flash('Занятие добавлено!', 'success')
     return redirect(url_for('main.admin_schedule'))
+
+
+@bp.route('/cabinet/contact_admin', methods=['GET', 'POST'])
+@login_required
+def contact_admin():
+    form = WorkMessageForm()
+
+    # Получаем данные пользователя в зависимости от роли
+    student = None
+    teacher = None
+
+    if current_user.role == 'student':
+        student = Student.query.filter_by(user_id=current_user.id).first()
+    elif current_user.role == 'teacher':
+        teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+
+    # Получаем историю сообщений пользователя к админу
+    admin = User.query.filter_by(role='admin').first()
+    messages = []
+    if admin:
+        messages = WorkMessage.query.filter_by(
+            from_user_id=current_user.id,
+            to_user_id=admin.id
+        ).order_by(WorkMessage.created_at).all()
+
+    if form.validate_on_submit():
+        filename = None
+        if form.file.data:
+            file = form.file.data
+            filename = f'msg_{current_user.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{file.filename}'
+            os.makedirs('app/static/uploads/messages', exist_ok=True)
+            filepath = os.path.join('app/static/uploads/messages', filename)
+            file.save(filepath)
+
+        message = WorkMessage(
+            work_id=None,
+            from_user_id=current_user.id,
+            to_user_id=admin.id if admin else None,
+            message=form.message.data,
+            file_path=f'/static/uploads/messages/{filename}' if filename else None
+        )
+        db.session.add(message)
+        db.session.commit()
+        flash('Ваше сообщение отправлено администратору!', 'success')
+        return redirect(url_for('main.contact_admin'))
+
+    return render_template('cabinet/contact_admin.html',
+                           breadcrumb_title='Связь с администратором',
+                           form=form,
+                           student=student,
+                           teacher=teacher,
+                           messages=messages)
 
 
 @bp.route('/admin/schedule/delete/<int:schedule_id>')
