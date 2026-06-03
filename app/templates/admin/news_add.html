@@ -1,10 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<h2>➕ Добавление новости</h2>
+
+<form method="POST">
+    <div style="margin-bottom: 15px;">
+        <label>Заголовок *</label><br>
+        <input type="text" name="title" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label>Содержание *</label><br>
+        <textarea name="content" rows="10" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+    </div>
+    <div>
+        <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Сохранить</button>
+        <a href="{{ url_for('main.admin_news') }}" style="margin-left: 10px;">Отмена</a>
+    </div>
+</form>
+{% endblock %}
 </body>
 </html>
