@@ -1,10 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<h2>💬 Все сообщения</h2>
+
+<!-- Вкладки -->
+<div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd;">
+    <button onclick="showTab('feedback')" id="tabFeedbackBtn" style="background: #003366; color: white; border: none; padding: 10px 20px; border-radius: 5px 5px 0 0; cursor: pointer;">📧 Из формы обратной связи</button>
+    <button onclick="showTab('personal')" id="tabPersonalBtn" style="background: #ddd; color: #333; border: none; padding: 10px 20px; border-radius: 5px 5px 0 0; cursor: pointer;">💬 Личные сообщения</button>
+</div>
+
+<!-- Сообщения из обратной связи -->
+<div id="feedbackTab" style="display: block;">
+    <h3>📧 Сообщения из формы обратной связи</h3>
+    {% if feedback_messages %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #003366; color: white;">
+                    <th style="padding: 12px;">ID</th>
+                    <th style="padding: 12px;">Отправитель</th>
+                    <th style="padding: 12px;">Email</th>
+                    <th style="padding: 12px;">Тема</th>
+                    <th style="padding: 12px;">Сообщение</th>
+                    <th style="padding: 12px;">Дата</th>
+                    <th style="padding: 12px;">Статус</th>
+                    <th style="padding: 12px;">Ответить</th>
+                    <th style="padding: 12px;">Удалить</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for msg in feedback_messages %}
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 10px;">{{ msg.id }}</td>
+                    <td style="padding: 10px;">{{ msg.name }}</td>
+                    <td style="padding: 10px;">{{ msg.email }}</td>
+                    <td style="padding: 10px;">{{ msg.subject }}</td>
+                    <td style="padding: 10px;">{{ msg.message[:50] }}{% if msg.message|length > 50 %}...{% endif %}</td>
+                    <td style="padding: 10px;">{{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td style="padding: 10px;">
+                        <span style="background: {% if msg.status == 'new' %}#dc3545{% elif msg.status == 'replied' %}#28a745{% else %}#ffc107{% endif %}; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">
+                            {{ msg.status }}
+                        </span>
+                    </span>
+                    <td style="padding: 10px;">
+                        <a href="{{ url_for('main.admin_feedback_reply', feedback_id=msg.id) }}" style="color: #28a745;">✉️ Ответить</a>
+                    </span>
+                    <td style="padding: 10px;">
+                        <a href="{{ url_for('main.admin_feedback_delete', feedback_id=msg.id) }}"
+                           onclick="return confirm('Удалить это сообщение?')"
+                           style="color: #dc3545;">🗑️ Удалить</a>
+                    </span>
+                 </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Нет сообщений из формы обратной связи.</p>
+    {% endif %}
+</div>
+
+<!-- Личные сообщения -->
+<div id="personalTab" style="display: none;">
+    <h3>💬 Личные сообщения от студентов и преподавателей</h3>
+    {% if personal_messages %}
+        {% for msg in personal_messages %}
+        <div style="background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #003366;">
+            <p>
+                <strong>Отправитель:</strong> {{ msg.from_user.username }}
+                <span style="background: {% if msg.from_user.role == 'student' %}#17a2b8{% else %}#28a745{% endif %}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">
+                    {{ msg.from_user.role }}
+                </span>
+            </p>
+            <p><strong>Дата:</strong> {{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+            <p><strong>Сообщение:</strong></p>
+            <p style="background: white; padding: 10px; border-radius: 5px;">{{ msg.message }}</p>
+
+            {% if msg.file_path %}
+                <p><a href="{{ msg.file_path }}">📎 Скачать вложение</a></p>
+            {% endif %}
+
+            {% if msg.reply %}
+                <div style="background: #e8f4e8; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                    <strong>📬 Ваш ответ:</strong>
+                    <p>{{ msg.reply }}</p>
+                    <small>Отправлен: {{ msg.replied_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                </div>
+            {% else %}
+                <form method="POST" action="{{ url_for('main.admin_personal_message_reply', message_id=msg.id) }}" style="margin-top: 15px;">
+                    <textarea name="reply" rows="3" placeholder="Введите ответ..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+                    <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 5px; margin-top: 10px; cursor: pointer;">✉️ Отправить ответ</button>
+                </form>
+            {% endif %}
+            <div style="margin-top: 10px;">
+                <a href="{{ url_for('main.admin_personal_message_delete', message_id=msg.id) }}"
+                   onclick="return confirm('Удалить это сообщение?')"
+                   style="color: #dc3545; text-decoration: none;">🗑️ Удалить сообщение</a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>Нет личных сообщений от пользователей.</p>
+    {% endif %}
+</div>
+
+<script>
+function showTab(tab) {
+    var feedbackTab = document.getElementById('feedbackTab');
+    var personalTab = document.getElementById('personalTab');
+    var feedbackBtn = document.getElementById('tabFeedbackBtn');
+    var personalBtn = document.getElementById('tabPersonalBtn');
+
+    if (tab === 'feedback') {
+        feedbackTab.style.display = 'block';
+        personalTab.style.display = 'none';
+        feedbackBtn.style.background = '#003366';
+        feedbackBtn.style.color = 'white';
+        personalBtn.style.background = '#ddd';
+        personalBtn.style.color = '#333';
+    } else {
+        feedbackTab.style.display = 'none';
+        personalTab.style.display = 'block';
+        feedbackBtn.style.background = '#ddd';
+        feedbackBtn.style.color = '#333';
+        personalBtn.style.background = '#003366';
+        personalBtn.style.color = 'white';
+    }
+}
+</script>
+{% endblock %}
 </body>
 </html>
