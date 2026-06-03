@@ -10,42 +10,97 @@
 {% block admin_content %}
 <h2>📅 Управление расписанием</h2>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
+    <!-- Форма добавления -->
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
         <h3 style="margin-top: 0;">➕ Добавить занятие</h3>
-        <form>
-            <div style="margin-bottom: 10px;">
-                <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option>Выберите дисциплину</option>
+        <form method="POST" action="{{ url_for('main.admin_schedule_add') }}">
+            <div style="margin-bottom: 15px;">
+                <label>Дисциплина *</label><br>
+                <select name="discipline_id" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="">Выберите дисциплину</option>
+                    {% for d in disciplines %}
+                    <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
-            <div style="margin-bottom: 10px;">
-                <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option>Выберите группу</option>
+            <div style="margin-bottom: 15px;">
+                <label>Группа *</label><br>
+                <select name="group_name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="">Выберите группу</option>
+                    {% for g in groups %}
+                    <option value="{{ g }}">{{ g }}</option>
+                    {% endfor %}
                 </select>
             </div>
-            <div style="margin-bottom: 10px;">
-                <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option>Понедельник</option>
-                    <option>Вторник</option>
-                    <option>Среда</option>
-                    <option>Четверг</option>
-                    <option>Пятница</option>
+            <div style="margin-bottom: 15px;">
+                <label>День недели *</label><br>
+                <select name="day_of_week" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="">Выберите день</option>
+                    {% for d in days %}
+                    <option value="{{ d }}">{{ d }}</option>
+                    {% endfor %}
                 </select>
             </div>
-            <div style="margin-bottom: 10px;">
-                <input type="text" placeholder="Время (09:00-10:30)" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <div style="margin-bottom: 15px;">
+                <label>Время *</label><br>
+                <select name="lesson_time" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="">Выберите время</option>
+                    {% for t in times %}
+                    <option value="{{ t }}">{{ t }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div style="margin-bottom: 10px;">
-                <input type="text" placeholder="Аудитория" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <div style="margin-bottom: 15px;">
+                <label>Аудитория</label><br>
+                <input type="text" name="classroom" placeholder="Например: 401" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
             </div>
             <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Сохранить</button>
         </form>
     </div>
 
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+    <!-- Текущее расписание -->
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
         <h3 style="margin-top: 0;">📋 Текущее расписание</h3>
-        <p style="color: #666;">Здесь будет отображаться список занятий.</p>
+        {% if schedule %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #003366; color: white;">
+                        <th style="padding: 8px;">Дисциплина</th>
+                        <th style="padding: 8px;">Группа</th>
+                        <th style="padding: 8px;">День</th>
+                        <th style="padding: 8px;">Время</th>
+                        <th style="padding: 8px;">Ауд.</th>
+                        <th style="padding: 8px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in schedule %}
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 8px;">{{ item.discipline.name if item.discipline else '—' }}</td>
+                        <td style="padding: 8px;">{{ item.group_name }}</td>
+                        <td style="padding: 8px;">
+                            {% if item.day_of_week == 1 %}Пн
+                            {% elif item.day_of_week == 2 %}Вт
+                            {% elif item.day_of_week == 3 %}Ср
+                            {% elif item.day_of_week == 4 %}Чт
+                            {% elif item.day_of_week == 5 %}Пт
+                            {% else %}Сб{% endif %}
+                        </td>
+                        <td style="padding: 8px;">{{ item.lesson_time }}</td>
+                        <td style="padding: 8px;">{{ item.classroom or '—' }}</td>
+                        <td style="padding: 8px;">
+                            <a href="{{ url_for('main.admin_schedule_delete', schedule_id=item.id) }}" onclick="return confirm('Удалить занятие?')" style="color: #dc3545;">🗑️</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #666;">Расписание пусто. Добавьте первое занятие!</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
