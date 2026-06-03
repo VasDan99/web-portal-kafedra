@@ -703,6 +703,7 @@ def admin_schedule():
 
     schedule = Schedule.query.all()
     disciplines = Discipline.query.all()
+    teachers = Teacher.query.all()
     groups = ['ИС-01', 'ИС-02', 'ИС-03', 'ПИ-01', 'ПИ-02']
     days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
     times = ['09:00-10:30', '10:45-12:15', '12:30-14:00', '14:15-15:45', '16:00-17:30']
@@ -711,6 +712,7 @@ def admin_schedule():
                            breadcrumb_title='Расписание',
                            schedule=schedule,
                            disciplines=disciplines,
+                           teachers=teachers,
                            groups=groups,
                            days=days,
                            times=times)
@@ -727,8 +729,8 @@ def admin_schedule_add():
     day_of_week = request.form.get('day_of_week')
     lesson_time = request.form.get('lesson_time')
     classroom = request.form.get('classroom')
+    teacher_id = request.form.get('teacher_id')
 
-    # Преобразуем день недели в число
     days_map = {'Понедельник': 1, 'Вторник': 2, 'Среда': 3, 'Четверг': 4, 'Пятница': 5, 'Суббота': 6}
     day_num = days_map.get(day_of_week, 1)
 
@@ -738,7 +740,7 @@ def admin_schedule_add():
         day_of_week=day_num,
         lesson_time=lesson_time,
         classroom=classroom,
-        teacher_id=Discipline.query.get(discipline_id).teacher_id
+        teacher_id=teacher_id if teacher_id else None
     )
     db.session.add(schedule_item)
     db.session.commit()
