@@ -964,3 +964,28 @@ def admin_news_delete(news_id):
 
     flash('Новость удалена!', 'success')
     return redirect(url_for('main.admin_news'))
+
+
+@bp.route('/admin/feedback/reply/<int:feedback_id>', methods=['GET', 'POST'])
+@login_required
+def admin_feedback_reply(feedback_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    feedback = Feedback.query.get_or_404(feedback_id)
+
+    if request.method == 'POST':
+        reply = request.form.get('reply')
+        if reply:
+            feedback.reply = reply
+            feedback.replied_at = datetime.utcnow()
+            feedback.status = 'replied'
+            db.session.commit()
+            flash('Ответ отправлен!', 'success')
+
+            # Здесь можно добавить отправку email пользователю
+            # send_mail(feedback.email, f'Ответ на ваше обращение: {feedback.subject}', reply)
+
+            return redirect(url_for('main.admin_feedback'))
+
+    return render_template('admin/feedback_reply.html', breadcrumb_title='Ответ на сообщение', feedback=feedback)
