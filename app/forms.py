@@ -75,7 +75,9 @@ class ChangePasswordForm(FlaskForm):
     confirm_password = PasswordField('Подтвердите пароль', validators=[DataRequired(), EqualTo('new_password')])
     submit = SubmitField('Сменить пароль')
 
-    class WorkMessageForm(FlaskForm):
-        message = TextAreaField('Сообщение', validators=[DataRequired(), Length(min=1, max=1000)])
-        file = FileField('Файл с правками')
-        submit = SubmitField('Отправить')
+
+# Форма сообщений по работам
+class WorkMessageForm(FlaskForm):
+    message = TextAreaField('Сообщение', validators=[DataRequired(), Length(min=1, max=1000)])
+    file = FileField('Файл с правками')
+    submit = SubmitField('Отправить')
