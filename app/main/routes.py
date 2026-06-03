@@ -645,3 +645,84 @@ def student_work_chat(work_id):
     return render_template('cabinet/student/work_chat.html',
                          breadcrumb_title='Обсуждение работы',
                          work=work, teacher=teacher, student=student, messages=messages, form=form)
+
+
+# ==================== Админ-панель ====================
+
+@bp.route('/admin/dashboard')
+@login_required
+def admin_dashboard():
+    if current_user.role != 'admin':
+        abort(403)
+
+    students_count = Student.query.count()
+    teachers_count = Teacher.query.count()
+    disciplines_count = Discipline.query.count()
+    works_count = Document.query.count()
+
+    return render_template('admin/dashboard.html',
+                           breadcrumb_title='Главная',
+                           students_count=students_count,
+                           teachers_count=teachers_count,
+                           disciplines_count=disciplines_count,
+                           works_count=works_count)
+
+
+@bp.route('/admin/students')
+@login_required
+def admin_students():
+    if current_user.role != 'admin':
+        abort(403)
+
+    students = Student.query.all()
+    return render_template('admin/students.html',
+                           breadcrumb_title='Студенты',
+                           students=students)
+
+
+@bp.route('/admin/teachers')
+@login_required
+def admin_teachers():
+    if current_user.role != 'admin':
+        abort(403)
+
+    teachers = Teacher.query.all()
+    return render_template('admin/teachers.html',
+                           breadcrumb_title='Преподаватели',
+                           teachers=teachers)
+
+
+@bp.route('/admin/schedule')
+@login_required
+def admin_schedule():
+    if current_user.role != 'admin':
+        abort(403)
+
+    schedule = Schedule.query.all()
+    return render_template('admin/schedule.html',
+                           breadcrumb_title='Расписание',
+                           schedule=schedule)
+
+
+@bp.route('/admin/news')
+@login_required
+def admin_news():
+    if current_user.role != 'admin':
+        abort(403)
+
+    news = News.query.order_by(News.created_at.desc()).all()
+    return render_template('admin/news.html',
+                           breadcrumb_title='Новости',
+                           news=news)
+
+
+@bp.route('/admin/feedback')
+@login_required
+def admin_feedback():
+    if current_user.role != 'admin':
+        abort(403)
+
+    messages = Feedback.query.order_by(Feedback.created_at.desc()).all()
+    return render_template('admin/feedback.html',
+                           breadcrumb_title='Сообщения',
+                           messages=messages)
