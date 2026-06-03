@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block title %}Дисциплины кафедры{% endblock %}
+
+{% block content %}
+<style>
+    .disciplines-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #003366;
+    }
+    .disciplines-header h2 {
+        color: #003366;
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    .disciplines-header p {
+        color: #666;
+        font-size: 14px;
+    }
+    .disciplines-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+    .discipline-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .discipline-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .discipline-header {
+        background: linear-gradient(135deg, #003366 0%, #005599 100%);
+        color: white;
+        padding: 15px 20px;
+    }
+    .discipline-header h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+    .discipline-code {
+        font-size: 12px;
+        opacity: 0.8;
+        margin-top: 5px;
+    }
+    .discipline-body {
+        padding: 20px;
+    }
+    .discipline-description {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        min-height: 80px;
+    }
+    .discipline-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+    .hours {
+        background: #e8f0f8;
+        color: #003366;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: bold;
+    }
+    .teacher {
+        color: #666;
+        font-size: 13px;
+    }
+    .teacher span {
+        color: #003366;
+        font-weight: 500;
+    }
+    .discipline-icon {
+        font-size: 40px;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .category-badge {
+        display: inline-block;
+        background: #f0f7ff;
+        color: #003366;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 11px;
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+    .info-panel {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 20px;
+        text-align: center;
+    }
+    .info-panel h3 {
+        color: #003366;
+        margin-bottom: 15px;
+    }
+    @media (max-width: 768px) {
+        .disciplines-grid {
+            grid-template-columns: 1fr;
+        }
+        .disciplines-header h2 {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div class="disciplines-header">
+    <h2>📚 Дисциплины кафедры информационных систем</h2>
+    <p>Современные образовательные программы для подготовки IT-специалистов</p>
+</div>
+
+<div class="disciplines-grid">
+    <!-- Программирование -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>💻 Программирование</h3>
+            <div class="discipline-code">Код: PR-101</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Изучение языков программирования, алгоритмов и структур данных. Основы Python, Java, C++.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">144 часа</span>
+                <span class="teacher">👨‍🏫 <span>Киселев Ф.В.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Базы данных -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>🗄️ Базы данных</h3>
+            <div class="discipline-code">Код: DB-201</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Проектирование, разработка и администрирование баз данных. SQL, нормализация, оптимизация запросов.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">108 часов</span>
+                <span class="teacher">👨‍🏫 <span>Королькова И.А.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Web-технологии -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>🌐 Web-технологии</h3>
+            <div class="discipline-code">Код: WEB-301</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Разработка веб-приложений на современных фреймворках. HTML, CSS, JavaScript, React, Flask.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">108 часов</span>
+                <span class="teacher">👨‍🏫 <span>Киселев Ф.В.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Искусственный интеллект -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>🧠 Искусственный интеллект</h3>
+            <div class="discipline-code">Код: AI-401</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Нейронные сети, машинное обучение и анализ данных. Python, TensorFlow, scikit-learn.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">72 часа</span>
+                <span class="teacher">👩‍🏫 <span>Атаева О.М.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Компьютерные сети -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>🔗 Компьютерные сети</h3>
+            <div class="discipline-code">Код: NET-202</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Основы построения компьютерных сетей, протоколы TCP/IP, сетевая безопасность.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">108 часов</span>
+                <span class="teacher">👨‍🏫 <span>Блощук А.А.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Офисные приложения -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>📊 Офисные приложения</h3>
+            <div class="discipline-code">Код: OFF-102</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Современные офисные технологии, совместная работа с документами, Microsoft Office, Google Workspace.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">72 часа</span>
+                <span class="teacher">👩‍🏫 <span>Имани Х.К.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1С: Предприятие -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>🏢 1С: Предприятие</h3>
+            <div class="discipline-code">Код: 1С-401</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Конфигурирование на платформе 1С, разработка конфигураций, автоматизация учёта.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">108 часов</span>
+                <span class="teacher">👩‍🏫 <span>Стряпунина Н.И.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Управление IT проектами -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>📋 Управление IT проектами</h3>
+            <div class="discipline-code">Код: PM-302</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Методологии Agile, Scrum, Kanban. Управление командой, планирование, риски.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">72 часа</span>
+                <span class="teacher">👨‍🏫 <span>Блощук А.А.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Алгоритмизация -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>⚙️ Алгоритмизация</h3>
+            <div class="discipline-code">Код: ALG-103</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Основы алгоритмизации, блок-схемы, сложность алгоритмов, решение олимпиадных задач.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">108 часов</span>
+                <span class="teacher">👨‍🏫 <span>Киселев Ф.В.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Реляционные базы данных -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>🔍 Реляционные БД</h3>
+            <div class="discipline-code">Код: RDB-202</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Углублённое изучение реляционных СУБД, PostgreSQL, MySQL, оптимизация, транзакции.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">108 часов</span>
+                <span class="teacher">👩‍🏫 <span>Королькова И.А.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Высокоуровневые методы программирования -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>🚀 Высокоуровневые методы</h3>
+            <div class="discipline-code">Код: HLP-303</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Современные парадигмы программирования, функциональное программирование, паттерны проектирования.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">72 часа</span>
+                <span class="teacher">👨‍🏫 <span>Преображенский М.В.</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Теория систем -->
+    <div class="discipline-card">
+        <div class="discipline-header">
+            <h3>🎯 Теория систем</h3>
+            <div class="discipline-code">Код: SYS-401</div>
+        </div>
+        <div class="discipline-body">
+            <div class="discipline-description">
+                Системный анализ, теория систем и системный подход, моделирование сложных систем.
+            </div>
+            <div class="discipline-meta">
+                <span class="hours">72 часа</span>
+                <span class="teacher">👩‍🏫 <span>Сурина Е.Е.</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="info-panel">
+    <h3>🎓 Дополнительные возможности</h3>
+    <p>Студенты имеют возможность получить дополнительные сертификаты и пройти стажировку в ведущих IT-компаниях.</p>
+    <p style="margin-top: 10px;">📜 Сертификация 1С:Профессионал | 📜 Сертификация 1С:Специалист</p>
+    <p style="margin-top: 10px;">🤝 Партнёры: Фирма 1С, Kaspersky, Yandex, VK</p>
+</div>
+{% endblock %}
+</body>
+</html>
