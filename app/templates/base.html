@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Кафедра ИС Мос. им. Витте{% endblock %}</title>
+    <title>{% block title %}Кафедра информационных систем Мос. им. Витте{% endblock %}</title>
     <style>
         * {
             margin: 0;
@@ -13,14 +13,13 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f5;
             line-height: 1.6;
-            min-height: 100vh;
         }
 
         /* Верхняя панель */
         .top-bar {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: #003366;
             color: white;
             padding: 8px 0;
             font-size: 13px;
@@ -36,34 +35,79 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         /* Личный кабинет (овал) */
         .cabinet-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: rgba(255,255,255,0.2);
             border-radius: 40px;
             padding: 6px 20px;
             color: white;
             text-decoration: none;
             font-size: 14px;
-            transition: all 0.3s;
+            transition: background 0.3s;
         }
 
         .cabinet-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Выпадающее меню языков */
+        .language-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .lang-current {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 4px 12px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .lang-current:hover {
+            background: rgba(255,255,255,0.4);
+        }
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            min-width: 120px;
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .language-dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .lang-option {
+            display: block;
+            padding: 8px 15px;
+            color: #003366;
+            text-decoration: none;
+            transition: background 0.3s;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .lang-option:hover {
+            background: #f0f7ff;
         }
 
         /* Шапка */
         .header {
             background: white;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #003366;
             padding: 20px 0;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
         .logo h1 {
-            color: #1a1a2e;
+            color: #003366;
             font-size: 28px;
         }
 
@@ -74,11 +118,10 @@
 
         /* Главное меню */
         .main-menu {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: #003366;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
         }
 
         .main-menu ul {
@@ -94,12 +137,11 @@
             text-decoration: none;
             font-weight: 500;
             font-size: 14px;
-            transition: all 0.3s;
+            transition: background 0.3s;
         }
 
         .main-menu li a:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transform: translateY(-2px);
+            background: #005599;
         }
 
         /* Хлебные крошки */
@@ -108,11 +150,10 @@
             padding: 12px 0;
             margin-bottom: 20px;
             border-bottom: 1px solid #ddd;
-            border-radius: 8px;
         }
 
         .breadcrumbs a {
-            color: #667eea;
+            color: #003366;
             text-decoration: none;
         }
 
@@ -123,15 +164,15 @@
         /* Основной контент */
         .main-content {
             background: white;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 25px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             width: 100%;
         }
 
         /* Подвал */
         .footer {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: #1a1a2e;
             color: white;
             padding: 40px 0 20px;
             margin-top: 40px;
@@ -147,7 +188,6 @@
         .footer-section h3 {
             margin-bottom: 15px;
             font-size: 18px;
-            color: #667eea;
         }
 
         .footer-section p {
@@ -169,40 +209,10 @@
             .main-menu ul {
                 flex-direction: column;
             }
-        }
-
-        /* Кнопки */
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 40px;
-            cursor: pointer;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 40px;
-            cursor: pointer;
+            .top-bar .container {
+                flex-direction: column;
+                text-align: center;
+            }
         }
     </style>
     {% block extra_css %}{% endblock %}
@@ -210,23 +220,32 @@
 <body>
     <div class="top-bar">
         <div class="container">
-            <span>Московский университет имени Витте | Кафедра информационных систем</span>
-            <div>
+            <span data-i18n="university">Московский университет имени Витте | Кафедра информационных систем</span>
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <!-- Выпадающее меню языков -->
+                <div class="language-dropdown">
+                    <button class="lang-current">🌐 Язык ▼</button>
+                    <div class="dropdown-content">
+                        <a class="lang-option" data-lang="ru" onclick="changeLanguage('ru'); return false;">🇷🇺 Русский</a>
+                        <a class="lang-option" data-lang="en" onclick="changeLanguage('en'); return false;">🇬🇧 English</a>
+                        <a class="lang-option" data-lang="zh" onclick="changeLanguage('zh'); return false;">🇨🇳 中文</a>
+                    </div>
+                </div>
                 {% if current_user.is_authenticated %}
-                    <span style="margin-right: 15px;">👤 {{ current_user.username }} ({{ current_user.role }})</span>
+                    <span style="margin-right: 5px;">{{ current_user.username }} ({{ current_user.role }})</span>
                     {% if current_user.role == 'student' %}
-                        <a href="{{ url_for('main.student_profile') }}" class="cabinet-btn">👤 Личный кабинет</a>
+                        <a href="{{ url_for('main.student_profile') }}" class="cabinet-btn" data-i18n="cabinet">👤 Личный кабинет</a>
                     {% elif current_user.role == 'teacher' %}
-                        <a href="{{ url_for('main.teacher_profile') }}" class="cabinet-btn">👤 Личный кабинет</a>
+                        <a href="{{ url_for('main.teacher_profile') }}" class="cabinet-btn" data-i18n="cabinet">👤 Личный кабинет</a>
                     {% elif current_user.role == 'admin' %}
-                        <a href="{{ url_for('main.admin_dashboard') }}" class="cabinet-btn">👤 Админ-панель</a>
+                        <a href="{{ url_for('main.admin_dashboard') }}" class="cabinet-btn" data-i18n="admin">👤 Админ-панель</a>
                     {% else %}
-                        <a href="#" class="cabinet-btn">👤 Личный кабинет</a>
+                        <a href="#" class="cabinet-btn" data-i18n="cabinet">👤 Личный кабинет</a>
                     {% endif %}
-                    <a href="{{ url_for('auth.logout') }}" class="cabinet-btn" style="margin-left: 10px;">🚪 Выход</a>
+                    <a href="{{ url_for('auth.logout') }}" class="cabinet-btn" style="margin-left: 5px;" data-i18n="logout">🚪 Выход</a>
                 {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="cabinet-btn">🔐 Вход</a>
-                    <a href="{{ url_for('auth.register') }}" class="cabinet-btn" style="margin-left: 10px;">📝 Регистрация</a>
+                    <a href="{{ url_for('auth.login') }}" class="cabinet-btn" data-i18n="login">🔐 Вход</a>
+                    <a href="{{ url_for('auth.register') }}" class="cabinet-btn" style="margin-left: 5px;" data-i18n="register">📝 Регистрация</a>
                 {% endif %}
             </div>
         </div>
@@ -235,8 +254,8 @@
     <div class="header">
         <div class="container">
             <div class="logo">
-                <h1>Кафедра информационных систем</h1>
-                <p>Московский университет имени Витте</p>
+                <h1 data-i18n="faculty_name">Кафедра информационных систем</h1>
+                <p data-i18n="university_short">Московский университет имени Витте</p>
             </div>
         </div>
     </div>
@@ -244,14 +263,14 @@
     <div class="main-menu">
         <div class="container">
             <ul>
-                <li><a href="{{ url_for('main.index') }}">🏠 Главная</a></li>
-                <li><a href="{{ url_for('main.about') }}">📖 О кафедре</a></li>
-                <li><a href="{{ url_for('main.teachers') }}">👨‍🏫 Преподаватели</a></li>
-                <li><a href="{{ url_for('main.disciplines') }}">📚 Дисциплины</a></li>
-                <li><a href="{{ url_for('main.schedule') }}">📅 Расписание</a></li>
-                <li><a href="{{ url_for('main.science_works') }}">🔬 Научные работы</a></li>
-                <li><a href="{{ url_for('main.contacts') }}">📞 Контакты</a></li>
-                <li><a href="{{ url_for('main.feedback') }}">💬 Обратная связь</a></li>
+                <li><a href="{{ url_for('main.index') }}" data-i18n="main">Главная</a></li>
+                <li><a href="{{ url_for('main.about') }}" data-i18n="about">О кафедре</a></li>
+                <li><a href="{{ url_for('main.teachers') }}" data-i18n="teachers">Преподаватели</a></li>
+                <li><a href="{{ url_for('main.disciplines') }}" data-i18n="disciplines">Дисциплины</a></li>
+                <li><a href="{{ url_for('main.schedule') }}" data-i18n="schedule">Расписание</a></li>
+                <li><a href="{{ url_for('main.science_works') }}" data-i18n="science_works">Научные работы</a></li>
+                <li><a href="{{ url_for('main.contacts') }}" data-i18n="contacts">Контакты</a></li>
+                <li><a href="{{ url_for('main.feedback') }}" data-i18n="feedback">Обратная связь</a></li>
             </ul>
         </div>
     </div>
@@ -259,12 +278,26 @@
     <div class="container">
         <div class="breadcrumbs">
             {% block breadcrumbs %}
-                <a href="{{ url_for('main.index') }}">Главная</a>
+                <a href="{{ url_for('main.index') }}" data-i18n="main">Главная</a>
                 {% if breadcrumb_title %}
                     <span> / {{ breadcrumb_title }}</span>
                 {% endif %}
             {% endblock %}
         </div>
+
+        <!-- Flash сообщения -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 10px; margin-bottom: 15px; border-radius: 5px;
+                        {% if category == 'success' %}background: #d4edda; border: 1px solid #c3e6cb; color: #155724;
+                        {% elif category == 'danger' %}background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;
+                        {% else %}background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460;{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <main class="main-content">
             {% block content %}{% endblock %}
@@ -275,27 +308,125 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>📞 Контакты</h3>
-                    <p>📍 г. Москва, ул. Косыгина, д. 15</p>
-                    <p>📱 +7 (495) 123-45-67</p>
-                    <p>✉️ is@vitte.ru</p>
+                    <h3 data-i18n="contacts_title">Контакты</h3>
+                    <p>г. Москва, ул. Косыгина, д. 15</p>
+                    <p>+7 (495) 123-45-67</p>
+                    <p>is@vitte.ru</p>
                 </div>
                 <div class="footer-section">
-                    <h3>🏛️ Кафедра ИС</h3>
-                    <p>Московский университет им. Витте</p>
-                    <p>Факультет информационных систем</p>
+                    <h3 data-i18n="department">Кафедра ИС</h3>
+                    <p data-i18n="university_short">Московский университет им. Витте</p>
                 </div>
                 <div class="footer-section">
-                    <h3>⏰ Режим работы</h3>
+                    <h3 data-i18n="work_hours">Режим работы</h3>
                     <p>Пн-Пт: 9:00 - 18:00</p>
                     <p>Сб-Вс: выходной</p>
                 </div>
             </div>
             <div class="copyright">
-                © 2026 Кафедра информационных систем.<br>
-                Разработчик: Васильев Даниил Андреевич
+                <span data-i18n="copyright">© 2026 Кафедра информационных систем.</span><br>
+                <span data-i18n="developer">Разработчик: Васильев Даниил Андреевич</span>
             </div>
         </div>
     </div>
+
+    <script>
+        // Словарь переводов
+        const translations = {
+            ru: {
+                'main': 'Главная',
+                'about': 'О кафедре',
+                'teachers': 'Преподаватели',
+                'disciplines': 'Дисциплины',
+                'schedule': 'Расписание',
+                'science_works': 'Научные работы',
+                'contacts': 'Контакты',
+                'feedback': 'Обратная связь',
+                'cabinet': 'Личный кабинет',
+                'admin': 'Админ-панель',
+                'login': '🔐 Вход',
+                'register': '📝 Регистрация',
+                'logout': '🚪 Выход',
+                'university': 'Московский университет имени Витте | Кафедра информационных систем',
+                'faculty_name': 'Кафедра информационных систем',
+                'university_short': 'Московский университет имени Витте',
+                'contacts_title': 'Контакты',
+                'department': 'Кафедра ИС',
+                'work_hours': 'Режим работы',
+                'copyright': '© 2026 Кафедра информационных систем.',
+                'developer': 'Разработчик: Васильев Даниил Андреевич'
+            },
+            en: {
+                'main': 'Home',
+                'about': 'About',
+                'teachers': 'Teachers',
+                'disciplines': 'Disciplines',
+                'schedule': 'Schedule',
+                'science_works': 'Research',
+                'contacts': 'Contacts',
+                'feedback': 'Feedback',
+                'cabinet': 'Personal cabinet',
+                'admin': 'Admin panel',
+                'login': '🔐 Login',
+                'register': '📝 Register',
+                'logout': '🚪 Logout',
+                'university': 'Moscow Witte University | Department of Information Systems',
+                'faculty_name': 'Department of Information Systems',
+                'university_short': 'Moscow Witte University',
+                'contacts_title': 'Contacts',
+                'department': 'Department IS',
+                'work_hours': 'Working hours',
+                'copyright': '© 2026 Department of Information Systems.',
+                'developer': 'Developer: Daniil Vasilyev'
+            },
+            zh: {
+                'main': '主页',
+                'about': '关于系',
+                'teachers': '教师',
+                'disciplines': '学科',
+                'schedule': '课程表',
+                'science_works': '研究',
+                'contacts': '联系方式',
+                'feedback': '反馈',
+                'cabinet': '个人中心',
+                'admin': '管理面板',
+                'login': '🔐 登录',
+                'register': '📝 注册',
+                'logout': '🚪 退出',
+                'university': '维特莫斯科大学 | 信息系统系',
+                'faculty_name': '信息系统系',
+                'university_short': '维特莫斯科大学',
+                'contacts_title': '联系方式',
+                'department': '信息系统系',
+                'work_hours': '工作时间',
+                'copyright': '© 2026 信息系统系。',
+                'developer': '开发者: 瓦西里耶夫·丹尼尔'
+            }
+        };
+
+        let currentLang = localStorage.getItem('language') || 'ru';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+
+            // Переводим все элементы с атрибутом data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    if (el.tagName === 'INPUT' && (el.type === 'button' || el.type === 'submit')) {
+                        el.value = translations[lang][key];
+                    } else {
+                        el.innerHTML = translations[lang][key];
+                    }
+                }
+            });
+        }
+
+        // Устанавливаем язык при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            changeLanguage(currentLang);
+        });
+    </script>
 </body>
 </html>
