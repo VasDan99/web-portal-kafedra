@@ -1,12 +1,202 @@
 {% extends "base.html" %}
 
-{% block title %}О кафедре{% endblock %}
+{% block title %}О Кафедре Информационных Систем{% endblock %}
 
 {% block content %}
-<h2>О кафедре информационных технологий</h2>
-<p>Кафедра информационных технологий осуществляет подготовку специалистов в области IT.</p>
-<h3>Миссия кафедры</h3>
-<p>Подготовка высококвалифицированных IT-специалистов...</p>
-<h3>История кафедры</h3>
-<p>Кафедра основана в 2005 году...</p>
+<style>
+    .about-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .about-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #003366;
+    }
+    .about-header h2 {
+        color: #003366;
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    .about-header p {
+        color: #666;
+        font-size: 14px;
+    }
+    .section {
+        margin-bottom: 35px;
+    }
+    .section-title {
+        color: #003366;
+        font-size: 22px;
+        margin-bottom: 20px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #003366;
+        display: inline-block;
+    }
+    .section-text {
+        line-height: 1.8;
+        color: #333;
+        text-align: justify;
+    }
+    .highlight {
+        background: linear-gradient(120deg, #f0f7ff 0%, #f0f7ff 100%);
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 4px solid #003366;
+        margin: 20px 0;
+    }
+    .highlight p {
+        margin: 0;
+        font-style: italic;
+        color: #003366;
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+        margin-top: 20px;
+    }
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid #e0e0e0;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    .info-card h3 {
+        color: #003366;
+        font-size: 18px;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .info-card p {
+        margin: 8px 0;
+        color: #555;
+        line-height: 1.5;
+    }
+    .info-card .icon {
+        font-size: 24px;
+        margin-right: 10px;
+    }
+    .contact-item {
+        display: flex;
+        align-items: center;
+        margin: 12px 0;
+    }
+    .contact-icon {
+        width: 40px;
+        color: #003366;
+        font-size: 20px;
+    }
+    .schedule-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .schedule-table td {
+        padding: 10px 5px;
+        border-bottom: 1px solid #eee;
+    }
+    .schedule-table td:first-child {
+        font-weight: bold;
+        color: #003366;
+        width: 120px;
+    }
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        .about-header h2 {
+            font-size: 24px;
+        }
+        .section-title {
+            font-size: 18px;
+        }
+    }
+</style>
+
+<div class="about-container">
+    <div class="about-header">
+        <h2>О Кафедре Информационных Систем</h2>
+        <p>Кафедра Информационных Ссистем — лидер в подготовке IT-специалистов</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Профессиональная подготовка</div>
+        <div class="section-text">
+            <p>Профессиональная подготовка специалистов на факультете информационных технологий реализуется на кафедре информационных систем. Кафедра готовит <strong>руководителей IT-отдела, бизнес-аналитиков, специалистов по настройке и развертыванию корпоративных информационных систем</strong>.</p>
+        </div>
+    </div>
+
+    <div class="highlight">
+        <p>«Повышение конкурентоспособности наших выпускников на рынке труда – важнейшая задача, которую мы ставим перед собой.»</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Сертификация 1С</div>
+        <div class="section-text">
+            <p>Всем студентам факультета предоставляется возможность получения <strong>сертификата 1С:Профессионал</strong> сразу после изучения профильных дисциплин. Занятия по этим дисциплинам ведут лучшие преподаватели, сертифицированные в 1С.</p>
+            <p style="margin-top: 15px;">Студентам-выпускникам предоставлена возможность получения сертификата <strong>«1С:Специалист»</strong>, который позволяет претендовать им на высокие должности в отделах разработки конфигураций 1С. Лучших студентов ещё в процессе обучения приглашают для прохождения практики в организации-партнёры фирмы 1С, где можно получить опыт решения актуальных практических задач и получить постоянную должность разработчика.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Цифровая экономика</div>
+        <div class="section-text">
+            <p>Современные тенденции цифровизации экономики требуют от наших выпускников знаний в сфере <strong>интернет-маркетинга, реплицированных распределенных баз данных (blockchain), информационных систем управления бизнесом и взаимоотношениями с клиентами (CRM)</strong>. Для этого в наши образовательные программы включен модуль дисциплин <strong>«Цифровая экономика»</strong>.</p>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-card">
+            <h3>📍 Где нас найти</h3>
+            <div class="contact-item">
+                <span class="contact-icon">🏢</span>
+                <span>г. Москва, 2-й Кожуховский пр-д, 12, стр.1<br>главный корпус, 5 этаж, кабинет №501</span>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>🕐 Время работы</h3>
+            <table class="schedule-table">
+                <tr><td>Пн.-чт.:</td><td>09:30 — 18:15</td></tr>
+                <tr><td>Пт.:</td><td>09:30 — 17:00</td></tr>
+                <tr><td>Сб.-вс.:</td><td>выходной</td></tr>
+            </table>
+        </div>
+
+        <div class="info-card">
+            <h3>📞 Контакты</h3>
+            <div class="contact-item">
+                <span class="contact-icon">📞</span>
+                <span>+7 (495) 783-68-48, доб. 5533 — заведующий</span>
+            </div>
+            <div class="contact-item">
+                <span class="contact-icon">📞</span>
+                <span>+7 (495) 783-68-48, доб. 5318 — лаборант</span>
+            </div>
+            <div class="contact-item">
+                <span class="contact-icon">📧</span>
+                <span>is@vitte.ru</span>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>📚 Направления подготовки</h3>
+            <ul style="margin: 0; padding-left: 20px;">
+                <li>Информационные системы и технологии</li>
+                <li>Программная инженерия</li>
+                <li>Бизнес-информатика</li>
+                <li>Прикладная информатика</li>
+            </ul>
+        </div>
+    </div>
+</div>
 {% endblock %}
