@@ -1,10 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/student_base.html" %}
+
+{% block title %}Обсуждение работы{% endblock %}
+
+{% block cabinet_content %}
+<h2>Обсуждение работы: {{ work.title }}</h2>
+<p><strong>Преподаватель:</strong> {{ teacher.full_name }}</p>
+
+<hr>
+
+<h3>История сообщений</h3>
+<div style="background: #f9f9f9; padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto;">
+    {% for msg in messages %}
+    <div style="margin-bottom: 15px; padding: 10px; background: {% if msg.from_user_id == current_user.id %}#e3f2fd{% else %}#fff3e0{% endif %}; border-radius: 8px;">
+        <p><strong>{{ msg.from_user.username }}:</strong> <small>{{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}</small></p>
+        <p>{{ msg.message }}</p>
+        {% if msg.file_path %}
+            <p><a href="{{ msg.file_path }}">📎 Скачать файл</a></p>
+        {% endif %}
+    </div>
+    {% else %}
+    <p>Сообщений пока нет.</p>
+    {% endfor %}
+</div>
+
+<hr>
+
+<h3>Отправить сообщение</h3>
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div style="margin-bottom: 15px;">
+        {{ form.message.label }}<br>
+        {{ form.message(rows=4, style="width: 100%; padding: 8px;") }}
+    </div>
+    <div style="margin-bottom: 15px;">
+        {{ form.file.label }}<br>
+        {{ form.file() }}
+    </div>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+
+<p><a href="{{ url_for('main.student_works') }}">← Назад к моим работам</a></p>
+{% endblock %}
 </body>
 </html>
