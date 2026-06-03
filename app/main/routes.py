@@ -461,6 +461,7 @@ def teacher_students_works():
         discipline = Discipline.query.get(work.discipline_id)
 
         works_data.append({
+            'id': work.id,
             'title': work.title,
             'file_path': work.file_path,
             'uploaded_at': work.uploaded_at,
@@ -599,7 +600,7 @@ def teacher_work_chat(work_id):
 
     return render_template('cabinet/teacher/work_chat.html',
                            breadcrumb_title='Обсуждение работы',
-                           work=work, student=student, messages=messages, form=form)
+                           work=work, teacher=teacher, student=student, messages=messages, form=form)
 
 
 @bp.route('/cabinet/student/work/<int:work_id>/chat', methods=['GET', 'POST'])
