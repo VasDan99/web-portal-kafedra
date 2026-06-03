@@ -25,6 +25,15 @@
                 </select>
             </div>
             <div style="margin-bottom: 15px;">
+                <label>Преподаватель</label><br>
+                <select name="teacher_id" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="">Выберите преподавателя</option>
+                    {% for t in teachers %}
+                    <option value="{{ t.id }}">{{ t.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
                 <label>Группа *</label><br>
                 <select name="group_name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
                     <option value="">Выберите группу</option>
@@ -68,6 +77,7 @@
                 <thead>
                     <tr style="background: #003366; color: white;">
                         <th style="padding: 8px;">Дисциплина</th>
+                        <th style="padding: 8px;">Преподаватель</th>
                         <th style="padding: 8px;">Группа</th>
                         <th style="padding: 8px;">День</th>
                         <th style="padding: 8px;">Время</th>
@@ -79,6 +89,7 @@
                     {% for item in schedule %}
                     <tr style="border-bottom: 1px solid #ddd;">
                         <td style="padding: 8px;">{{ item.discipline.name if item.discipline else '—' }}</td>
+                        <td style="padding: 8px;">{{ item.teacher.full_name if item.teacher else '—' }}</td>
                         <td style="padding: 8px;">{{ item.group_name }}</td>
                         <td style="padding: 8px;">
                             {% if item.day_of_week == 1 %}Пн
