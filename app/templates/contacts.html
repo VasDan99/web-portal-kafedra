@@ -1,13 +1,298 @@
 {% extends "base.html" %}
 
-{% block title %}Контакты{% endblock %}
+{% block title %}Контакты кафедры информационных систем{% endblock %}
 
 {% block content %}
-<h2>Контакты кафедры</h2>
-<p><strong>Адрес:</strong> г. Москва, ул. Косыгина, д. 15, каб. 401</p>
-<p><strong>Телефон:</strong> +7 (495) 123-45-67</p>
-<p><strong>Email:</strong> it@vitte.ru</p>
-<h3>Заведующий кафедрой</h3>
-<p>Иванов Иван Иванович, д.т.н., профессор</p>
-<p><strong>Часы приёма:</strong> вторник, четверг 14:00-16:00</p>
+<style>
+    .contacts-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #003366;
+    }
+    .contacts-header h2 {
+        color: #003366;
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    .contacts-header p {
+        color: #666;
+        font-size: 14px;
+    }
+    .contacts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .info-card h3 {
+        color: #003366;
+        font-size: 20px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #003366;
+    }
+    .contact-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    .contact-icon {
+        width: 45px;
+        height: 45px;
+        background: #f0f7ff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 20px;
+    }
+    .contact-text {
+        flex: 1;
+    }
+    .contact-text strong {
+        color: #003366;
+        display: block;
+        margin-bottom: 5px;
+    }
+    .contact-text p {
+        color: #555;
+        margin: 0;
+        line-height: 1.5;
+    }
+    .schedule-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .schedule-table td {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .schedule-table td:first-child {
+        font-weight: bold;
+        color: #003366;
+        width: 120px;
+    }
+    .map-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .map-card h3 {
+        color: #003366;
+        font-size: 20px;
+        margin: 0;
+        padding: 20px 25px 10px;
+    }
+    .map-container {
+        width: 100%;
+        height: 400px;
+        background: #e8ecf1;
+    }
+    .map-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e8ecf1 0%, #dce1e8 100%);
+        color: #666;
+    }
+    .map-placeholder .map-icon {
+        font-size: 64px;
+        margin-bottom: 15px;
+    }
+    .map-placeholder p {
+        margin: 5px 0;
+    }
+    .map-placeholder .address {
+        font-weight: bold;
+        color: #003366;
+        margin-top: 10px;
+    }
+    .route-link {
+        display: inline-block;
+        margin-top: 10px;
+        color: #003366;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .route-link:hover {
+        text-decoration: underline;
+    }
+    .map-footer {
+        padding: 15px 25px;
+        background: #f8f9fa;
+        border-top: 1px solid #eee;
+    }
+    .staff-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .staff-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        transition: transform 0.3s;
+    }
+    .staff-card:hover {
+        transform: translateY(-3px);
+    }
+    .staff-name {
+        font-weight: bold;
+        color: #003366;
+        font-size: 16px;
+    }
+    .staff-position {
+        font-size: 13px;
+        color: #666;
+        margin: 5px 0;
+    }
+    .staff-phone {
+        font-size: 12px;
+        color: #555;
+        margin-top: 8px;
+    }
+    @media (max-width: 768px) {
+        .contacts-grid {
+            grid-template-columns: 1fr;
+        }
+        .contacts-header h2 {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div class="contacts-header">
+    <h2>📞 Контакты кафедры информационных систем</h2>
+    <p>Свяжитесь с нами любым удобным способом</p>
+</div>
+
+<div class="contacts-grid">
+    <div class="info-card">
+        <h3>📍 Контактная информация</h3>
+
+        <div class="contact-item">
+            <div class="contact-icon">🏢</div>
+            <div class="contact-text">
+                <strong>Адрес</strong>
+                <p>г. Москва, 2-й Кожуховский пр-д, 12, стр.1<br>главный корпус, 5 этаж, кабинет №501</p>
+            </div>
+        </div>
+
+        <div class="contact-item">
+            <div class="contact-icon">📞</div>
+            <div class="contact-text">
+                <strong>Телефоны</strong>
+                <p>+7 (495) 783-68-48, доб. 5533 — заведующий<br>+7 (495) 783-68-48, доб. 5318 — лаборант</p>
+            </div>
+        </div>
+
+        <div class="contact-item">
+            <div class="contact-icon">📧</div>
+            <div class="contact-text">
+                <strong>Email</strong>
+                <p>is@vitte.ru</p>
+            </div>
+        </div>
+
+        <div class="contact-item">
+            <div class="contact-icon">🕐</div>
+            <div class="contact-text">
+                <strong>Режим работы</strong>
+                <table class="schedule-table">
+                    <tr><td>Понедельник — четверг</td><td>09:30 — 18:15</td></tr>
+                    <tr><td>Пятница</td><td>09:30 — 17:00</td></tr>
+                    <tr><td>Суббота — воскресенье</td><td>выходной</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="map-card">
+        <h3>🗺️ Схема проезда</h3>
+        <div class="map-container">
+            <div class="map-placeholder">
+                <div class="map-icon">📍</div>
+                <p><strong>2-й Кожуховский пр-д, 12, стр.1</strong></p>
+                <p>г. Москва</p>
+                <div class="address">
+                    🚇 м. Кожуховская | 🚌 авт. 44, 193
+                </div>
+                <a href="https://yandex.ru/maps/213/moscow/house/2_y_kozhukhovskiy_proezd_12s1/" target="_blank" class="route-link">🚗 Построить маршрут →</a>
+            </div>
+        </div>
+        <div class="map-footer">
+            <p>🚇 <strong>Как добраться:</strong> Метро «Кожуховская», далее пешком 5 минут или автобусами 44, 193 до остановки «2-й Кожуховский проезд».</p>
+        </div>
+    </div>
+</div>
+
+<div class="info-card" style="margin-bottom: 30px;">
+    <h3>👥 Руководство кафедры</h3>
+    <div class="staff-grid">
+        <div class="staff-card">
+            <div class="staff-name">Сурина Елена Евгеньевна</div>
+            <div class="staff-position">Заведующий кафедрой, доцент</div>
+            <div class="staff-phone">📞 +7 (495) 783-68-48, доб. 5533</div>
+            <div class="staff-phone">📧 surina@vitte.ru</div>
+        </div>
+        <div class="staff-card">
+            <div class="staff-name">Киселев Федор Владимирович</div>
+            <div class="staff-position">Заместитель заведующего по учебной работе</div>
+            <div class="staff-phone">📞 +7 (495) 783-68-48, доб. 5315</div>
+            <div class="staff-phone">📧 kiselev@vitte.ru</div>
+        </div>
+        <div class="staff-card">
+            <div class="staff-name">Королькова Ирина Анатольевна</div>
+            <div class="staff-position">Руководитель образовательной программы</div>
+            <div class="staff-phone">📞 +7 (495) 783-68-48, доб. 5320</div>
+            <div class="staff-phone">📧 korolkova@vitte.ru</div>
+        </div>
+        <div class="staff-card">
+            <div class="staff-name">Стряпунина Нэля Ильинична</div>
+            <div class="staff-position">Ответственный за практику</div>
+            <div class="staff-phone">📞 +7 (495) 783-68-48, доб. 5318</div>
+            <div class="staff-phone">📧 stryapunina@vitte.ru</div>
+        </div>
+    </div>
+</div>
+
+<div class="info-card">
+    <h3>📱 Мы в социальных сетях</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div class="contact-item" style="margin-bottom: 0;">
+            <div class="contact-icon">📘</div>
+            <div class="contact-text">
+                <strong>ВКонтакте</strong>
+                <p><a href="https://vk.com/vitte" style="color: #003366;">vk.com/vitte</a></p>
+            </div>
+        </div>
+        <div class="contact-item" style="margin-bottom: 0;">
+            <div class="contact-icon">📺</div>
+            <div class="contact-text">
+                <strong>Telegram</strong>
+                <p><a href="https://t.me/vitte" style="color: #003366;">t.me/vitte</a></p>
+            </div>
+        </div>
+        <div class="contact-item" style="margin-bottom: 0;">
+            <div class="contact-icon">📧</div>
+            <div class="contact-text">
+                <strong>Email рассылка</strong>
+                <p>Подпишитесь на новости кафедры</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
