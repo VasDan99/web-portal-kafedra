@@ -148,6 +148,7 @@ class Schedule(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
 
     discipline = db.relationship('Discipline', backref='schedule')
+    teacher = db.relationship('Teacher', backref='schedule')
 
 
 # Таблица 11: Сообщения по работам
