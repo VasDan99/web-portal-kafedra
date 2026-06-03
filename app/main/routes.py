@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 from io import BytesIO
 from docx import Document as DocxDocument
+from flask import render_template, redirect, url_for, flash, abort, request, send_file, session
 
 # ==================== Публичные страницы ====================
 
@@ -1171,3 +1172,178 @@ def admin_personal_message_delete(message_id):
 
     flash('Сообщение удалено!', 'success')
     return redirect(url_for('main.admin_all_messages'))
+
+@bp.route('/language/<lang>')
+def set_language(lang):
+    if lang in ['ru', 'en', 'zh']:
+        session['lang'] = lang
+    return redirect(request.referrer or url_for('main.index'))
+
+
+# ==================== Генерация отчётов для преподавателя ====================
+
+@bp.route('/cabinet/teacher/generate/grades-docx')
+@login_required
+def teacher_generate_grades_docx():
+    if current_user.role != 'teacher':
+        abort(403)
+
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    disciplines = Discipline.query.filter_by(teacher_id=teacher.id).all()
+
+    doc = DocxDocument()
+    doc.add_heading(f'Ведомость успеваемости преподавателя {teacher.full_name}', 0)
+    doc.add_paragraph(f'Кафедра: {teacher.department}')
+    doc.add_paragraph(f'Дата формирования: {datetime.now().strftime("%d.%m.%Y %H:%M")}')
+
+    for discipline in disciplines:
+        doc.add_heading(f'Дисциплина: {discipline.name}', level=1)
+        doc.add_paragraph(f'Код: {discipline.code}, Часов: {discipline.hours}')
+
+        # Получаем оценки по дисциплине
+        grades = Grade.query.filter_by(discipline_id=discipline.id).all()
+
+        if grades:
+            table = doc.add_table(rows=1, cols=4)
+            table.style = 'Light Grid Accent 1'
+            hdr_cells = table.rows[0].cells
+            hdr_cells[0].text = 'Студент'
+            hdr_cells[1].text = 'Группа'
+            hdr_cells[2].text = 'Оценка'
+            hdr_cells[3].text = 'Дата'
+
+            for grade in grades:
+                student = Student.query.get(grade.student_id)
+                if student:
+                    row_cells = table.add_row().cells
+                    row_cells[0].text = student.full_name
+                    row_cells[1].text = student.group_name
+                    row_cells[2].text = str(grade.grade_value)
+                    row_cells[3].text = grade.date.strftime('%d.%m.%Y') if grade.date else '—'
+        else:
+            doc.add_paragraph('Оценок пока нет.')
+
+        doc.add_paragraph()
+
+    byte_io = BytesIO()
+    doc.save(byte_io)
+    byte_io.seek(0)
+
+    return send_file(byte_io, as_attachment=True,
+                     download_name=f'vedomost_{teacher.full_name}_{datetime.now().strftime("%Y%m%d")}.docx')
+
+
+@bp.route('/cabinet/teacher/generate/students-xlsx')
+@login_required
+def teacher_generate_students_xlsx():
+    if current_user.role != 'teacher':
+        abort(403)
+
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    students = Student.query.all()
+
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Студенты"
+
+    # Заголовки
+    headers = ['ID', 'ФИО', 'Группа', 'Курс', 'Email', 'Телефон']
+    header_fill = PatternFill(start_color="003366", end_color="003366", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center')
+
+    # Данные
+    for row, student in enumerate(students, 2):
+        ws.cell(row=row, column=1, value=student.id)
+        ws.cell(row=row, column=2, value=student.full_name)
+        ws.cell(row=row, column=3, value=student.group_name)
+        ws.cell(row=row, column=4, value=student.course)
+        ws.cell(row=row, column=5, value=student.user.email if student.user else '—')
+        ws.cell(row=row, column=6, value=student.phone or '—')
+
+    # Автоширина колонок
+    for col in ws.columns:
+        max_length = 0
+        col_letter = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 30)
+        ws.column_dimensions[col_letter].width = adjusted_width
+
+    byte_io = BytesIO()
+    wb.save(byte_io)
+    byte_io.seek(0)
+
+    return send_file(byte_io, as_attachment=True, download_name=f'students_{datetime.now().strftime("%Y%m%d")}.xlsx')
+
+
+@bp.route('/cabinet/teacher/generate/grades-xlsx')
+@login_required
+def teacher_generate_grades_xlsx():
+    if current_user.role != 'teacher':
+        abort(403)
+
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    grades = Grade.query.join(Discipline).filter(Discipline.teacher_id == teacher.id).all()
+
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Оценки"
+
+    # Заголовки
+    headers = ['ID', 'Студент', 'Группа', 'Дисциплина', 'Оценка', 'Тип', 'Дата']
+    header_fill = PatternFill(start_color="003366", end_color="003366", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center')
+
+    # Данные
+    for row, grade in enumerate(grades, 2):
+        student = Student.query.get(grade.student_id)
+        discipline = Discipline.query.get(grade.discipline_id)
+
+        ws.cell(row=row, column=1, value=grade.id)
+        ws.cell(row=row, column=2, value=student.full_name if student else '—')
+        ws.cell(row=row, column=3, value=student.group_name if student else '—')
+        ws.cell(row=row, column=4, value=discipline.name if discipline else '—')
+        ws.cell(row=row, column=5, value=grade.grade_value)
+        ws.cell(row=row, column=6, value=grade.grade_type or '—')
+        ws.cell(row=row, column=7, value=grade.date.strftime('%d.%m.%Y') if grade.date else '—')
+
+    # Автоширина колонок
+    for col in ws.columns:
+        max_length = 0
+        col_letter = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 30)
+        ws.column_dimensions[col_letter].width = adjusted_width
+
+    byte_io = BytesIO()
+    wb.save(byte_io)
+    byte_io.seek(0)
+
+    return send_file(byte_io, as_attachment=True, download_name=f'grades_{datetime.now().strftime("%Y%m%d")}.xlsx')
