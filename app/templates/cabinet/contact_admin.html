@@ -1,10 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "cabinet/student_base.html" %}
+
+{% block title %}Связь с администратором{% endblock %}
+
+{% block cabinet_content %}
+<h2>📧 Связь с администратором</h2>
+<p>Задайте вопрос администратору. Ответ придёт в этот раздел.</p>
+
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div style="margin-bottom: 15px;">
+        {{ form.message.label }}<br>
+        {{ form.message(rows=5, style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;") }}
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        {{ form.file.label }}<br>
+        {{ form.file() }}
+    </div>
+
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+
+<hr>
+
+<h3>📜 История обращений</h3>
+{% if messages %}
+    {% for msg in messages %}
+    <div style="background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 8px;">
+        <p><strong>📅 {{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}</strong></p>
+        <p>{{ msg.message }}</p>
+        {% if msg.reply %}
+            <div style="background: #e8f4e8; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                <strong>📬 Ответ администратора:</strong>
+                <p>{{ msg.reply }}</p>
+            </div>
+        {% endif %}
+        {% if msg.file_path %}
+            <p><a href="{{ msg.file_path }}">📎 Скачать файл</a></p>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+    <p>У вас пока нет обращений к администратору.</p>
+{% endif %}
+{% endblock %}
 </body>
 </html>
