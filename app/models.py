@@ -166,13 +166,4 @@ class WorkMessage(db.Model):
     from_user = db.relationship('User', foreign_keys=[from_user_id], backref='sent_messages')
     to_user = db.relationship('User', foreign_keys=[to_user_id], backref='received_messages')
 
-    class News(db.Model):
-        __tablename__ = 'news'
-        id = db.Column(db.Integer, primary_key=True)
-        title = db.Column(db.String(200), nullable=False)
-        content = db.Column(db.Text, nullable=False)
-        image_url = db.Column(db.String(300))
-        created_at = db.Column(db.DateTime, default=datetime.utcnow)
-        author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
-        author = db.relationship('User', backref='news')
+    
