@@ -1,10 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "base.html" %}
+
+{% block title %}{{ news.title }}{% endblock %}
+
+{% block content %}
+<article>
+    <h1 style="color: #003366; margin-bottom: 10px;">{{ news.title }}</h1>
+    <div style="color: #999; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+        📅 {{ news.created_at.strftime('%d.%m.%Y %H:%M') }} | ✍️ {{ news.author.username if news.author else 'Администратор' }}
+    </div>
+
+    {% if news.image_url %}
+    <div style="margin-bottom: 20px;">
+        <img src="{{ news.image_url }}" style="max-width: 100%; border-radius: 8px;">
+    </div>
+    {% endif %}
+
+    <div style="line-height: 1.8; font-size: 16px;">
+        {{ news.content|safe }}
+    </div>
+
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <a href="{{ url_for('main.index') }}" style="color: #003366;">← Назад к новостям</a>
+    </div>
+</article>
+{% endblock %}
 </body>
 </html>
