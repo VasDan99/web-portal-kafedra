@@ -166,4 +166,14 @@ class WorkMessage(db.Model):
     from_user = db.relationship('User', foreign_keys=[from_user_id], backref='sent_messages')
     to_user = db.relationship('User', foreign_keys=[to_user_id], backref='received_messages')
 
-    
+class Feedback(db.Model):
+        __tablename__ = 'feedback'
+        id = db.Column(db.Integer, primary_key=True)
+        name = db.Column(db.String(100), nullable=False)
+        email = db.Column(db.String(120), nullable=False)
+        subject = db.Column(db.String(200), nullable=False)
+        message = db.Column(db.Text, nullable=False)
+        created_at = db.Column(db.DateTime, default=datetime.utcnow)
+        status = db.Column(db.String(20), default='new')
+        reply = db.Column(db.Text)  # ответ администратора
+        replied_at = db.Column(db.DateTime)  # дата ответа
