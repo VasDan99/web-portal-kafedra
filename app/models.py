@@ -155,15 +155,15 @@ class Schedule(db.Model):
 class WorkMessage(db.Model):
     __tablename__ = 'work_messages'
     id = db.Column(db.Integer, primary_key=True)
-    work_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=True)  # nullable=True для обращений к админу
+    work_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=True)  # ← nullable=True
     from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     message = db.Column(db.Text, nullable=False)
     file_path = db.Column(db.String(300))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_read = db.Column(db.Boolean, default=False)
-    reply = db.Column(db.Text)                    # ответ администратора
-    replied_at = db.Column(db.DateTime)          # дата ответа
+    reply = db.Column(db.Text)
+    replied_at = db.Column(db.DateTime)
 
     work = db.relationship('Document', backref='messages')
     from_user = db.relationship('User', foreign_keys=[from_user_id], backref='sent_messages')
