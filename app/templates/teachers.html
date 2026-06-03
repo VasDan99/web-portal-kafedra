@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block title %}Преподаватели кафедры{% endblock %}
+
+{% block content %}
+<style>
+    .teachers-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #003366;
+    }
+    .teachers-header h2 {
+        color: #003366;
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    .teachers-header p {
+        color: #666;
+        font-size: 14px;
+    }
+    .teachers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+    .teacher-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+    }
+    .teacher-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .teacher-photo {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #003366 0%, #005599 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 60px;
+    }
+    .teacher-info {
+        padding: 20px;
+    }
+    .teacher-name {
+        font-size: 20px;
+        font-weight: bold;
+        color: #003366;
+        margin-bottom: 5px;
+    }
+    .teacher-position {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+    .teacher-degree {
+        font-size: 13px;
+        color: #888;
+        margin-bottom: 15px;
+    }
+    .teacher-btn {
+        background: #f0f7ff;
+        color: #003366;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background 0.3s;
+    }
+    .teacher-btn:hover {
+        background: #003366;
+        color: white;
+    }
+
+    /* Модальное окно */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal.active {
+        display: flex;
+    }
+    .modal-content {
+        background: white;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        border-radius: 16px;
+        overflow-y: auto;
+        position: relative;
+        animation: modalFadeIn 0.3s;
+    }
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(-50px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-header {
+        background: linear-gradient(135deg, #003366 0%, #005599 100%);
+        color: white;
+        padding: 20px;
+        position: sticky;
+        top: 0;
+    }
+    .modal-header h3 {
+        margin: 0;
+        font-size: 22px;
+    }
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 28px;
+        cursor: pointer;
+        color: white;
+    }
+    .modal-body {
+        padding: 20px;
+    }
+    .modal-section {
+        margin-bottom: 20px;
+    }
+    .modal-section h4 {
+        color: #003366;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #eee;
+    }
+    .modal-section p {
+        color: #555;
+        line-height: 1.6;
+        margin: 5px 0;
+    }
+    .discipline-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .discipline-tag {
+        background: #f0f7ff;
+        color: #003366;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+    @media (max-width: 768px) {
+        .teachers-header h2 {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div class="teachers-header">
+    <h2>👨‍🏫 Преподаватели кафедры информационных систем</h2>
+    <p>Высококвалифицированный педагогический состав</p>
+</div>
+
+<div class="teachers-grid">
+    <!-- Сурина Елена Евгеньевна -->
+    <div class="teacher-card" onclick="openModal('surina')">
+        <div class="teacher-photo">👩‍🏫</div>
+        <div class="teacher-info">
+            <div class="teacher-name">Сурина Елена Евгеньевна</div>
+            <div class="teacher-position">Заведующий кафедрой МиЕНД, доцент кафедры ИС</div>
+            <div class="teacher-degree">Кандидат экономических наук, Доцент</div>
+            <button class="teacher-btn">📖 Подробнее</button>
+        </div>
+    </div>
+
+    <!-- Королькова Ирина Анатольевна -->
+    <div class="teacher-card" onclick="openModal('korolkova')">
+        <div class="teacher-photo">👩‍🏫</div>
+        <div class="teacher-info">
+            <div class="teacher-name">Королькова Ирина Анатольевна</div>
+            <div class="teacher-position">Руководитель образовательной программы, старший преподаватель</div>
+            <div class="teacher-degree">Высшее образование, инженер</div>
+            <button class="teacher-btn">📖 Подробнее</button>
+        </div>
+    </div>
+
+    <!-- Атаева Ольга Муратовна -->
+    <div class="teacher-card" onclick="openModal('ataeva')">
+        <div class="teacher-photo">👩‍🏫</div>
+        <div class="teacher-info">
+            <div class="teacher-name">Атаева Ольга Муратовна</div>
+            <div class="teacher-position">Старший научный сотрудник, доцент</div>
+            <div class="teacher-degree">Кандидат технических наук</div>
+            <button class="teacher-btn">📖 Подробнее</button>
+        </div>
+    </div>
+
+    <!-- Киселев Федор Владимирович -->
+    <div class="teacher-card" onclick="openModal('kiselev')">
+        <div class="teacher-photo">👨‍🏫</div>
+        <div class="teacher-info">
+            <div class="teacher-name">Киселев Федор Владимирович</div>
+            <div class="teacher-position">Старший преподаватель</div>
+            <div class="teacher-degree">Высшее; математик, системный программист</div>
+            <button class="teacher-btn">📖 Подробнее</button>
+        </div>
+    </div>
+
+    <!-- Блощук Андрей Алексеевич -->
+    <div class="teacher-card" onclick="openModal('bloschuk')">
+        <div class="teacher-photo">👨‍🏫</div>
+        <div class="teacher-info">
+            <div class="teacher-name">Блощук Андрей Алексеевич</div>
+            <div class="teacher-position">Доцент кафедры</div>
+            <div class="teacher-degree">Кандидат технических наук</div>
+            <button class="teacher-btn">📖 Подробнее</button>
+        </div>
+    </div>
+
+    <!-- Имани Ханум Курбанкадыевна -->
+    <div class="teacher-card" onclick="openModal('imani')">
+        <div class="teacher-photo">👩‍🏫</div>
+        <div class="teacher-info">
+            <div class="teacher-name">Имани Ханум Курбанкадыевна</div>
+            <div class="teacher-position">Старший преподаватель</div>
+            <div class="teacher-degree">Высшее; математика, информатика</div>
+            <button class="teacher-btn">📖 Подробнее</button>
+        </div>
+    </div>
+
+    <!-- Стряпунина Нэля Ильинична -->
+    <div class="teacher-card" onclick="openModal('stryapunina')">
+        <div class="teacher-photo">👩‍🏫</div>
+        <div class="teacher-info">
+            <div class="teacher-name">Стряпунина Нэля Ильинична</div>
+            <div class="teacher-position">Старший преподаватель</div>
+            <div class="teacher-degree">Высшее; инженер-системотехник</div>
+            <button class="teacher-btn">📖 Подробнее</button>
+        </div>
+    </div>
+
+    <!-- Преображенский Максим Владимирович -->
+    <div class="teacher-card" onclick="openModal('preobrazhensky')">
+        <div class="teacher-photo">👨‍🏫</div>
+        <div class="teacher-info">
+            <div class="teacher-name">Преображенский Максим Владимирович</div>
+            <div class="teacher-position">Старший преподаватель</div>
+            <div class="teacher-degree">Bachelor of science (with honours)</div>
+            <button class="teacher-btn">📖 Подробнее</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div id="teacherModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Преподаватель</h3>
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Контент подгружается через JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const teachersData = {
+        surina: {
+            name: 'Сурина Елена Евгеньевна',
+            position: 'Заведующий кафедрой МиЕНД, доцент кафедры ИС',
+            education: 'Высшее; Математик, Экономист - менеджер, Магистр',
+            degree: 'Кандидат экономических наук',
+            title: 'Доцент',
+            experience: '35 лет',
+            disciplines: ['Теория систем и системный анализ', 'Методы оптимизации', 'Выполнение и защита выпускной квалификационной работы', 'Эконометрика', 'Статистические методы веб-аналитики'],
+            courses: [
+                'Удостоверение о ПК №3200057808 от 26 мая 2023 г. "Взаимодействие куратора учебной или производственной практик"',
+                'Удостоверение о ПК №772418834813 от 17.10.2023 "Применение ИКТ в образовательном процессе"',
+                'Удостоверение о ПК №772418834599 от 12.10.2023 "Обучение работодателей и работников вопросам охраны труда"'
+            ],
+            email: 'surina@vitte.ru',
+            phone: '+7 (495) 783-68-48, доб. 5533'
+        },
+        korolkova: {
+            name: 'Королькова Ирина Анатольевна',
+            position: 'Руководитель образовательной программы, старший преподаватель',
+            education: 'Высшее; Инженер',
+            degree: '—',
+            title: '—',
+            experience: '12 лет',
+            disciplines: ['Проектирование пользовательских интерфейсов'],
+            courses: [],
+            email: 'korolkova@vitte.ru',
+            phone: '+7 (495) 783-68-48, доб. 5320'
+        },
+        ataeva: {
+            name: 'Атаева Ольга Муратовна',
+            position: 'Старший научный сотрудник, доцент',
+            education: 'Высшее; математик, системный программист',
+            degree: 'Кандидат технических наук',
+            title: '—',
+            experience: '1 год',
+            disciplines: ['Прикладные задачи анализа данных'],
+            courses: [],
+            email: 'ataeva@vitte.ru',
+            phone: '+7 (495) 783-68-48, доб. 5325'
+        },
+        kiselev: {
+            name: 'Киселев Федор Владимирович',
+            position: 'Старший преподаватель',
+            education: 'Высшее; математик, системный программист, магистр',
+            degree: '—',
+            title: '—',
+            experience: '4 года',
+            disciplines: ['Алгоритмизация и программирование', 'Веб-разработка', 'Ознакомительная практика'],
+            courses: [],
+            email: 'kiselev@vitte.ru',
+            phone: '+7 (495) 783-68-48, доб. 5315'
+        },
+        bloschuk: {
+            name: 'Блощук Андрей Алексеевич',
+            position: 'Доцент кафедры',
+            education: 'Высшее; Дипломированный инженер',
+            degree: 'Кандидат технических наук',
+            title: '—',
+            experience: '15 лет',
+            disciplines: ['Преддипломная практика', 'Управление ИТ проектами', 'Проектная деятельность в ИТ'],
+            courses: [],
+            email: 'bloschuk@vitte.ru',
+            phone: '+7 (495) 783-68-48, доб. 5330'
+        },
+        imani: {
+            name: 'Имани Ханум Курбанкадыевна',
+            position: 'Старший преподаватель',
+            education: 'Высшее; математика, преподаватель математики, информатики и вычислительной техники',
+            degree: '—',
+            title: '—',
+            experience: '17 лет',
+            disciplines: ['Офисные приложения и совместная работа с документами', 'Информационно-аналитические системы'],
+            courses: [],
+            email: 'imani@vitte.ru',
+            phone: '+7 (495) 783-68-48, доб. 5335'
+        },
+        stryapunina: {
+            name: 'Стряпунина Нэля Ильинична',
+            position: 'Старший преподаватель',
+            education: 'Высшее; инженер-системотехник',
+            degree: '—',
+            title: '—',
+            experience: '9 лет',
+            disciplines: ['Конфигурирование на платформе 1С: Предприятие', 'Интеллектуальные системы управления ресурсами предприятия', 'Информационные системы управления бизнесом и взаимоотношениями с клиентами'],
+            courses: [],
+            email: 'stryapunina@vitte.ru',
+            phone: '+7 (495) 783-68-48, доб. 5318'
+        },
+        preobrazhensky: {
+            name: 'Преображенский Максим Владимирович',
+            position: 'Старший преподаватель',
+            education: 'Bachelor of science (with honours)',
+            degree: '—',
+            title: '—',
+            experience: '8 лет',
+            disciplines: ['Высокоуровневые методы программирования', 'Эксплуатационная практика'],
+            courses: [],
+            email: 'preobrazhensky@vitte.ru',
+            phone: '+7 (495) 783-68-48, доб. 5340'
+        }
+    };
+
+    function openModal(teacherId) {
+        const teacher = teachersData[teacherId];
+        if (!teacher) return;
+
+        const modal = document.getElementById('teacherModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+
+        modalTitle.textContent = teacher.name;
+
+        let disciplinesHtml = '';
+        if (teacher.disciplines && teacher.disciplines.length > 0) {
+            disciplinesHtml = `
+                <div class="modal-section">
+                    <h4>📚 Преподаваемые дисциплины</h4>
+                    <div class="discipline-list">
+                        ${teacher.disciplines.map(d => `<span class="discipline-tag">${d}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        let coursesHtml = '';
+        if (teacher.courses && teacher.courses.length > 0) {
+            coursesHtml = `
+                <div class="modal-section">
+                    <h4>📜 Повышение квалификации</h4>
+                    ${teacher.courses.map(c => `<p>• ${c}</p>`).join('')}
+                </div>
+            `;
+        }
+
+        modalBody.innerHTML = `
+            <div class="modal-section">
+                <h4>📌 Должность</h4>
+                <p>${teacher.position}</p>
+            </div>
+            <div class="modal-section">
+                <h4>🎓 Образование</h4>
+                <p>${teacher.education}</p>
+            </div>
+            <div class="modal-section">
+                <h4>🏆 Учёная степень</h4>
+                <p>${teacher.degree || '—'}</p>
+            </div>
+            <div class="modal-section">
+                <h4>📖 Учёное звание</h4>
+                <p>${teacher.title || '—'}</p>
+            </div>
+            <div class="modal-section">
+                <h4>⏱️ Стаж работы</h4>
+                <p>${teacher.experience} лет</p>
+            </div>
+            ${disciplinesHtml}
+            ${coursesHtml}
+            <div class="modal-section">
+                <h4>📞 Контакты</h4>
+                <p>✉️ ${teacher.email}</p>
+                <p>📞 ${teacher.phone}</p>
+            </div>
+        `;
+
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('teacherModal');
+        modal.classList.remove('active');
+    }
+
+    // Закрытие по клику вне модального окна
+    window.onclick = function(event) {
+        const modal = document.getElementById('teacherModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+</script>
+{% endblock %}
+</body>
+</html>
