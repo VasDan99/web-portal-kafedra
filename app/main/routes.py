@@ -891,3 +891,56 @@ def admin_teacher_delete(teacher_id):
 
     flash('Преподаватель удалён!', 'success')
     return redirect(url_for('main.admin_teachers'))
+
+
+@bp.route('/admin/news/add', methods=['GET', 'POST'])
+@login_required
+def admin_news_add():
+    if current_user.role != 'admin':
+        abort(403)
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+
+        news = News(title=title, content=content, author_id=current_user.id)
+        db.session.add(news)
+        db.session.commit()
+
+        flash('Новость добавлена!', 'success')
+        return redirect(url_for('main.admin_news'))
+
+    return render_template('admin/news_add.html', breadcrumb_title='Добавление новости')
+
+
+@bp.route('/admin/news/edit/<int:news_id>', methods=['GET', 'POST'])
+@login_required
+def admin_news_edit(news_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    news = News.query.get_or_404(news_id)
+
+    if request.method == 'POST':
+        news.title = request.form.get('title')
+        news.content = request.form.get('content')
+        db.session.commit()
+
+        flash('Новость обновлена!', 'success')
+        return redirect(url_for('main.admin_news'))
+
+    return render_template('admin/news_edit.html', breadcrumb_title='Редактирование новости', news=news)
+
+
+@bp.route('/admin/news/delete/<int:news_id>')
+@login_required
+def admin_news_delete(news_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    news = News.query.get_or_404(news_id)
+    db.session.delete(news)
+    db.session.commit()
+
+    flash('Новость удалена!', 'success')
+    return redirect(url_for('main.admin_news'))
