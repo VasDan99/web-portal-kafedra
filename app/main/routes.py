@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash, abort, request, sen
 from flask_login import login_required, current_user
 from app.main import bp
 from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, ChangePasswordForm, WorkMessageForm
-from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage
+from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News
 from app import db
 import os
 from datetime import datetime
@@ -727,3 +727,84 @@ def admin_feedback():
     return render_template('admin/feedback.html',
                            breadcrumb_title='Сообщения',
                            messages=messages)
+
+
+@bp.route('/admin/student/add', methods=['GET', 'POST'])
+@login_required
+def admin_student_add():
+    if current_user.role != 'admin':
+        abort(403)
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        full_name = request.form.get('full_name')
+        group_name = request.form.get('group_name')
+        course = request.form.get('course')
+        phone = request.form.get('phone')
+
+        # Проверяем, не существует ли пользователь
+        if User.query.filter_by(username=username).first():
+            flash('Пользователь с таким логином уже существует!', 'danger')
+            return redirect(url_for('main.admin_student_add'))
+
+        user = User(username=username, email=email, role='student')
+        user.set_password(password)
+        db.session.add(user)
+        db.session.flush()
+
+        student = Student(
+            user_id=user.id,
+            full_name=full_name,
+            group_name=group_name,
+            course=int(course),
+            phone=phone
+        )
+        db.session.add(student)
+        db.session.commit()
+
+        flash('Студент успешно добавлен!', 'success')
+        return redirect(url_for('main.admin_students'))
+
+    return render_template('admin/student_add.html', breadcrumb_title='Добавление студента')
+
+
+@bp.route('/admin/student/edit/<int:student_id>', methods=['GET', 'POST'])
+@login_required
+def admin_student_edit(student_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    student = Student.query.get_or_404(student_id)
+
+    if request.method == 'POST':
+        student.full_name = request.form.get('full_name')
+        student.group_name = request.form.get('group_name')
+        student.course = int(request.form.get('course'))
+        student.phone = request.form.get('phone')
+
+        if request.form.get('password'):
+            student.user.set_password(request.form.get('password'))
+
+        db.session.commit()
+        flash('Студент обновлён!', 'success')
+        return redirect(url_for('main.admin_students'))
+
+    return render_template('admin/student_edit.html', breadcrumb_title='Редактирование студента', student=student)
+
+
+@bp.route('/admin/student/delete/<int:student_id>')
+@login_required
+def admin_student_delete(student_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    student = Student.query.get_or_404(student_id)
+    user = student.user
+    db.session.delete(student)
+    db.session.delete(user)
+    db.session.commit()
+
+    flash('Студент удалён!', 'success')
+    return redirect(url_for('main.admin_students'))
