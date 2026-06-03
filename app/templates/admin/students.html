@@ -11,7 +11,7 @@
 <h2>👨‍🎓 Управление студентами</h2>
 
 <div style="margin-bottom: 20px;">
-   <a href="{{ url_for('main.admin_student_add') }}" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">➕ Добавить студента</a>
+    <a href="{{ url_for('main.admin_student_add') }}" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">➕ Добавить студента</a>
 </div>
 
 <div style="overflow-x: auto;">
@@ -35,8 +35,8 @@
                 <td style="padding: 10px;">{{ student.course }}</td>
                 <td style="padding: 10px;">{{ student.user.email if student.user else '—' }}</td>
                 <td style="padding: 10px;">
-                    <a href="#" style="color: #ffc107; text-decoration: none; margin-right: 10px;">✏️</a>
-                    <a href="#" style="color: #dc3545; text-decoration: none;" onclick="return confirm('Удалить?')">🗑️</a>
+                    <a href="{{ url_for('main.admin_student_edit', student_id=student.id) }}" style="color: #ffc107; text-decoration: none; margin-right: 10px;">✏️</a>
+                    <a href="{{ url_for('main.admin_student_delete', student_id=student.id) }}" style="color: #dc3545; text-decoration: none;" onclick="return confirm('Удалить студента?')">🗑️</a>
                 </td>
             </tr>
             {% endfor %}
