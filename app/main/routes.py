@@ -642,5 +642,5 @@ def student_work_chat(work_id):
     messages = WorkMessage.query.filter_by(work_id=work_id).order_by(WorkMessage.created_at).all()
 
     return render_template('cabinet/student/work_chat.html',
-                           breadcrumb_title='Обсуждение работы',
-                           work=work, teacher=teacher, messages=messages, form=form)
+                         breadcrumb_title='Обсуждение работы',
+                         work=work, teacher=teacher, student=student, messages=messages, form=form)
