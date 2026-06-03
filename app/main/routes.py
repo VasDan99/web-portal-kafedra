@@ -8,8 +8,6 @@ import os
 from datetime import datetime
 from io import BytesIO
 from docx import Document as DocxDocument
-from flask_mail import Message
-from app import mail
 
 # ==================== Публичные страницы ====================
 
