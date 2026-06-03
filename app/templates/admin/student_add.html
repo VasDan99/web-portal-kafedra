@@ -1,10 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<h2>➕ Добавление студента</h2>
+
+<form method="POST">
+    <div style="margin-bottom: 15px;">
+        <label>Логин *</label><br>
+        <input type="text" name="username" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label>Email *</label><br>
+        <input type="email" name="email" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label>Пароль *</label><br>
+        <input type="password" name="password" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label>ФИО *</label><br>
+        <input type="text" name="full_name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label>Группа *</label><br>
+        <input type="text" name="group_name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label>Курс *</label><br>
+        <input type="number" name="course" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label>Телефон</label><br>
+        <input type="text" name="phone" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+    <div>
+        <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Сохранить</button>
+        <a href="{{ url_for('main.admin_students') }}" style="margin-left: 10px;">Отмена</a>
+    </div>
+</form>
+{% endblock %}
 </body>
 </html>
