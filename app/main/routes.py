@@ -15,7 +15,8 @@ from docx import Document as DocxDocument
 @bp.route('/')
 def index():
     breadcrumb_title = None
-    return render_template('index.html', breadcrumb_title=breadcrumb_title)
+    news = News.query.order_by(News.created_at.desc()).limit(5).all()
+    return render_template('index.html', breadcrumb_title=breadcrumb_title, news=news)
 
 @bp.route('/about')
 def about():
@@ -744,7 +745,6 @@ def admin_student_add():
         course = request.form.get('course')
         phone = request.form.get('phone')
 
-        # Проверяем, не существует ли пользователь
         if User.query.filter_by(username=username).first():
             flash('Пользователь с таким логином уже существует!', 'danger')
             return redirect(url_for('main.admin_student_add'))
@@ -935,12 +935,4 @@ def admin_news_edit(news_id):
 @bp.route('/admin/news/delete/<int:news_id>')
 @login_required
 def admin_news_delete(news_id):
-    if current_user.role != 'admin':
-        abort(403)
-
-    news = News.query.get_or_404(news_id)
-    db.session.delete(news)
-    db.session.commit()
-
-    flash('Новость удалена!', 'success')
-    return redirect(url_for('main.admin_news'))
+    if current_user.role != 'admin
