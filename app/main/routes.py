@@ -5,6 +5,7 @@ from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, Work
 from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News
 from app import db
 import os
+from werkzeug.utils import secure_filename
 from datetime import datetime
 from io import BytesIO
 from docx import Document as DocxDocument
@@ -903,7 +904,17 @@ def admin_news_add():
         title = request.form.get('title')
         content = request.form.get('content')
 
-        news = News(title=title, content=content, author_id=current_user.id)
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                filename = secure_filename(f'news_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{file.filename}')
+                os.makedirs('app/static/uploads/news', exist_ok=True)
+                filepath = os.path.join('app/static/uploads/news', filename)
+                file.save(filepath)
+                image_url = f'/static/uploads/news/{filename}'
+
+        news = News(title=title, content=content, image_url=image_url, author_id=current_user.id)
         db.session.add(news)
         db.session.commit()
 
@@ -924,8 +935,17 @@ def admin_news_edit(news_id):
     if request.method == 'POST':
         news.title = request.form.get('title')
         news.content = request.form.get('content')
-        db.session.commit()
 
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                filename = secure_filename(f'news_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{file.filename}')
+                os.makedirs('app/static/uploads/news', exist_ok=True)
+                filepath = os.path.join('app/static/uploads/news', filename)
+                file.save(filepath)
+                news.image_url = f'/static/uploads/news/{filename}'
+
+        db.session.commit()
         flash('Новость обновлена!', 'success')
         return redirect(url_for('main.admin_news'))
 
@@ -935,4 +955,12 @@ def admin_news_edit(news_id):
 @bp.route('/admin/news/delete/<int:news_id>')
 @login_required
 def admin_news_delete(news_id):
-    if current_user.role != 'admin
+    if current_user.role != 'admin':
+        abort(403)
+
+    news = News.query.get_or_404(news_id)
+    db.session.delete(news)
+    db.session.commit()
+
+    flash('Новость удалена!', 'success')
+    return redirect(url_for('main.admin_news'))
