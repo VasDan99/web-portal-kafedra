@@ -989,3 +989,9 @@ def admin_feedback_reply(feedback_id):
             return redirect(url_for('main.admin_feedback'))
 
     return render_template('admin/feedback_reply.html', breadcrumb_title='Ответ на сообщение', feedback=feedback)
+
+@bp.route('/news/<int:news_id>')
+def news_detail(news_id):
+    news_item = News.query.get_or_404(news_id)
+    breadcrumb_title = news_item.title
+    return render_template('news_detail.html', breadcrumb_title=breadcrumb_title, news=news_item)
