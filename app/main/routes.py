@@ -97,10 +97,11 @@ def feedback():
     return render_template('feedback.html', breadcrumb_title=breadcrumb_title, form=form)
 
 @bp.route('/admin')
+@login_required
 def admin():
-    breadcrumb_title = 'Админ-панель'
-    messages = Feedback.query.order_by(Feedback.created_at.desc()).all()
-    return render_template('admin/index.html', breadcrumb_title=breadcrumb_title, messages=messages)
+    if current_user.role != 'admin':
+        abort(403)
+    return redirect(url_for('main.admin_dashboard'))
 
 
 # ==================== Личный кабинет студента ====================
