@@ -5,19 +5,35 @@
     <title>Title</title>
 </head>
 <body>
-{% extends "cabinet/teacher_base.html" %}
+{% extends "cabinet/teacher/teacher_base.html" %}
 
 {% block title %}Отчёты{% endblock %}
 
 {% block teacher_content %}
-<h2>Генерация отчётов</h2>
+<h2>📊 Генерация отчётов</h2>
 
-<ul>
-    <li><a href="#">Сформировать ведомость успеваемости (DOCX)</a></li>
-    <li><a href="#">Экспорт списка студентов (XLSX)</a></li>
-    <li><a href="#">Экспорт оценок (XLSX)</a></li>
-</ul>
-<p style="color: #999; margin-top: 20px;">Функционал в разработке.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+    <div style="background: linear-gradient(135deg, #003366 0%, #005599 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+        <div style="font-size: 48px;">📄</div>
+        <h3 style="margin: 15px 0;">Ведомость успеваемости</h3>
+        <p style="font-size: 14px; opacity: 0.9;">Формат DOCX</p>
+        <a href="{{ url_for('main.teacher_generate_grades_docx') }}" style="display: inline-block; margin-top: 15px; background: white; color: #003366; padding: 10px 25px; border-radius: 30px; text-decoration: none; font-weight: bold;">Скачать →</a>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+        <div style="font-size: 48px;">📊</div>
+        <h3 style="margin: 15px 0;">Список студентов</h3>
+        <p style="font-size: 14px; opacity: 0.9;">Формат XLSX</p>
+        <a href="{{ url_for('main.teacher_generate_students_xlsx') }}" style="display: inline-block; margin-top: 15px; background: white; color: #28a745; padding: 10px 25px; border-radius: 30px; text-decoration: none; font-weight: bold;">Скачать →</a>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+        <div style="font-size: 48px;">📈</div>
+        <h3 style="margin: 15px 0;">Экспорт оценок</h3>
+        <p style="font-size: 14px; opacity: 0.9;">Формат XLSX</p>
+        <a href="{{ url_for('main.teacher_generate_grades_xlsx') }}" style="display: inline-block; margin-top: 15px; background: white; color: #ff9800; padding: 10px 25px; border-radius: 30px; text-decoration: none; font-weight: bold;">Скачать →</a>
+    </div>
+</div>
 {% endblock %}
 </body>
 </html>
