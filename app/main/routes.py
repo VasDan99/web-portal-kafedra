@@ -1103,3 +1103,71 @@ def news_detail(news_id):
     # Преобразуем Markdown в HTML
     news_item.content_html = markdown.markdown(news_item.content, extensions=['extra'])
     return render_template('news_detail.html', breadcrumb_title=breadcrumb_title, news=news_item)
+
+
+@bp.route('/admin/all-messages')
+@login_required
+def admin_all_messages():
+    if current_user.role != 'admin':
+        abort(403)
+
+    # Сообщения из обратной связи (от гостей)
+    feedback_messages = Feedback.query.order_by(Feedback.created_at.desc()).all()
+
+    # Личные сообщения пользователей (студентов и преподавателей)
+    personal_messages = WorkMessage.query.filter(
+        WorkMessage.to_user_id == current_user.id,
+        WorkMessage.work_id.is_(None)
+    ).order_by(WorkMessage.created_at.desc()).all()
+
+    return render_template('admin/all_messages.html',
+                           breadcrumb_title='Все сообщения',
+                           feedback_messages=feedback_messages,
+                           personal_messages=personal_messages)
+
+
+@bp.route('/admin/personal-message/reply/<int:message_id>', methods=['POST'])
+@login_required
+def admin_personal_message_reply(message_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    msg = WorkMessage.query.get_or_404(message_id)
+    reply_text = request.form.get('reply')
+
+    if reply_text:
+        msg.reply = reply_text
+        msg.replied_at = datetime.utcnow()
+        msg.is_read = True
+        db.session.commit()
+        flash('Ответ отправлен пользователю!', 'success')
+
+    return redirect(url_for('main.admin_all_messages'))
+
+
+@bp.route('/admin/feedback/delete/<int:feedback_id>')
+@login_required
+def admin_feedback_delete(feedback_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    feedback = Feedback.query.get_or_404(feedback_id)
+    db.session.delete(feedback)
+    db.session.commit()
+
+    flash('Сообщение удалено!', 'success')
+    return redirect(url_for('main.admin_all_messages'))
+
+
+@bp.route('/admin/personal-message/delete/<int:message_id>')
+@login_required
+def admin_personal_message_delete(message_id):
+    if current_user.role != 'admin':
+        abort(403)
+
+    message = WorkMessage.query.get_or_404(message_id)
+    db.session.delete(message)
+    db.session.commit()
+
+    flash('Сообщение удалено!', 'success')
+    return redirect(url_for('main.admin_all_messages'))
