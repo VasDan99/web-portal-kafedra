@@ -1,15 +1,14 @@
 from flask import render_template, redirect, url_for, flash, abort, request, send_file
 from flask_login import login_required, current_user
 from app.main import bp
-from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, ChangePasswordForm
-from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document
+from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, ChangePasswordForm, WorkMessageForm
+from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage
 from app import db
 import os
 from datetime import datetime
 from io import BytesIO
 from docx import Document as DocxDocument
-from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, ChangePasswordForm, WorkMessageForm
-from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessag
+
 
 # ==================== Публичные страницы ====================
 
@@ -557,51 +556,6 @@ def teacher_profile_edit():
     return render_template('cabinet/teacher/profile_edit.html', breadcrumb_title='Редактирование профиля', form=form, teacher=teacher)
 
 
-@bp.route('/cabinet/teacher/work/<int:work_id>/chat', methods=['GET', 'POST'])
-@login_required
-def teacher_work_chat(work_id):
-    if current_user.role != 'teacher':
-        abort(403)
-
-    work = Document.query.get_or_404(work_id)
-    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
-    student = Student.query.get(work.uploaded_by)
-
-    # Проверяем, что работа принадлежит дисциплине преподавателя
-    discipline = Discipline.query.get(work.discipline_id)
-    if discipline.teacher_id != teacher.id:
-        abort(403)
-
-    form = WorkMessageForm()
-
-    if form.validate_on_submit():
-        filename = None
-        if form.file.data:
-            file = form.file.data
-            filename = f'work_{work_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{file.filename}'
-            os.makedirs('app/static/uploads/reviews', exist_ok=True)
-            filepath = os.path.join('app/static/uploads/reviews', filename)
-            file.save(filepath)
-
-        message = WorkMessage(
-            work_id=work_id,
-            from_user_id=current_user.id,
-            to_user_id=student.user_id,
-            message=form.message.data,
-            file_path=f'/static/uploads/reviews/{filename}' if filename else None
-        )
-        db.session.add(message)
-        db.session.commit()
-        flash('Сообщение отправлено студенту!', 'success')
-        return redirect(url_for('main.teacher_work_chat', work_id=work_id))
-
-    messages = WorkMessage.query.filter_by(work_id=work_id).order_by(WorkMessage.created_at).all()
-
-    return render_template('cabinet/teacher/work_chat.html',
-                           breadcrumb_title='Обсуждение работы',
-                           work=work, student=student, messages=messages, form=form)
-
-
 # ==================== Чат по работам ====================
 
 @bp.route('/cabinet/teacher/work/<int:work_id>/chat', methods=['GET', 'POST'])
@@ -614,7 +568,6 @@ def teacher_work_chat(work_id):
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     student = Student.query.get(work.uploaded_by)
 
-    # Проверяем, что работа принадлежит дисциплине преподавателя
     discipline = Discipline.query.get(work.discipline_id)
     if discipline.teacher_id != teacher.id:
         abort(403)
