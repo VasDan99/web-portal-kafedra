@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from io import BytesIO
 from docx import Document as DocxDocument
-
+import markdown
 
 # ==================== Публичные страницы ====================
 
@@ -994,4 +994,6 @@ def admin_feedback_reply(feedback_id):
 def news_detail(news_id):
     news_item = News.query.get_or_404(news_id)
     breadcrumb_title = news_item.title
+    # Преобразуем Markdown в HTML
+    news_item.content_html = markdown.markdown(news_item.content, extensions=['extra'])
     return render_template('news_detail.html', breadcrumb_title=breadcrumb_title, news=news_item)
