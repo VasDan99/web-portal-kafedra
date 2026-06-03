@@ -21,6 +21,7 @@
                 <th style="padding: 12px; text-align: left;">Сообщение</th>
                 <th style="padding: 12px; text-align: left;">Дата</th>
                 <th style="padding: 12px; text-align: left;">Статус</th>
+                <th style="padding: 12px; text-align: left;">Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -33,9 +34,12 @@
                 <td style="padding: 10px;">{{ msg.message[:50] }}{% if msg.message|length > 50 %}...{% endif %}</td>
                 <td style="padding: 10px;">{{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
                 <td style="padding: 10px;">
-                    <span style="background: {% if msg.status == 'new' %}#dc3545{% elif msg.status == 'read' %}#ffc107{% else %}#28a745{% endif %}; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">
+                    <span style="background: {% if msg.status == 'new' %}#dc3545{% elif msg.status == 'replied' %}#28a745{% else %}#ffc107{% endif %}; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">
                         {{ msg.status }}
                     </span>
+                </td>
+                <td style="padding: 10px;">
+                    <a href="{{ url_for('main.admin_feedback_reply', feedback_id=msg.id) }}" style="color: #28a745; text-decoration: none;">✉️ Ответить</a>
                 </td>
             </tr>
             {% endfor %}

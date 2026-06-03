@@ -1,10 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<h2>📝 Ответ на сообщение</h2>
+
+<div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Отправитель:</strong> {{ feedback.name }} ({{ feedback.email }})</p>
+    <p><strong>Тема:</strong> {{ feedback.subject }}</p>
+    <p><strong>Сообщение:</strong></p>
+    <p style="background: white; padding: 10px; border-radius: 5px;">{{ feedback.message }}</p>
+    <p><strong>Дата:</strong> {{ feedback.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+</div>
+
+<form method="POST">
+    <div style="margin-bottom: 15px;">
+        <label>Ваш ответ *</label><br>
+        <textarea name="reply" rows="8" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+    </div>
+    <div>
+        <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer;">✉️ Отправить ответ</button>
+        <a href="{{ url_for('main.admin_feedback') }}" style="margin-left: 10px;">Отмена</a>
+    </div>
+</form>
+{% endblock %}
 </body>
 </html>
