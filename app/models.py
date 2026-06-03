@@ -148,3 +148,19 @@ class Schedule(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
 
     discipline = db.relationship('Discipline', backref='schedule')
+
+    # Таблица 11: Сообщения по работам
+    class WorkMessage(db.Model):
+        __tablename__ = 'work_messages'
+        id = db.Column(db.Integer, primary_key=True)
+        work_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=False)
+        from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+        to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+        message = db.Column(db.Text, nullable=False)
+        file_path = db.Column(db.String(300))
+        created_at = db.Column(db.DateTime, default=datetime.utcnow)
+        is_read = db.Column(db.Boolean, default=False)
+
+        work = db.relationship('Document', backref='messages')
+        from_user = db.relationship('User', foreign_keys=[from_user_id], backref='sent_messages')
+        to_user = db.relationship('User', foreign_keys=[to_user_id], backref='received_messages')
