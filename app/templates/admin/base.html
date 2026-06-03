@@ -1,21 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    .admin-sidebar a {
+        font-size: 16px;
+    }
+    .admin-sidebar li a {
+        font-size: 16px;
+    }
+</style>
 <div style="display: flex; gap: 20px;">
     <!-- Боковое меню админа -->
-    <div style="width: 280px; background: #f5f5f5; padding: 20px; border-radius: 8px;">
+    <div class="admin-sidebar" style="width: 280px; background: #f5f5f5; padding: 20px; border-radius: 8px;">
         <div style="text-align: center; margin-bottom: 20px;">
             <h3>Админ-панель</h3>
             <p style="color: #666;">{{ current_user.username }}</p>
         </div>
         <hr>
         <ul style="list-style: none; padding: 0;">
-            <li><a href="{{ url_for('main.admin_dashboard') }}">📊 Главная</a></li>
-            <li><a href="{{ url_for('main.admin_students') }}">🧑‍🎓 Студенты</a></li>
-            <li><a href="{{ url_for('main.admin_teachers') }}">👨‍🏫 Преподаватели</a></li>
-            <li><a href="{{ url_for('main.admin_schedule') }}">📅 Расписание</a></li>
-            <li><a href="{{ url_for('main.admin_news') }}">📰 Новости</a></li>
-            <li><a href="{{ url_for('main.admin_all_messages') }}">💬 Все сообщения</a></li>
+            <li><a href="{{ url_for('main.admin_dashboard') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none;">📊 Главная</a></li>
+            <li><a href="{{ url_for('main.admin_students') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none;">🧑‍🎓 Студенты</a></li>
+            <li><a href="{{ url_for('main.admin_teachers') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none;">👨‍🏫 Преподаватели</a></li>
+            <li><a href="{{ url_for('main.admin_schedule') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none;">📅 Расписание</a></li>
+            <li><a href="{{ url_for('main.admin_news') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none;">📰 Новости</a></li>
+            <li><a href="{{ url_for('main.admin_all_messages') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none;">💬 Все сообщения</a></li>
         </ul>
     </div>
 
