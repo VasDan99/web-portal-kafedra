@@ -1,26 +1,49 @@
 {% extends "base.html" %}
 
-{% block title %}О факультете ИТ{% endblock %}
+{% block title %}Главная - Кафедра информационных систем{% endblock %}
 
 {% block content %}
-<h2>О факультете информационных технологий</h2>
+<div style="text-align: center; margin-bottom: 30px;">
+    <h2 style="font-size: 32px; color: #1a1a2e;">🏛️ Добро пожаловать на портал</h2>
+    <h3 style="color: #667eea;">Кафедра информационных систем</h3>
+    <p>Московский университет имени Витте</p>
+</div>
 
-<h3>Общая информация</h3>
-<p>Факультет информационных технологий Московского университета имени Витте осуществляет подготовку высококвалифицированных IT-специалистов.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px;">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+        <div style="font-size: 48px;">🎓</div>
+        <div style="font-size: 24px; font-weight: bold;">500+</div>
+        <div>Студентов</div>
+    </div>
+    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+        <div style="font-size: 48px;">👨‍🏫</div>
+        <div style="font-size: 24px; font-weight: bold;">15+</div>
+        <div>Преподавателей</div>
+    </div>
+    <div style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+        <div style="font-size: 48px;">📚</div>
+        <div style="font-size: 24px; font-weight: bold;">20+</div>
+        <div>Дисциплин</div>
+    </div>
+    <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #1a1a2e; padding: 25px; border-radius: 12px; text-align: center;">
+        <div style="font-size: 48px;">🔬</div>
+        <div style="font-size: 24px; font-weight: bold;">100+</div>
+        <div>Научных работ</div>
+    </div>
+</div>
 
-<h3>Направления подготовки</h3>
-<ul>
-    <li>Информационные системы и технологии</li>
-    <li>Программная инженерия</li>
-    <li>Бизнес-информатика</li>
-    <li>Компьютерные науки</li>
-</ul>
+<hr style="margin: 30px 0;">
 
-<h3>Наши преимущества</h3>
-<ul>
-    <li>Современные лаборатории и компьютерные классы</li>
-    <li>Преподаватели-практики из ведущих IT-компаний</li>
-    <li>Стажировки у партнеров факультета</li>
-    <li>Участие в научных конференциях и хакатонах</li>
-</ul>
+<h3 style="color: #1a1a2e; margin-bottom: 20px;">📰 Последние новости</h3>
+{% if news %}
+    {% for item in news %}
+    <div style="background: #f9f9f9; padding: 20px; margin-bottom: 20px; border-radius: 12px; border-left: 5px solid #667eea; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <h4 style="margin: 0 0 10px 0; color: #1a1a2e;">{{ item.title }}</h4>
+        <small style="color: #999;">📅 {{ item.created_at.strftime('%d.%m.%Y %H:%M') }} | ✍️ {{ item.author.username if item.author else 'Администратор' }}</small>
+        <p style="margin-top: 15px; color: #555; line-height: 1.6;">{{ item.content[:200] }}{% if item.content|length > 200 %}...{% endif %}</p>
+    </div>
+    {% endfor %}
+{% else %}
+    <p style="text-align: center; color: #999;">Новостей пока нет. Добавьте первую новость в админ-панели!</p>
+{% endif %}
 {% endblock %}
