@@ -5,6 +5,43 @@
     <title>Title</title>
 </head>
 <body>
+{% extends "admin/base.html" %}
 
+{% block admin_content %}
+<h2>💬 Сообщения обратной связи</h2>
+
+<div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background: #003366; color: white;">
+                <th style="padding: 12px; text-align: left;">ID</th>
+                <th style="padding: 12px; text-align: left;">Отправитель</th>
+                <th style="padding: 12px; text-align: left;">Email</th>
+                <th style="padding: 12px; text-align: left;">Тема</th>
+                <th style="padding: 12px; text-align: left;">Сообщение</th>
+                <th style="padding: 12px; text-align: left;">Дата</th>
+                <th style="padding: 12px; text-align: left;">Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in messages %}
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 10px;">{{ msg.id }}</td>
+                <td style="padding: 10px;">{{ msg.name }}</td>
+                <td style="padding: 10px;">{{ msg.email }}</td>
+                <td style="padding: 10px;">{{ msg.subject }}</td>
+                <td style="padding: 10px;">{{ msg.message[:50] }}{% if msg.message|length > 50 %}...{% endif %}</td>
+                <td style="padding: 10px;">{{ msg.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td style="padding: 10px;">
+                    <span style="background: {% if msg.status == 'new' %}#dc3545{% elif msg.status == 'read' %}#ffc107{% else %}#28a745{% endif %}; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">
+                        {{ msg.status }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
 </body>
 </html>

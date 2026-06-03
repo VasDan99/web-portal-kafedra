@@ -5,6 +5,49 @@
     <title>Title</title>
 </head>
 <body>
+{% extends "admin/base.html" %}
 
+{% block admin_content %}
+<h2>📅 Управление расписанием</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+        <h3 style="margin-top: 0;">➕ Добавить занятие</h3>
+        <form>
+            <div style="margin-bottom: 10px;">
+                <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option>Выберите дисциплину</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option>Выберите группу</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option>Понедельник</option>
+                    <option>Вторник</option>
+                    <option>Среда</option>
+                    <option>Четверг</option>
+                    <option>Пятница</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <input type="text" placeholder="Время (09:00-10:30)" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <input type="text" placeholder="Аудитория" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Сохранить</button>
+        </form>
+    </div>
+
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+        <h3 style="margin-top: 0;">📋 Текущее расписание</h3>
+        <p style="color: #666;">Здесь будет отображаться список занятий.</p>
+    </div>
+</div>
+{% endblock %}
 </body>
 </html>
