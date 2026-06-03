@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block title %}Научные работы кафедры{% endblock %}
+
+{% block content %}
+<style>
+    .science-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #003366;
+    }
+    .science-header h2 {
+        color: #003366;
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    .science-header p {
+        color: #666;
+        font-size: 14px;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #003366 0%, #005599 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-number {
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+    .category-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    .filter-btn {
+        background: #f0f0f0;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+        background: #003366;
+        color: white;
+    }
+    .publications-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+    .publication-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .publication-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .pub-category {
+        display: inline-block;
+        padding: 5px 12px;
+        font-size: 11px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin: 15px 15px 0;
+    }
+    .category-monograph { background: #e8f4fd; color: #0066cc; }
+    .category-article { background: #e8f8f5; color: #27ae60; }
+    .category-conference { background: #fff3e0; color: #e67e22; }
+    .category-thesis { background: #fce4e4; color: #c0392b; }
+    .pub-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #003366;
+        margin: 10px 15px;
+    }
+    .pub-authors {
+        color: #666;
+        font-size: 13px;
+        margin: 5px 15px;
+    }
+    .pub-meta {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 15px 15px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+        font-size: 12px;
+        color: #999;
+    }
+    .pub-year {
+        background: #f0f0f0;
+        padding: 2px 8px;
+        border-radius: 12px;
+    }
+    .pub-link {
+        color: #003366;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .pub-link:hover {
+        text-decoration: underline;
+    }
+    .info-panel {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 20px;
+        text-align: center;
+    }
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .publications-grid {
+            grid-template-columns: 1fr;
+        }
+        .science-header h2 {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div class="science-header">
+    <h2>🔬 Научные работы кафедры информационных систем</h2>
+    <p>Научные достижения и публикации преподавателей и студентов</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">15+</div>
+        <div class="stat-label">Монографий</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">50+</div>
+        <div class="stat-label">Статей в журналах ВАК</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">100+</div>
+        <div class="stat-label">Публикаций в РИНЦ</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">30+</div>
+        <div class="stat-label">Выпускных работ</div>
+    </div>
+</div>
+
+<div class="category-filter">
+    <button class="filter-btn active" data-category="all">Все публикации</button>
+    <button class="filter-btn" data-category="monograph">Монографии</button>
+    <button class="filter-btn" data-category="article">Статьи ВАК</button>
+    <button class="filter-btn" data-category="conference">Тезисы конференций</button>
+    <button class="filter-btn" data-category="thesis">Выпускные работы</button>
+</div>
+
+<div class="publications-grid" id="publicationsGrid">
+    <!-- Монографии -->
+    <div class="publication-card" data-category="monograph">
+        <div class="pub-category category-monograph">📚 МОНОГРАФИЯ</div>
+        <div class="pub-title">Современные информационные системы в образовании</div>
+        <div class="pub-authors">Иванов И.И., Петров П.П.</div>
+        <div class="pub-meta">
+            <span>Издательство: МУ им. Витте</span>
+            <span class="pub-year">2025 г.</span>
+        </div>
+    </div>
+    <div class="publication-card" data-category="monograph">
+        <div class="pub-category category-monograph">📚 МОНОГРАФИЯ</div>
+        <div class="pub-title">Искусственный интеллект: методы и алгоритмы</div>
+        <div class="pub-authors">Атаева О.М., Сидоров С.С.</div>
+        <div class="pub-meta">
+            <span>Издательство: Наука</span>
+            <span class="pub-year">2024 г.</span>
+        </div>
+    </div>
+    <div class="publication-card" data-category="monograph">
+        <div class="pub-category category-monograph">📚 МОНОГРАФИЯ</div>
+        <div class="pub-title">Базы данных: теория и практика</div>
+        <div class="pub-authors">Королькова И.А., Романова И.П.</div>
+        <div class="pub-meta">
+            <span>Издательство: ДМК Пресс</span>
+            <span class="pub-year">2024 г.</span>
+        </div>
+    </div>
+
+    <!-- Статьи ВАК -->
+    <div class="publication-card" data-category="article">
+        <div class="pub-category category-article">📄 СТАТЬЯ ВАК</div>
+        <div class="pub-title">Методы машинного обучения в анализе данных</div>
+        <div class="pub-authors">Киселев Ф.В., Атаева О.М.</div>
+        <div class="pub-meta">
+            <span>Вестник МУ им. Витте, №3</span>
+            <span class="pub-year">2025 г.</span>
+        </div>
+    </div>
+    <div class="publication-card" data-category="article">
+        <div class="pub-category category-article">📄 СТАТЬЯ ВАК</div>
+        <div class="pub-title">Web-технологии в образовательном процессе</div>
+        <div class="pub-authors">Киселев Ф.В., Преображенский М.В.</div>
+        <div class="pub-meta">
+            <span>Информационные технологии, №2</span>
+            <span class="pub-year">2025 г.</span>
+        </div>
+    </div>
+    <div class="publication-card" data-category="article">
+        <div class="pub-category category-article">📄 СТАТЬЯ ВАК</div>
+        <div class="pub-title">Оптимизация реляционных баз данных</div>
+        <div class="pub-authors">Королькова И.А., Романова И.П.</div>
+        <div class="pub-meta">
+            <span>Системы управления, №4</span>
+            <span class="pub-year">2024 г.</span>
+        </div>
+    </div>
+    <div class="publication-card" data-category="article">
+        <div class="pub-category category-article">📄 СТАТЬЯ ВАК</div>
+        <div class="pub-title">Цифровая экономика: вызовы и перспективы</div>
+        <div class="pub-authors">Сурина Е.Е., Блощук А.А.</div>
+        <div class="pub-meta">
+            <span>Экономика и управление, №1</span>
+            <span class="pub-year">2025 г.</span>
+        </div>
+    </div>
+
+    <!-- Тезисы конференций -->
+    <div class="publication-card" data-category="conference">
+        <div class="pub-category category-conference">🎤 ТЕЗИСЫ КОНФЕРЕНЦИИ</div>
+        <div class="pub-title">ИТ в современном мире: новые горизонты</div>
+        <div class="pub-authors">Студенты кафедры ИС</div>
+        <div class="pub-meta">
+            <span>Международная конференция, Москва</span>
+            <span class="pub-year">2025 г.</span>
+        </div>
+    </div>
+    <div class="publication-card" data-category="conference">
+        <div class="pub-category category-conference">🎤 ТЕЗИСЫ КОНФЕРЕНЦИИ</div>
+        <div class="pub-title">Цифровая трансформация бизнеса</div>
+        <div class="pub-authors">Блощук А.А., Сурина Е.Е.</div>
+        <div class="pub-meta">
+            <span>Форум IT-лидеров, Санкт-Петербург</span>
+            <span class="pub-year">2024 г.</span>
+        </div>
+    </div>
+    <div class="publication-card" data-category="conference">
+        <div class="pub-category category-conference">🎤 ТЕЗИСЫ КОНФЕРЕНЦИИ</div>
+        <div class="pub-title">Искусственный интеллект в медицине</div>
+        <div class="pub-authors">Атаева О.М., Киселев Ф.В.</div>
+        <div class="pub-meta">
+            <span>Нейротехнологии-2025, Казань</span>
+            <span class="pub-year">2025 г.</span>
+        </div>
+    </div>
+
+    <!-- Выпускные работы -->
+    <div class="publication-card" data-category="thesis">
+        <div class="pub-category category-thesis">🎓 ВЫПУСКНАЯ РАБОТА</div>
+        <div class="pub-title">Разработка веб-портала кафедры информационных систем</div>
+        <div class="pub-authors">Васильев Д.А.</div>
+        <div class="pub-meta">
+            <span>Научный руководитель: Киселев Ф.В.</span>
+            <span class="pub-year">2026 г.</span>
+        </div>
+    </div>
+    <div class="publication-card" data-category="thesis">
+        <div class="pub-category category-thesis">🎓 ВЫПУСКНАЯ РАБОТА</div>
+        <div class="pub-title">Мобильное приложение для дистанционного обучения</div>
+        <div class="pub-authors">Смирнова Е.В.</div>
+        <div class="pub-meta">
+            <span>Научный руководитель: Королькова И.А.</span>
+            <span class="pub-year">2025 г.</span>
+        </div>
+    </div>
+    <div class="publication-card" data-category="thesis">
+        <div class="pub-category category-thesis">🎓 ВЫПУСКНАЯ РАБОТА</div>
+        <div class="pub-title">Автоматизация документооборота на платформе 1С</div>
+        <div class="pub-authors">Кузнецов А.А.</div>
+        <div class="pub-meta">
+            <span>Научный руководитель: Стряпунина Н.И.</span>
+            <span class="pub-year">2025 г.</span>
+        </div>
+    </div>
+</div>
+
+<div class="info-panel">
+    <h3>📝 Публикационная активность</h3>
+    <p>Кафедра информационных систем активно участвует в научной жизни университета и публикует результаты исследований в ведущих научных журналах.</p>
+    <p style="margin-top: 10px;">📊 Индекс Хирша кафедры: 12 | 📈 Количество цитирований: 450+</p>
+    <p style="margin-top: 10px;">🤝 Сотрудничество с журналами: Вестник МУ им. Витте, Информационные технологии, Системы управления</p>
+</div>
+
+<script>
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const category = this.getAttribute('data-category');
+            const publications = document.querySelectorAll('.publication-card');
+
+            publications.forEach(pub => {
+                if (category === 'all' || pub.getAttribute('data-category') === category) {
+                    pub.style.display = 'block';
+                } else {
+                    pub.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+</body>
+</html>
