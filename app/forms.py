@@ -82,25 +82,29 @@ class WorkMessageForm(FlaskForm):
     file = FileField('Файл с правками')
     submit = SubmitField('Отправить')
 
-    class SiteSettingsForm(FlaskForm):
-        site_title = StringField('Название сайта', validators=[Optional()])
-        site_description = StringField('Описание сайта', validators=[Optional()])
-        email = StringField('Email', validators=[Optional(), Email()])
-        phone = StringField('Телефон', validators=[Optional()])
-        address = StringField('Адрес', validators=[Optional()])
-        work_hours = StringField('Часы работы', validators=[Optional()])
-        vk_url = StringField('ВКонтакте', validators=[Optional()])
-        telegram_url = StringField('Telegram', validators=[Optional()])
-        primary_color = StringField('Основной цвет', validators=[Optional()])
-        secondary_color = StringField('Вторичный цвет', validators=[Optional()])
-        accent_color = StringField('Акцентный цвет', validators=[Optional()])
-        logo = FileField('Логотип')
-        about_text = TextAreaField('Текст о кафедре', validators=[Optional()])
-        submit = SubmitField('Сохранить настройки')
 
-    class AdminProfileForm(FlaskForm):
-        username = StringField('Логин', validators=[DataRequired(), Length(min=3, max=80)])
-        email = StringField('Email', validators=[DataRequired(), Email()])
-        password = PasswordField('Новый пароль (оставьте пустым, чтобы не менять)')
-        confirm_password = PasswordField('Подтвердите пароль', validators=[EqualTo('password')])
-        submit = SubmitField('Сохранить профиль')
+# Форма настроек сайта
+class SiteSettingsForm(FlaskForm):
+    site_title = StringField('Название сайта', validators=[Optional()])
+    site_description = StringField('Описание сайта', validators=[Optional()])
+    email = StringField('Email', validators=[Optional(), Email()])
+    phone = StringField('Телефон', validators=[Optional()])
+    address = StringField('Адрес', validators=[Optional()])
+    work_hours = StringField('Часы работы', validators=[Optional()])
+    vk_url = StringField('ВКонтакте', validators=[Optional()])
+    telegram_url = StringField('Telegram', validators=[Optional()])
+    primary_color = StringField('Основной цвет', validators=[Optional()])
+    secondary_color = StringField('Вторичный цвет', validators=[Optional()])
+    accent_color = StringField('Акцентный цвет', validators=[Optional()])
+    logo = FileField('Логотип')
+    about_text = TextAreaField('Текст о кафедре', validators=[Optional()])
+    submit = SubmitField('Сохранить настройки')
+
+
+# Форма профиля администратора
+class AdminProfileForm(FlaskForm):
+    username = StringField('Логин', validators=[DataRequired(), Length(min=3, max=80)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Новый пароль (оставьте пустым, чтобы не менять)')
+    confirm_password = PasswordField('Подтвердите пароль', validators=[EqualTo('password')])
+    submit = SubmitField('Сохранить профиль')
