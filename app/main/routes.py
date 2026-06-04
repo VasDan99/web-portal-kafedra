@@ -1,14 +1,13 @@
-from flask import render_template, redirect, url_for, flash, abort, request, send_file
+from flask import render_template, redirect, url_for, flash, abort, request, send_file, session
 from flask_login import login_required, current_user
 from app.main import bp
-from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, ChangePasswordForm, WorkMessageForm
-from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News, User
+from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, ChangePasswordForm, WorkMessageForm, SiteSettingsForm, AdminProfileForm
+from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News, User, SiteSettings
 from app import db
 import os
 from datetime import datetime
 from io import BytesIO
 from docx import Document as DocxDocument
-from flask import render_template, redirect, url_for, flash, abort, request, send_file, session
 
 # ==================== Публичные страницы ====================
 
