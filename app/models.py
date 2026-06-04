@@ -119,6 +119,8 @@ class Feedback(db.Model):
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(20), default='new')
+    reply = db.Column(db.Text)
+    replied_at = db.Column(db.DateTime)
 
 
 # Таблица 9: Оценки
@@ -155,7 +157,7 @@ class Schedule(db.Model):
 class WorkMessage(db.Model):
     __tablename__ = 'work_messages'
     id = db.Column(db.Integer, primary_key=True)
-    work_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=True)  # ← nullable=True
+    work_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=True)
     from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     message = db.Column(db.Text, nullable=False)
@@ -169,66 +171,23 @@ class WorkMessage(db.Model):
     from_user = db.relationship('User', foreign_keys=[from_user_id], backref='sent_messages')
     to_user = db.relationship('User', foreign_keys=[to_user_id], backref='received_messages')
 
-    # Таблица 12: Настройки сайта
-    class SiteSettings(db.Model):
-        __tablename__ = 'site_settings'
-        id = db.Column(db.Integer, primary_key=True)
 
-        # Основные настройки
-        site_title = db.Column(db.String(200), default='Кафедра информационных систем')
-        site_description = db.Column(db.String(500), default='Московский университет имени Витте')
+# Таблица 12: Настройки сайта
+class SiteSettings(db.Model):
+    __tablename__ = 'site_settings'
+    id = db.Column(db.Integer, primary_key=True)
 
-        # Контакты
-        email = db.Column(db.String(120), default='is@vitte.ru')
-        phone = db.Column(db.String(50), default='+7 (495) 123-45-67')
-        address = db.Column(db.String(300), default='г. Москва, ул. Косыгина, д. 15')
-        work_hours = db.Column(db.String(200), default='Пн-Пт: 9:00 - 18:00')
-
-        # Социальные сети
-        vk_url = db.Column(db.String(200), default='https://vk.com/vitte')
-        telegram_url = db.Column(db.String(200), default='https://t.me/vitte')
-
-        # Цветовая схема
-        primary_color = db.Column(db.String(20), default='#003366')  # основной цвет
-        secondary_color = db.Column(db.String(20), default='#005599')  # вторичный цвет
-        accent_color = db.Column(db.String(20), default='#28a745')  # акцентный цвет
-
-        # Логотип
-        logo_path = db.Column(db.String(200), default='/static/images/logo.png')
-
-        # Текст о кафедре
-        about_text = db.Column(db.Text, default='')
-
-        updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-        # Таблица 12: Настройки сайта
-        class SiteSettings(db.Model):
-            __tablename__ = 'site_settings'
-            id = db.Column(db.Integer, primary_key=True)
-
-            # Основные настройки
-            site_title = db.Column(db.String(200), default='Кафедра информационных систем')
-            site_description = db.Column(db.String(500), default='Московский университет имени Витте')
-
-            # Контакты
-            email = db.Column(db.String(120), default='is@vitte.ru')
-            phone = db.Column(db.String(50), default='+7 (495) 123-45-67')
-            address = db.Column(db.String(300), default='г. Москва, ул. Косыгина, д. 15')
-            work_hours = db.Column(db.String(200), default='Пн-Пт: 9:00 - 18:00')
-
-            # Социальные сети
-            vk_url = db.Column(db.String(200), default='https://vk.com/vitte')
-            telegram_url = db.Column(db.String(200), default='https://t.me/vitte')
-
-            # Цветовая схема
-            primary_color = db.Column(db.String(20), default='#003366')
-            secondary_color = db.Column(db.String(20), default='#005599')
-            accent_color = db.Column(db.String(20), default='#28a745')
-
-            # Логотип
-            logo_path = db.Column(db.String(200), default='/static/images/logo.png')
-
-            # Текст о кафедре
-            about_text = db.Column(db.Text, default='')
-
-            updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    site_title = db.Column(db.String(200), default='Кафедра информационных систем')
+    site_description = db.Column(db.String(500), default='Московский университет имени Витте')
+    email = db.Column(db.String(120), default='is@vitte.ru')
+    phone = db.Column(db.String(50), default='+7 (495) 123-45-67')
+    address = db.Column(db.String(300), default='г. Москва, ул. Косыгина, д. 15')
+    work_hours = db.Column(db.String(200), default='Пн-Пт: 9:00 - 18:00')
+    vk_url = db.Column(db.String(200), default='https://vk.com/vitte')
+    telegram_url = db.Column(db.String(200), default='https://t.me/vitte')
+    primary_color = db.Column(db.String(20), default='#003366')
+    secondary_color = db.Column(db.String(20), default='#005599')
+    accent_color = db.Column(db.String(20), default='#28a745')
+    logo_path = db.Column(db.String(200), default='/static/images/logo.png')
+    about_text = db.Column(db.Text, default='')
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
