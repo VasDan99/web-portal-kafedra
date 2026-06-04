@@ -185,6 +185,7 @@ class SiteSettings(db.Model):
     work_hours = db.Column(db.String(200), default='Пн-Пт: 9:00 - 18:00')
     vk_url = db.Column(db.String(200), default='https://vk.com/vitte')
     telegram_url = db.Column(db.String(200), default='https://t.me/vitte')
+    max_url = db.Column(db.String(200), default='')  # ← ДОБАВИТЬ ЭТУ СТРОКУ
     primary_color = db.Column(db.String(20), default='#003366')
     secondary_color = db.Column(db.String(20), default='#005599')
     accent_color = db.Column(db.String(20), default='#28a745')
