@@ -1,10 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-$END$
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<h2>👤 Профиль администратора</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div style="max-width: 500px; margin: 0 auto;">
+        <div style="margin-bottom: 15px;">
+            <label>Логин</label><br>
+            {{ form.username(size=40) }}
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Email</label><br>
+            {{ form.email(size=40) }}
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Новый пароль</label><br>
+            {{ form.password(size=40) }}
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Подтвердите пароль</label><br>
+            {{ form.confirm_password(size=40) }}
+        </div>
+        <div>
+            {{ form.submit() }}
+        </div>
+    </div>
+</form>
+{% endblock %}
 </body>
 </html>

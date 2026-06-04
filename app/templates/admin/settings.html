@@ -5,6 +5,95 @@
     <title>Title</title>
 </head>
 <body>
+{% extends "admin/base.html" %}
 
+{% block admin_content %}
+<h2>⚙️ Настройки сайта</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+            <h3>🏷️ Основные настройки</h3>
+            <div style="margin-bottom: 15px;">
+                <label>Название сайта</label><br>
+                {{ form.site_title(size=40) }}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>Описание сайта</label><br>
+                {{ form.site_description(size=40) }}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>Логотип</label><br>
+                {{ form.logo() }}
+                {% if settings.logo_path %}
+                    <img src="{{ settings.logo_path }}" style="max-width: 100px; margin-top: 10px;">
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+            <h3>🎨 Цветовая схема</h3>
+            <div style="margin-bottom: 15px;">
+                <label>Основной цвет</label><br>
+                {{ form.primary_color(size=20, type="color") }}
+                <span>{{ form.primary_color.data }}</span>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>Вторичный цвет</label><br>
+                {{ form.secondary_color(size=20, type="color") }}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>Акцентный цвет</label><br>
+                {{ form.accent_color(size=20, type="color") }}
+            </div>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+            <h3>📞 Контакты</h3>
+            <div style="margin-bottom: 15px;">
+                <label>Email</label><br>
+                {{ form.email(size=40) }}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>Телефон</label><br>
+                {{ form.phone(size=40) }}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>Адрес</label><br>
+                {{ form.address(size=40) }}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>Часы работы</label><br>
+                {{ form.work_hours(size=40) }}
+            </div>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+            <h3>🌐 Социальные сети</h3>
+            <div style="margin-bottom: 15px;">
+                <label>ВКонтакте</label><br>
+                {{ form.vk_url(size=40) }}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>Telegram</label><br>
+                {{ form.telegram_url(size=40) }}
+            </div>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; grid-column: span 2;">
+            <h3>📖 О кафедре</h3>
+            <div style="margin-bottom: 15px;">
+                {{ form.about_text(rows=10, style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;") }}
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock %}
 </body>
 </html>
