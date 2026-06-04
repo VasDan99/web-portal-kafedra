@@ -93,6 +93,7 @@ class SiteSettingsForm(FlaskForm):
     work_hours = StringField('Часы работы', validators=[Optional()])
     vk_url = StringField('ВКонтакте', validators=[Optional()])
     telegram_url = StringField('Telegram', validators=[Optional()])
+    max_url = StringField('MAX', validators=[Optional()])  # ← ДОБАВИТЬ ЭТУ СТРОКУ
     primary_color = StringField('Основной цвет', validators=[Optional()])
     secondary_color = StringField('Вторичный цвет', validators=[Optional()])
     accent_color = StringField('Акцентный цвет', validators=[Optional()])
