@@ -1347,3 +1347,86 @@ def teacher_generate_grades_xlsx():
     byte_io.seek(0)
 
     return send_file(byte_io, as_attachment=True, download_name=f'grades_{datetime.now().strftime("%Y%m%d")}.xlsx')
+
+
+@bp.route('/admin/settings', methods=['GET', 'POST'])
+@login_required
+def admin_settings():
+    if current_user.role != 'admin':
+        abort(403)
+
+    settings = SiteSettings.query.first()
+    if not settings:
+        settings = SiteSettings()
+        db.session.add(settings)
+        db.session.commit()
+
+    form = SiteSettingsForm()
+
+    if form.validate_on_submit():
+        settings.site_title = form.site_title.data
+        settings.site_description = form.site_description.data
+        settings.email = form.email.data
+        settings.phone = form.phone.data
+        settings.address = form.address.data
+        settings.work_hours = form.work_hours.data
+        settings.vk_url = form.vk_url.data
+        settings.telegram_url = form.telegram_url.data
+        settings.primary_color = form.primary_color.data
+        settings.secondary_color = form.secondary_color.data
+        settings.accent_color = form.accent_color.data
+        settings.about_text = form.about_text.data
+
+        if form.logo.data:
+            logo_file = form.logo.data
+            filename = f'logo_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png'
+            os.makedirs('app/static/uploads', exist_ok=True)
+            filepath = os.path.join('app/static/uploads', filename)
+            logo_file.save(filepath)
+            settings.logo_path = f'/static/uploads/{filename}'
+
+        db.session.commit()
+        flash('Настройки сохранены!', 'success')
+        return redirect(url_for('main.admin_settings'))
+
+    # Заполняем форму текущими данными
+    form.site_title.data = settings.site_title
+    form.site_description.data = settings.site_description
+    form.email.data = settings.email
+    form.phone.data = settings.phone
+    form.address.data = settings.address
+    form.work_hours.data = settings.work_hours
+    form.vk_url.data = settings.vk_url
+    form.telegram_url.data = settings.telegram_url
+    form.primary_color.data = settings.primary_color
+    form.secondary_color.data = settings.secondary_color
+    form.accent_color.data = settings.accent_color
+    form.about_text.data = settings.about_text
+
+    return render_template('admin/settings.html', breadcrumb_title='Настройки сайта', form=form, settings=settings)
+
+
+@bp.route('/admin/profile', methods=['GET', 'POST'])
+@login_required
+def admin_profile():
+    if current_user.role != 'admin':
+        abort(403)
+
+    form = AdminProfileForm()
+
+    if form.validate_on_submit():
+        if form.username.data:
+            current_user.username = form.username.data
+        if form.email.data:
+            current_user.email = form.email.data
+        if form.password.data:
+            current_user.set_password(form.password.data)
+
+        db.session.commit()
+        flash('Профиль обновлён!', 'success')
+        return redirect(url_for('main.admin_profile'))
+
+    form.username.data = current_user.username
+    form.email.data = current_user.email
+
+    return render_template('admin/profile.html', breadcrumb_title='Профиль администратора', form=form)
