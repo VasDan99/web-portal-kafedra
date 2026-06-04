@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Дисциплины преподавателя{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.admin_dashboard') }}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('main.admin_teachers') }}">Преподаватели</a></li>
+            <li class="breadcrumb-item active">Дисциплины {{ teacher.full_name }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4">Дисциплины преподавателя: {{ teacher.full_name }}</h1>
+
+    <form method="POST">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Выберите дисциплины, которые ведёт преподаватель</h5>
+                <p class="text-muted">Отметьте все дисциплины, которые преподаёт {{ teacher.full_name }}</p>
+                
+                <div class="row">
+                    {% for discipline in all_disciplines %}
+                    <div class="col-md-4 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" 
+                                   name="disciplines" value="{{ discipline.id }}"
+                                   id="disc_{{ discipline.id }}"
+                                   {% if discipline.id in teacher_discipline_ids %}checked{% endif %}>
+                            <label class="form-check-label" for="disc_{{ discipline.id }}">
+                                {{ discipline.name }}
+                                {% if discipline.code %}
+                                <small class="text-muted">({{ discipline.code }})</small>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if not all_disciplines %}
+                <div class="alert alert-warning">
+                    Нет созданных дисциплин. <a href="{{ url_for('main.admin_disciplines') }}">Создайте сначала дисциплины</a>.
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{{ url_for('main.admin_teachers') }}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
