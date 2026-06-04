@@ -13,48 +13,49 @@
 <h2>Редактирование профиля</h2>
 
 <form method="POST" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
+    <input type="hidden" name="csrf_token" value="{{ form.csrf_token._value() if form.csrf_token else '' }}">
 
     <div style="margin-bottom: 15px;">
-        {{ form.full_name.label }}<br>
-        {{ form.full_name(size=50) }}
+        <label>ФИО</label><br>
+        <input type="text" name="full_name" value="{{ form.full_name.data or '' }}" size="50" class="form-control">
     </div>
 
     <div style="margin-bottom: 15px;">
-        {{ form.department.label }}<br>
-        {{ form.department(size=50) }}
+        <label>Кафедра</label><br>
+        <input type="text" name="department" value="{{ form.department.data or '' }}" size="50" class="form-control">
     </div>
 
     <div style="margin-bottom: 15px;">
-        {{ form.position.label }}<br>
-        {{ form.position(size=50) }}
+        <label>Должность</label><br>
+        <input type="text" name="position" value="{{ form.position.data or '' }}" size="50" class="form-control">
     </div>
 
     <div style="margin-bottom: 15px;">
-        {{ form.degree.label }}<br>
-        {{ form.degree(size=50) }}
+        <label>Учёная степень</label><br>
+        <input type="text" name="degree" value="{{ form.degree.data or '' }}" size="50" class="form-control">
     </div>
 
     <div style="margin-bottom: 15px;">
-        {{ form.phone.label }}<br>
-        {{ form.phone(size=50) }}
+        <label>Телефон</label><br>
+        <input type="text" name="phone" value="{{ form.phone.data or '' }}" size="50" class="form-control">
     </div>
 
     <div style="margin-bottom: 15px;">
-        {{ form.bio.label }}<br>
-        {{ form.bio(rows=5, cols=50) }}
+        <label>О себе</label><br>
+        <textarea name="bio" rows="5" cols="50" class="form-control">{{ form.bio.data or '' }}</textarea>
     </div>
 
     <div style="margin-bottom: 15px;">
-        {{ form.avatar.label }}<br>
-        {{ form.avatar() }}
+        <label>Фото профиля</label><br>
+        <input type="file" name="avatar" class="form-control">
         {% if teacher.avatar %}
-            <p><img src="{{ teacher.avatar }}" style="max-width: 100px; border-radius: 50%;"></p>
+            <p><img src="{{ teacher.avatar }}" style="max-width: 100px; border-radius: 50%; margin-top: 10px;"></p>
         {% endif %}
     </div>
 
     <div>
-        {{ form.submit() }}
+        <button type="submit" name="submit" class="btn btn-primary" style="background: #003366; color: white; border: none; padding: 10px 30px; border-radius: 5px;">Сохранить изменения</button>
+        <a href="{{ url_for('main.teacher_profile') }}" style="margin-left: 10px;">Отмена</a>
     </div>
 </form>
 {% endblock %}

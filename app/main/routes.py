@@ -520,33 +520,55 @@ def teacher_reports():
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     return render_template('cabinet/teacher/reports.html', breadcrumb_title='Отчёты', teacher=teacher)
 
+
 @bp.route('/cabinet/teacher/profile/edit', methods=['GET', 'POST'])
 @login_required
 def teacher_profile_edit():
     if current_user.role != 'teacher':
         abort(403)
+
+    print("=== ОТЛАДКА ===")
+    print("Метод:", request.method)
+    print("Файлы:", request.files)
+
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     form = TeacherProfileForm()
 
+    if request.method == 'POST':
+        print("Это POST запрос")
+        if 'avatar' in request.files:
+            print("Аватар найден в request.files!")
+            avatar_file = request.files['avatar']
+            print(f"Имя файла: {avatar_file.filename}")
+            if avatar_file.filename:
+                filename = f'teacher_avatar_{current_user.id}.jpg'
+                os.makedirs('app/static/uploads/avatars', exist_ok=True)
+                filepath = os.path.join('app/static/uploads/avatars', filename)
+                avatar_file.save(filepath)
+                teacher.avatar = f'/static/uploads/avatars/{filename}'
+                print(f"Файл сохранён: {filepath}")
+                db.session.commit()
+                flash('Аватар загружен!', 'success')
+            else:
+                print("Имя файла пустое!")
+        else:
+            print("Аватар НЕ найден в request.files!")
+
     if form.validate_on_submit():
+        print("Форма валидна")
         teacher.full_name = form.full_name.data
         teacher.department = form.department.data
         teacher.position = form.position.data
         teacher.degree = form.degree.data
         teacher.phone = form.phone.data
         teacher.bio = form.bio.data
-
-        if form.avatar.data:
-            avatar_file = form.avatar.data
-            filename = f'teacher_avatar_{current_user.id}.jpg'
-            os.makedirs('app/static/uploads/avatars', exist_ok=True)
-            filepath = os.path.join('app/static/uploads/avatars', filename)
-            avatar_file.save(filepath)
-            teacher.avatar = f'/static/uploads/avatars/{filename}'
-
         db.session.commit()
         flash('Профиль обновлён!', 'success')
         return redirect(url_for('main.teacher_profile'))
+    else:
+        if request.method == 'POST':
+            print("Форма НЕ валидна!")
+            print(form.errors)
 
     form.full_name.data = teacher.full_name
     form.department.data = teacher.department
@@ -555,7 +577,8 @@ def teacher_profile_edit():
     form.phone.data = teacher.phone
     form.bio.data = teacher.bio
 
-    return render_template('cabinet/teacher/profile_edit.html', breadcrumb_title='Редактирование профиля', form=form, teacher=teacher)
+    return render_template('cabinet/teacher/profile_edit.html', breadcrumb_title='Редактирование профиля', form=form,
+                           teacher=teacher)
 
 
 # ==================== Чат по работам ====================
@@ -1371,18 +1394,28 @@ def admin_settings():
         settings.work_hours = form.work_hours.data
         settings.vk_url = form.vk_url.data
         settings.telegram_url = form.telegram_url.data
+        settings.max_url = form.max_url.data
         settings.primary_color = form.primary_color.data
         settings.secondary_color = form.secondary_color.data
         settings.accent_color = form.accent_color.data
         settings.about_text = form.about_text.data
 
-        if form.logo.data:
-            logo_file = form.logo.data
-            filename = f'logo_{datetime.now().strftime("%Y%m%d_%H%M%S")}.png'
-            os.makedirs('app/static/uploads', exist_ok=True)
-            filepath = os.path.join('app/static/uploads', filename)
-            logo_file.save(filepath)
-            settings.logo_path = f'/static/uploads/{filename}'
+        # Обработка загрузки логотипа
+        logo_file = request.files.get('logo')
+        if logo_file and logo_file.filename:
+            # Проверяем расширение файла
+            allowed_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.svg'}
+            file_ext = os.path.splitext(logo_file.filename)[1].lower()
+            if file_ext in allowed_extensions:
+                filename = f'logo_{datetime.now().strftime("%Y%m%d_%H%M%S")}{file_ext}'
+                upload_folder = os.path.join('app/static/uploads')
+                os.makedirs(upload_folder, exist_ok=True)
+                filepath = os.path.join(upload_folder, filename)
+                logo_file.save(filepath)
+                settings.logo_path = f'/static/uploads/{filename}'
+                flash('Логотип успешно загружен!', 'success')
+            else:
+                flash('Неподдерживаемый формат файла. Используйте PNG, JPG, GIF или SVG.', 'danger')
 
         db.session.commit()
         flash('Настройки сохранены!', 'success')

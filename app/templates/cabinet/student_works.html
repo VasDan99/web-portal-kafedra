@@ -74,11 +74,13 @@
         <td>{{ work.uploaded_at.strftime('%d.%m.%Y') }}</td>
         <td>
             <a href="{{ work.file_path }}">📥 Скачать</a> |
-            <a href="{{ url_for('main.student_work_delete', work_id=work.id) }}" onclick="return confirm('Удалить работу?')">🗑️ Удалить</a>
+            <a href="{{ url_for('main.student_work_delete', work_id=work.id) }}" onclick="return confirm('Удалить работу?')">🗑️ Удалить</a> |
+            <a href="{{ url_for('main.student_work_chat', work_id=work.id) }}">💬 Обсудить</a>
         </td>
     </tr>
     {% endfor %}
-<br>uelse
+</table>
+{% else %}
 <p>У вас пока нет загруженных работ.</p>
 {% endif %}
 {% endblock %}

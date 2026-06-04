@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user
@@ -19,7 +19,6 @@ def create_app():
     migrate.init_app(app, db)
     login_manager.init_app(app)
 
-    # Делаем current_user доступным во всех шаблонах
     @app.context_processor
     def inject_user():
         return dict(current_user=current_user)

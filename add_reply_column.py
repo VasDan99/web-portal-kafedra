@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-db_path = os.path.join('instance', 'portal.db')
+db_path = '/tmp/portal.db'
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 

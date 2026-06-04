@@ -1,7 +1,7 @@
 import sqlite3
 
 # Подключаемся к базе данных
-conn = sqlite3.connect('instance/portal.db')
+conn = sqlite3.connect('/tmp/portal.db')
 cursor = conn.cursor()
 
 # Проверяем текущие роли
