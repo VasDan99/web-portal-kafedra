@@ -1,4 +1,3 @@
-gitignore
 # Python
 __pycache__/
 *.py[cod]
@@ -11,10 +10,8 @@ venv/
 env/
 .venv/
 
-# Логи и базы
+# Логи
 *.log
-*.db
-*.sqlite
 
 # Системные
 .DS_Store
