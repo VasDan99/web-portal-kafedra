@@ -1429,19 +1429,4 @@ def admin_profile():
     form.username.data = current_user.username
     form.email.data = current_user.email
 
-    return render_template('admin/profile.html', breadcrumb_title='Профиль администратора', form=form)if form.validate_on_submit():
-    settings.site_title = form.site_title.data
-    settings.site_description = form.site_description.data
-    settings.email = form.email.data
-    settings.phone = form.phone.data
-    settings.address = form.address.data
-    settings.work_hours = form.work_hours.data
-    settings.vk_url = form.vk_url.data
-    settings.telegram_url = form.telegram_url.data
-    settings.max_url = form.max_url.data  # ← ДОБАВИТЬ ЭТУ СТРОКУ
-    settings.primary_color = form.primary_color.data
-    settings.secondary_color = form.secondary_color.data
-    settings.accent_color = form.accent_color.data
-    settings.about_text = form.about_text.data
-    ...
-
+    return render_template('admin/profile.html', breadcrumb_title='Профиль администратора', form=form)
