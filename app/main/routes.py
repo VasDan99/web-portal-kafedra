@@ -1463,3 +1463,4 @@ def admin_profile():
     form.email.data = current_user.email
 
     return render_template('admin/profile.html', breadcrumb_title='Профиль администратора', form=form)
+
