@@ -1,10 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
 {% extends "cabinet/teacher/teacher_base.html" %}
 
 {% block title %}Выставление оценок{% endblock %}
@@ -12,79 +5,101 @@
 {% block teacher_content %}
 <h2>Выставление оценок</h2>
 
-<form method="POST" action="{{ url_for('main.teacher_add_grade') }}">
-    <div style="margin-bottom: 15px;">
-        <label>Студент:</label><br>
-        <select name="student_id" required style="width: 100%; padding: 8px;">
-            <option value="">Выберите студента</option>
-            {% for student in students %}
-            <option value="{{ student.id }}">{{ student.full_name }} ({{ student.group_name }})</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div style="margin-bottom: 15px;">
-        <label>Дисциплина:</label><br>
-        <select name="discipline_id" required style="width: 100%; padding: 8px;">
-            <option value="">Выберите дисциплину</option>
-            {% for discipline in disciplines %}
-            <option value="{{ discipline.id }}">{{ discipline.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div style="margin-bottom: 15px;">
-        <label>Оценка:</label><br>
-        <select name="grade_value" required style="width: 100%; padding: 8px;">
-            <option value="">Выберите оценку</option>
-            <option value="5">5 (Отлично)</option>
-            <option value="4">4 (Хорошо)</option>
-            <option value="3">3 (Удовлетворительно)</option>
-            <option value="2">2 (Неудовлетворительно)</option>
-        </select>
-    </div>
-
-    <div style="margin-bottom: 15px;">
-        <label>Тип контроля:</label><br>
-        <select name="grade_type" style="width: 100%; padding: 8px;">
-            <option value="exam">Экзамен</option>
-            <option value="credit">Зачёт</option>
-            <option value="test">Тест</option>
-        </select>
-    </div>
-
-    <div>
-        <button type="submit" style="background: #003366; color: white; border: none; padding: 10px 30px; border-radius: 5px; cursor: pointer;">Выставить оценку</button>
+<form method="POST" action="{{ url_for('main.teacher_add_grade') }}" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="student_id">Студент:</label>
+                <select name="student_id" id="student_id" class="form-control" required>
+                    <option value="">Выберите студента</option>
+                    {% for student in students %}
+                    <option value="{{ student.id }}">{{ student.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="discipline_id">Дисциплина:</label>
+                <select name="discipline_id" id="discipline_id" class="form-control" required>
+                    <option value="">Выберите дисциплину</option>
+                    {% for discipline in disciplines %}
+                    <option value="{{ discipline.id }}">{{ discipline.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="grade_value">Оценка:</label>
+                <select name="grade_value" id="grade_value" class="form-control" required>
+                    <option value="">Выберите оценку</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="grade_type">Тип контроля:</label>
+                <select name="grade_type" id="grade_type" class="form-control">
+                    <option value="exam">Экзамен</option>
+                    <option value="credit">Зачёт</option>
+                    <option value="test">Тест</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Выставить оценку</button>
+        </div>
     </div>
 </form>
 
-<hr>
-
 <h3>Уже выставленные оценки</h3>
 {% if grades %}
-<table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
-    <tr style="background: #003366; color: white;">
-        <th>Студент</th>
-        <th>Дисциплина</th>
-        <th>Оценка</th>
-        <th>Тип</th>
-        <th>Дата</th>
-    </tr>
-    {% for grade in grades %}
-    <tr>
-        <td>{{ grade.student.full_name if grade.student else '—' }}</td>
-        <td>{{ grade.discipline.name if grade.discipline else '—' }}</td>
-        <td style="text-align: center; font-weight: bold; color: {% if grade.grade_value >= 4 %}green{% elif grade.grade_value >= 3 %}orange{% else %}red{% endif %};">
-            {{ grade.grade_value }}
-        </td>
-        <td>{{ grade.grade_type or '—' }}</td>
-        <td>{{ grade.date.strftime('%d.%m.%Y') if grade.date else '—' }}</td>
-    </tr>
-    {% endfor %}
+<table class="table table-bordered table-striped">
+    <thead style="background: #003366; color: white;">
+        <tr>
+            <th>Студент</th>
+            <th>Дисциплина</th>
+            <th>Оценка</th>
+            <th>Тип</th>
+            <th>Дата</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for grade in grades %}
+        <tr>
+            <td>{{ grade.student.full_name if grade.student else '—' }}</td>
+            <td>{{ grade.discipline.name if grade.discipline else '—' }}</td>
+            <td style="text-align: center; font-weight: bold; color:
+                {% if grade.grade_value >= 4 %}green
+                {% elif grade.grade_value >= 3 %}orange
+                {% else %}red{% endif %};">
+                {{ grade.grade_value }}
+            </td>
+            <td>
+                {% if grade.grade_type == 'exam' %}
+                    Экзамен
+                {% elif grade.grade_type == 'credit' %}
+                    Зачёт
+                {% elif grade.grade_type == 'test' %}
+                    Тест
+                {% else %}
+                    {{ grade.grade_type or '—' }}
+                {% endif %}
+            </td>
+            <td>{{ grade.date.strftime('%d.%m.%Y') if grade.date else '—' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 {% else %}
-<p>Нет выставленных оценок.</p>
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> Оценок пока нет.
+</div>
 {% endif %}
+
 {% endblock %}
-</body>
-</html>
