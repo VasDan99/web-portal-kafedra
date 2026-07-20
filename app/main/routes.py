@@ -189,8 +189,40 @@ def student_grades():
     if current_user.role != 'student':
         abort(403)
     student = Student.query.filter_by(user_id=current_user.id).first()
-    grades = Grade.query.filter_by(student_id=student.id).all() if student else []
-    return render_template('cabinet/student_grades.html', breadcrumb_title='Мои оценки', grades=grades, student=student)
+    if not student:
+        flash('Профиль студента не найден', 'danger')
+        return redirect(url_for('main.student_profile'))
+
+    # Получаем все оценки студента
+    grades = Grade.query.filter_by(student_id=student.id).all()
+
+    # Расчёт статистики
+    average = student.get_average_grade()
+    attendance_stats = student.get_attendance_stats()
+    debts = student.get_debts()
+    progress = student.get_progress_percentage()
+    total_credits = student.get_total_credits()
+    completed_credits = student.get_completed_credits()
+
+    # Группировка оценок по дисциплинам для удобного отображения
+    grades_by_discipline = {}
+    for grade in grades:
+        disc_name = grade.discipline.name if grade.discipline else 'Неизвестная дисциплина'
+        if disc_name not in grades_by_discipline:
+            grades_by_discipline[disc_name] = []
+        grades_by_discipline[disc_name].append(grade)
+
+    return render_template('cabinet/student_grades.html',
+                           breadcrumb_title='Мои оценки',
+                           grades=grades,
+                           grades_by_discipline=grades_by_discipline,
+                           student=student,
+                           average=average,
+                           attendance_stats=attendance_stats,
+                           debts=debts,
+                           progress=progress,
+                           total_credits=total_credits,
+                           completed_credits=completed_credits)
 
 
 @bp.route('/cabinet/student/schedule')

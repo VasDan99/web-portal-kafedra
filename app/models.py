@@ -40,6 +40,81 @@ class Student(db.Model):
 
     user = db.relationship('User', backref='student_profile', uselist=False)
 
+    def get_average_grade(self):
+        """Рассчитывает средний балл студента по всем оценкам"""
+        grades = Grade.query.filter_by(student_id=self.id).all()
+        if not grades:
+            return None
+        total = sum(g.grade_value for g in grades)
+        return round(total / len(grades), 2)
+
+    def get_grades_by_discipline(self, discipline_id):
+        """Возвращает все оценки студента по конкретной дисциплине"""
+        return Grade.query.filter_by(student_id=self.id, discipline_id=discipline_id).all()
+
+    def get_discipline_average(self, discipline_id):
+        """Средний балл по конкретной дисциплине"""
+        grades = self.get_grades_by_discipline(discipline_id)
+        if not grades:
+            return None
+        total = sum(g.grade_value for g in grades)
+        return round(total / len(grades), 2)
+
+    def get_attendance_stats(self):
+        """Статистика по дисциплинам: сдано/не сдано"""
+        # Получаем все дисциплины
+        all_disciplines = Discipline.query.all()
+        stats = {}
+
+        for disc in all_disciplines:
+            grades = Grade.query.filter_by(student_id=self.id, discipline_id=disc.id).all()
+            if grades:
+                # Если есть хотя бы одна оценка — считаем, что дисциплина сдана
+                stats[disc.name] = {
+                    'status': 'Сдана',
+                    'grades': [g.grade_value for g in grades],
+                    'average': round(sum(g.grade_value for g in grades) / len(grades), 2),
+                    'discipline_id': disc.id
+                }
+            else:
+                stats[disc.name] = {
+                    'status': 'Не сдана',
+                    'grades': [],
+                    'average': None,
+                    'discipline_id': disc.id
+                }
+        return stats
+
+    def get_debts(self):
+        """Возвращает список дисциплин, по которым есть задолженности"""
+        stats = self.get_attendance_stats()
+        debts = []
+        for disc_name, data in stats.items():
+            if data['status'] == 'Не сдана':
+                debts.append({
+                    'name': disc_name,
+                    'discipline_id': data['discipline_id']
+                })
+        return debts
+
+    def get_total_credits(self):
+        """Общее количество дисциплин"""
+        return Discipline.query.count()
+
+    def get_completed_credits(self):
+        """Количество сданных дисциплин"""
+        stats = self.get_attendance_stats()
+        completed = sum(1 for data in stats.values() if data['status'] == 'Сдана')
+        return completed
+
+    def get_progress_percentage(self):
+        """Процент успеваемости (сдано / всего дисциплин * 100)"""
+        total = self.get_total_credits()
+        if total == 0:
+            return 0
+        completed = self.get_completed_credits()
+        return round((completed / total) * 100, 1)
+
 
 # Таблица 3: Преподаватели
 class Teacher(db.Model):
@@ -185,7 +260,7 @@ class SiteSettings(db.Model):
     work_hours = db.Column(db.String(200), default='Пн-Пт: 9:00 - 18:00')
     vk_url = db.Column(db.String(200), default='https://vk.com/vitte')
     telegram_url = db.Column(db.String(200), default='https://t.me/vitte')
-    max_url = db.Column(db.String(200), default='')  # ← ДОБАВИТЬ ЭТУ СТРОКУ
+    max_url = db.Column(db.String(200), default='')
     primary_color = db.Column(db.String(20), default='#003366')
     secondary_color = db.Column(db.String(20), default='#005599')
     accent_color = db.Column(db.String(20), default='#28a745')
