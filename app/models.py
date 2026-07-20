@@ -183,6 +183,15 @@ class Document(db.Model):
     discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'))
     is_public = db.Column(db.Boolean, default=False)
 
+    # ===== НОВЫЕ ПОЛЯ ДЛЯ ПРОВЕРКИ РАБОТ =====
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    review_comment = db.Column(db.Text)  # Комментарий преподавателя
+    reviewed_at = db.Column(db.DateTime)  # Дата проверки
+    reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'))  # Кто проверил
+
+    # Связи
+    reviewer = db.relationship('User', foreign_keys=[reviewed_by], backref='reviewed_documents')
+
 
 # Таблица 8: Обратная связь
 class Feedback(db.Model):
