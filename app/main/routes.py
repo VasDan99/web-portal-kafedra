@@ -243,6 +243,13 @@ def student_works():
         abort(403)
     student = Student.query.filter_by(user_id=current_user.id).first()
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
+    
+    print("=== student_works ===")
+    print("Текущий пользователь ID:", current_user.id)
+    print("Найдено работ:", len(works))
+    for w in works:
+        print(f"  ID: {w.id}, Название: {w.title}, Статус: {w.status}")
+    
     form = WorkUploadForm()
     disciplines = Discipline.query.all()
     form.discipline_id.choices = [(d.id, d.name) for d in disciplines]
@@ -253,6 +260,10 @@ def student_works():
 @bp.route('/cabinet/student/works/upload', methods=['GET', 'POST'])
 @login_required
 def student_works_upload():
+    print("=== НАЧАЛО student_works_upload ===")
+    print("Метод:", request.method)
+    print("Текущий пользователь ID:", current_user.id)
+    
     if current_user.role != 'student':
         abort(403)
     student = Student.query.filter_by(user_id=current_user.id).first()
@@ -262,6 +273,11 @@ def student_works_upload():
     form.discipline_id.choices = [(d.id, d.name) for d in disciplines]
 
     if form.validate_on_submit():
+        print("=== ФОРМА ВАЛИДНА ===")
+        print("Название:", form.title.data)
+        print("Дисциплина ID:", form.discipline_id.data)
+        print("Файл:", form.file.data.filename if form.file.data else 'Нет файла')
+        
         file = form.file.data
         filename = f'work_{current_user.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
         os.makedirs('app/static/uploads/works', exist_ok=True)
@@ -281,16 +297,21 @@ def student_works_upload():
             file_type=file_type,
             uploaded_by=current_user.id,
             discipline_id=form.discipline_id.data,
-            is_public=False
+            is_public=False,
+            status='pending'
         )
         db.session.add(work)
         db.session.commit()
+        print("=== РАБОТА СОХРАНЕНА! ID:", work.id)
         flash('Работа успешно загружена!', 'success')
         return redirect(url_for('main.student_works'))
+    else:
+        print("=== ФОРМА НЕ ВАЛИДНА ===")
+        print(form.errors)
 
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
     return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы',
-                           student=student, form=form, works=works, disciplines=disciplines)
+                         student=student, form=form, works=works, disciplines=disciplines)
 
 
 @bp.route('/cabinet/student/work/delete/<int:work_id>')
@@ -558,13 +579,19 @@ def teacher_students_works():
         student = Student.query.get(work.uploaded_by)
         discipline = Discipline.query.get(work.discipline_id)
 
+        # ОТЛАДКА
+        print(f"DEBUG: work.id={work.id}, uploaded_by={work.uploaded_by}, student.full_name={student.full_name if student else 'None'}")
+
+        status = work.status if hasattr(work, 'status') and work.status else 'pending'
+
         works_data.append({
             'id': work.id,
             'title': work.title,
             'file_path': work.file_path,
             'uploaded_at': work.uploaded_at,
             'student_name': student.full_name if student else 'Неизвестно',
-            'discipline_name': discipline.name if discipline else '—'
+            'discipline_name': discipline.name if discipline else '—',
+            'status': status
         })
 
     return render_template('cabinet/teacher/students_works.html',
