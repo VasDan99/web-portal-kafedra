@@ -681,6 +681,49 @@ def teacher_profile_edit():
                            teacher=teacher)
 
 
+@bp.route('/cabinet/teacher/work/review/<int:work_id>', methods=['GET', 'POST'])
+@login_required
+def teacher_review_work(work_id):
+    """Страница проверки работы преподавателем"""
+    if current_user.role != 'teacher':
+        abort(403)
+
+    work = Document.query.get_or_404(work_id)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+
+    # Проверяем, что преподаватель ведёт эту дисциплину
+    discipline = Discipline.query.get(work.discipline_id)
+    if not discipline or discipline.teacher_id != teacher.id:
+        abort(403)
+
+    # Получаем студента, который загрузил работу
+    student = Student.query.filter_by(user_id=work.uploaded_by).first()
+
+    if request.method == 'POST':
+        status = request.form.get('status')
+        comment = request.form.get('comment', '').strip()
+
+        if status in ['approved', 'rejected']:
+            work.status = status
+            work.review_comment = comment
+            work.reviewed_at = datetime.utcnow()
+            work.reviewed_by = current_user.id
+
+            db.session.commit()
+
+            status_text = 'утверждена' if status == 'approved' else 'отклонена'
+            flash(f'Работа "{work.title}" {status_text}!', 'success')
+            return redirect(url_for('main.teacher_students_works'))
+        else:
+            flash('Неверный статус работы', 'danger')
+
+    return render_template('cabinet/teacher/review_work.html',
+                           work=work,
+                           teacher=teacher,
+                           student=student,
+                           discipline=discipline)
+
+
 # ==================== Чат по работам ====================
 
 @bp.route('/cabinet/teacher/work/<int:work_id>/chat', methods=['GET', 'POST'])
