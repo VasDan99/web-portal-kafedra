@@ -4,55 +4,12 @@
 <style>
     .sidebar-menu a {
         font-size: 16px;
-        transition: background 0.3s, color 0.3s;
     }
-    .sidebar-menu li a:hover {
-        background: #003366 !important;
-        color: white !important;
-        border-radius: 5px;
-    }
-    .notification-btn {
-        background: #dc3545;
-        color: white !important;
-        padding: 6px 14px;
-        border-radius: 20px;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 14px;
-        transition: background 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .notification-btn:hover {
-        background: #c82333 !important;
-        color: white !important;
-    }
-    .notification-btn .badge {
-        background: #ffc107;
-        color: #333;
-        border-radius: 50%;
-        padding: 1px 7px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-    .top-bar {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #eee;
-    }
-    .user-name {
-        color: #888;
-        font-size: 14px;
+    .sidebar-menu li a {
+        font-size: 16px;
     }
 </style>
-
 <div style="display: flex; gap: 20px;">
-    <!-- Боковое меню -->
     <div style="width: 280px; background: #f5f5f5; padding: 20px; border-radius: 8px;">
         <div style="text-align: center; margin-bottom: 20px;">
             <img src="{{ student.avatar or '/static/images/default-avatar.png' }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
@@ -62,31 +19,19 @@
         </div>
         <hr>
         <ul class="sidebar-menu" style="list-style: none; padding: 0;">
-            <li><a href="{{ url_for('main.student_profile') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px;">📋 Мой профиль</a></li>
-            <li><a href="{{ url_for('main.student_grades') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px;">📊 Мои оценки</a></li>
-            <li><a href="{{ url_for('main.student_schedule') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px;">📅 Расписание</a></li>
-            <li><a href="{{ url_for('main.student_works') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px;">📄 Мои работы</a></li>
-            <li><a href="{{ url_for('main.student_achievements') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px;">🏆 Мои достижения</a></li>
-            <li><a href="{{ url_for('main.student_teachers') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px;">👨‍🏫 Мои преподаватели</a></li>
-            <li><a href="{{ url_for('main.student_documents') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px;">📁 Мои документы</a></li>
-            <li><a href="{{ url_for('main.student_settings') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px;">⚙️ Настройки</a></li>
-            <li><a href="{{ url_for('main.contact_admin') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px;">📧 Связь с администратором</a></li>
+            <li><a href="{{ url_for('main.student_profile') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📋 Мой профиль</a></li>
+            <li><a href="{{ url_for('main.student_grades') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📊 Мои оценки</a></li>
+            <li><a href="{{ url_for('main.student_schedule') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📅 Расписание</a></li>
+            <li><a href="{{ url_for('main.student_works') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📄 Мои работы</a></li>
+            <li><a href="{{ url_for('main.student_achievements') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">🏆 Мои достижения</a></li>
+            <li><a href="{{ url_for('main.student_teachers') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">👨‍🏫 Мои преподаватели</a></li>
+            <li><a href="{{ url_for('main.student_documents') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📁 Мои документы</a></li>
+            <li><a href="{{ url_for('main.student_settings') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">⚙️ Настройки</a></li>
+            <li><a href="{{ url_for('main.contact_admin') }}" style="display: block; padding: 10px; color: #003366; text-decoration: none; border-radius: 5px; margin-bottom: 5px; transition: background 0.3s;">📧 Связь с администратором</a></li>
         </ul>
     </div>
     
-    <!-- Основной контент -->
     <div style="flex: 1; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <!-- Верхняя панель с именем и уведомлениями -->
-        <div class="top-bar">
-            <span class="user-name">{{ current_user.username }}</span>
-            <a href="{{ url_for('main.student_notifications') }}" class="notification-btn">
-                🔔 Уведомления
-                {% if unread_notifications > 0 %}
-                    <span class="badge">{{ unread_notifications }}</span>
-                {% endif %}
-            </a>
-        </div>
-        
         {% block cabinet_content %}{% endblock %}
     </div>
 </div>

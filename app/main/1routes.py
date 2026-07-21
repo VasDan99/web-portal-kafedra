@@ -4,7 +4,7 @@ from app.main import bp
 from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, \
     ChangePasswordForm, WorkMessageForm, SiteSettingsForm, AdminProfileForm, ReminderForm, RegistrationForm, LoginForm
 from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News, User, \
-    SiteSettings, Notification
+    SiteSettings, Notification, RegistrationRequest
 from app import db
 import os
 from datetime import datetime
@@ -127,10 +127,81 @@ def admin():
         abort(403)
     return redirect(url_for('main.admin_dashboard'))
 
+# =====================Регистрация ====================================
+@bp.route('/admin/registration-requests')
+@login_required
+def admin_registration_requests():
+    if current_user.role != 'admin':
+        abort(403)
+    
+    requests = RegistrationRequest.query.order_by(RegistrationRequest.created_at.desc()).all()
+    return render_template('admin/registration_requests.html', requests=requests)
 
-# ==================== Регистрация и заявки ====================
+
+@bp.route('/admin/approve-request/<int:request_id>')
+@login_required
+def admin_approve_request(request_id):
+    if current_user.role != 'admin':
+        abort(403)
+    
+    req = RegistrationRequest.query.get_or_404(request_id)
+    if req.status != 'pending':
+        flash('Эта заявка уже обработана', 'warning')
+        return redirect(url_for('main.admin_registration_requests'))
+    
+    user = User.query.get(req.user_id)
+    user.is_active = True
+    
+    student = Student(
+        user_id=user.id,
+        full_name=req.full_name,
+        group_name=req.group_name,
+        course=req.course,
+        phone=req.phone
+    )
+    db.session.add(student)
+    
+    req.status = 'approved'
+    req.reviewed_at = datetime.utcnow()
+    req.reviewed_by = current_user.id
+    
+    db.session.commit()
+    
+    notification = Notification(
+        user_id=user.id,
+        title='Аккаунт активирован!',
+        message=f'Ваш аккаунт был утверждён администратором. Теперь вы можете войти в свой личный кабинет.',
+        link=url_for('auth.login', _external=True)
+    )
+    db.session.add(notification)
+    db.session.commit()
+    
+    flash(f'✅ Заявка {req.full_name} утверждена. Аккаунт активирован.', 'success')
+    return redirect(url_for('main.admin_registration_requests'))
 
 
+@bp.route('/admin/reject-request/<int:request_id>')
+@login_required
+def admin_reject_request(request_id):
+    if current_user.role != 'admin':
+        abort(403)
+    
+    req = RegistrationRequest.query.get_or_404(request_id)
+    if req.status != 'pending':
+        flash('Эта заявка уже обработана', 'warning')
+        return redirect(url_for('main.admin_registration_requests'))
+    
+    user = User.query.get(req.user_id)
+    
+    req.status = 'rejected'
+    req.reviewed_at = datetime.utcnow()
+    req.reviewed_by = current_user.id
+    
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f'❌ Заявка {req.full_name} отклонена. Аккаунт удалён.', 'success')
+    return redirect(url_for('main.admin_registration_requests'))
 
 
 # ==================== Личный кабинет студента ====================
@@ -197,8 +268,10 @@ def student_grades():
         flash('Профиль студента не найден', 'danger')
         return redirect(url_for('main.student_profile'))
 
+    # Получаем все оценки студента
     grades = Grade.query.filter_by(student_id=student.id).all()
 
+    # Расчёт статистики
     average = student.get_average_grade()
     attendance_stats = student.get_attendance_stats()
     debts = student.get_debts()
@@ -206,6 +279,7 @@ def student_grades():
     total_credits = student.get_total_credits()
     completed_credits = student.get_completed_credits()
 
+    # Группировка оценок по дисциплинам для удобного отображения
     grades_by_discipline = {}
     for grade in grades:
         disc_name = grade.discipline.name if grade.discipline else 'Неизвестная дисциплина'
@@ -343,6 +417,7 @@ def student_achievements():
 @bp.route('/cabinet/student/teachers')
 @login_required
 def student_teachers():
+    """Страница 'Мои преподаватели' для студента"""
     if current_user.role != 'student':
         abort(403)
 
@@ -351,6 +426,7 @@ def student_teachers():
         flash('Профиль студента не найден', 'danger')
         return redirect(url_for('main.cabinet'))
 
+    # Получаем всех преподавателей, дисциплины и пользователей
     teachers = Teacher.query.all()
     disciplines = Discipline.query.all()
     users = User.query.all()
@@ -524,6 +600,30 @@ def student_settings():
     return render_template('cabinet/student_settings.html', breadcrumb_title='Настройки',
                            student=student, profile_form=profile_form, password_form=password_form)
 
+@bp.route('/cabinet/student/notifications')
+@login_required
+def student_notifications():
+    if current_user.role != 'student':
+        abort(403)
+    
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if not student:
+        flash('Профиль студента не найден', 'danger')
+        return redirect(url_for('main.student_profile'))
+    
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+    
+    for n in notifications:
+        n.is_read = True
+    db.session.commit()
+    
+    unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    
+    return render_template('cabinet/student_notifications.html', 
+                           notifications=notifications,
+                           unread_notifications=unread_count,
+                           student=student,
+                           breadcrumb_title='Уведомления')
 
 
 # ==================== Личный кабинет преподавателя ====================
@@ -579,6 +679,7 @@ def teacher_students_works():
         student = Student.query.get(work.uploaded_by)
         discipline = Discipline.query.get(work.discipline_id)
 
+        # ОТЛАДКА
         print(f"DEBUG: work.id={work.id}, uploaded_by={work.uploaded_by}, student.full_name={student.full_name if student else 'None'}")
 
         status = work.status if hasattr(work, 'status') and work.status else 'pending'
@@ -650,6 +751,7 @@ def teacher_reports():
 @bp.route('/cabinet/teacher/incomplete-reports')
 @login_required
 def teacher_incomplete_reports():
+    """Список незавершённых отчётов (FR-03)"""
     if current_user.role != 'teacher':
         abort(403)
 
@@ -658,13 +760,18 @@ def teacher_incomplete_reports():
         flash('Профиль преподавателя не найден', 'danger')
         return redirect(url_for('main.teacher_profile'))
 
+    # Получаем дисциплины преподавателя
     disciplines = Discipline.query.filter_by(teacher_id=teacher.id).all()
+
+    # Собираем всех студентов
     all_students = Student.query.all()
 
+    # Формируем отчёт
     incomplete_reports = []
 
     for discipline in disciplines:
         for student in all_students:
+            # Проверяем, есть ли у студента работа по этой дисциплине
             work = Document.query.filter_by(
                 uploaded_by=student.user_id,
                 discipline_id=discipline.id
@@ -673,8 +780,9 @@ def teacher_incomplete_reports():
             if work:
                 status = work.status if work.status else 'pending'
             else:
-                status = 'not_submitted'
+                status = 'not_submitted'  # Работа не загружена
 
+            # Добавляем в список только если работа не сдана (не 'approved')
             if status != 'approved':
                 incomplete_reports.append({
                     'student': student,
@@ -692,6 +800,7 @@ def teacher_incomplete_reports():
 @bp.route('/cabinet/teacher/send-reminder/<int:student_id>/<int:discipline_id>', methods=['GET', 'POST'])
 @login_required
 def teacher_send_reminder(student_id, discipline_id):
+    """Отправка личного напоминания студенту"""
     if current_user.role != 'teacher':
         abort(403)
 
@@ -709,6 +818,7 @@ def teacher_send_reminder(student_id, discipline_id):
     form = ReminderForm()
 
     if form.validate_on_submit():
+        # Создаём уведомление для студента
         notification = Notification(
             user_id=student.user_id,
             title=f'Напоминание от преподавателя {teacher.full_name}',
@@ -727,10 +837,128 @@ def teacher_send_reminder(student_id, discipline_id):
                            discipline=discipline,
                            teacher=teacher)
 
+    """Список незавершённых отчётов (FR-03)"""
+    if current_user.role != 'teacher':
+        abort(403)
+
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    if not teacher:
+        flash('Профиль преподавателя не найден', 'danger')
+        return redirect(url_for('main.teacher_profile'))
+
+    # Получаем дисциплины преподавателя
+    disciplines = Discipline.query.filter_by(teacher_id=teacher.id).all()
+
+    # Собираем всех студентов
+    all_students = Student.query.all()
+
+    # Формируем отчёт
+    incomplete_reports = []
+
+    for discipline in disciplines:
+        for student in all_students:
+            # Проверяем, есть ли у студента работа по этой дисциплине
+            work = Document.query.filter_by(
+                uploaded_by=student.user_id,
+                discipline_id=discipline.id
+            ).first()
+
+            if work:
+                status = work.status if work.status else 'pending'
+            else:
+                status = 'not_submitted'  # Работа не загружена
+
+            # Добавляем в список только если работа не сдана (не 'approved')
+            if status != 'approved':
+                incomplete_reports.append({
+                    'student': student,
+                    'discipline': discipline,
+                    'status': status,
+                    'work': work
+                })
+
+    return render_template('cabinet/teacher/incomplete_reports.html',
+                           teacher=teacher,
+                           incomplete_reports=incomplete_reports,
+                           disciplines=disciplines)
+
+
+# ===== МАРШРУТ ОТПРАВКИ EMAIL (ВРЕМЕННО ЗАКОММЕНТИРОВАН) =====
+# @bp.route('/cabinet/teacher/send-email/<int:student_id>/<int:discipline_id>', methods=['GET', 'POST'])
+# @login_required
+# def teacher_send_email(student_id, discipline_id):
+#     """Отправка персонализированного письма студенту"""
+#     if current_user.role != 'teacher':
+#         abort(403)
+#
+#     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+#     if not teacher:
+#         flash('Профиль преподавателя не найден', 'danger')
+#         return redirect(url_for('main.teacher_incomplete_reports'))
+#
+#     # === ПРОВЕРКА: ЕСЛИ У ПРЕПОДАВАТЕЛЯ НЕТ EMAIL ===
+#     if not teacher.user or not teacher.user.email:
+#         flash('❌ У преподавателя не указан email в профиле', 'danger')
+#         return redirect(url_for('main.teacher_incomplete_reports'))
+#
+#     student = Student.query.get_or_404(student_id)
+#     discipline = Discipline.query.get_or_404(discipline_id)
+#
+#     if discipline.teacher_id != teacher.id:
+#         abort(403)
+#
+#     form = SendEmailForm()
+#
+#     if request.method == 'GET':
+#         form.student_email.data = student.user.email
+#         form.subject.data = f'Напоминание о сдаче работы по дисциплине {discipline.name}'
+#         form.message.data = f'''Здравствуйте, {student.full_name}!
+#
+# Преподаватель {teacher.full_name} напоминает вам о необходимости сдать работу по дисциплине "{discipline.name}".
+#
+# Пожалуйста, зайдите в личный кабинет и загрузите работу:
+# {url_for('main.student_works', _external=True)}
+#
+# С уважением,
+# {teacher.full_name}
+# Кафедра информационных систем
+# Московский университет имени Витте'''
+#
+#     if form.validate_on_submit():
+#         try:
+#             sender_email = teacher.user.email if teacher.user else app.config['MAIL_DEFAULT_SENDER']
+#
+#             print("=== ОТПРАВКА ПИСЬМА ===")
+#             print(f"От: {sender_email}")
+#             print(f"Кому: {form.student_email.data}")
+#
+#             msg = Message(
+#                 subject=form.subject.data,
+#                 recipients=[form.student_email.data],
+#                 body=form.message.data,
+#                 sender=sender_email
+#             )
+#             mail.send(msg)
+#             flash(f'✅ Письмо отправлено от {sender_email} на {form.student_email.data}', 'success')
+#             return redirect(url_for('main.teacher_incomplete_reports'))
+#         except Exception as e:
+#             flash(f'❌ Ошибка при отправке: {str(e)}', 'danger')
+#     else:
+#         for field, errors in form.errors.items():
+#             for error in errors:
+#                 flash(f'Ошибка в поле {field}: {error}', 'danger')
+#
+#     return render_template('cabinet/teacher/send_email.html',
+#                            form=form,
+#                            student=student,
+#                            discipline=discipline,
+#                            teacher=teacher)
+
 
 @bp.route('/cabinet/teacher/remind/<int:student_id>/<int:discipline_id>')
 @login_required
 def teacher_remind_student(student_id, discipline_id):
+    """Отправка напоминания студенту по email"""
     if current_user.role != 'teacher':
         abort(403)
 
@@ -742,10 +970,12 @@ def teacher_remind_student(student_id, discipline_id):
     student = Student.query.get_or_404(student_id)
     discipline = Discipline.query.get_or_404(discipline_id)
 
+    # Проверяем, что преподаватель ведёт эту дисциплину
     if discipline.teacher_id != teacher.id:
         abort(403)
 
     try:
+        # Создаём письмо
         msg = Message(
             subject=f'Напоминание о сдаче работы по дисциплине {discipline.name}',
             recipients=[student.user.email],
@@ -833,16 +1063,19 @@ def teacher_profile_edit():
 @bp.route('/cabinet/teacher/work/review/<int:work_id>', methods=['GET', 'POST'])
 @login_required
 def teacher_review_work(work_id):
+    """Страница проверки работы преподавателем"""
     if current_user.role != 'teacher':
         abort(403)
 
     work = Document.query.get_or_404(work_id)
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
 
+    # Проверяем, что преподаватель ведёт эту дисциплину
     discipline = Discipline.query.get(work.discipline_id)
     if not discipline or discipline.teacher_id != teacher.id:
         abort(403)
 
+    # Получаем студента, который загрузил работу
     student = Student.query.filter_by(user_id=work.uploaded_by).first()
 
     if request.method == 'POST':
@@ -868,8 +1101,6 @@ def teacher_review_work(work_id):
                            teacher=teacher,
                            student=student,
                            discipline=discipline)
-
-
 # ==================== Чат по работам ====================
 
 @bp.route('/cabinet/teacher/work/<int:work_id>/chat', methods=['GET', 'POST'])
@@ -1064,6 +1295,7 @@ def admin_schedule_add():
 def contact_admin():
     form = WorkMessageForm()
 
+    # Получаем данные пользователя в зависимости от роли
     student = None
     teacher = None
 
@@ -1072,6 +1304,7 @@ def contact_admin():
     elif current_user.role == 'teacher':
         teacher = Teacher.query.filter_by(user_id=current_user.id).first()
 
+    # Получаем историю сообщений пользователя к админу
     admin = User.query.filter_by(role='admin').first()
     messages = []
     if admin:
@@ -1482,6 +1715,79 @@ def set_language(lang):
     if lang in ['ru', 'en', 'zh']:
         session['lang'] = lang
     return redirect(request.referrer or url_for('main.index'))
+
+
+@bp.route('/admin/approve-request/<int:request_id>')
+@login_required
+def admin_approve_request(request_id):
+    if current_user.role != 'admin':
+        abort(403)
+    
+    req = RegistrationRequest.query.get_or_404(request_id)
+    if req.status != 'pending':
+        flash('Эта заявка уже обработана', 'warning')
+        return redirect(url_for('main.admin_registration_requests'))
+    
+    # Активируем пользователя
+    user = User.query.get(req.user_id)
+    user.is_active = True
+    
+    # Создаём студента
+    student = Student(
+        user_id=user.id,
+        full_name=req.full_name,
+        group_name=req.group_name,
+        course=req.course,
+        phone=req.phone
+    )
+    db.session.add(student)
+    
+    # Обновляем заявку
+    req.status = 'approved'
+    req.reviewed_at = datetime.utcnow()
+    req.reviewed_by = current_user.id
+    
+    db.session.commit()
+    
+    # Создаём уведомление для студента
+    notification = Notification(
+        user_id=user.id,
+        title='Аккаунт активирован!',
+        message=f'Ваш аккаунт был утверждён администратором. Теперь вы можете войти в свой личный кабинет.',
+        link=url_for('auth.login', _external=True)
+    )
+    db.session.add(notification)
+    db.session.commit()
+    
+    flash(f'✅ Заявка {req.full_name} утверждена. Аккаунт активирован.', 'success')
+    return redirect(url_for('main.admin_registration_requests'))
+
+
+@bp.route('/admin/reject-request/<int:request_id>')
+@login_required
+def admin_reject_request(request_id):
+    if current_user.role != 'admin':
+        abort(403)
+    
+    req = RegistrationRequest.query.get_or_404(request_id)
+    if req.status != 'pending':
+        flash('Эта заявка уже обработана', 'warning')
+        return redirect(url_for('main.admin_registration_requests'))
+    
+    user = User.query.get(req.user_id)
+    
+    # Обновляем заявку
+    req.status = 'rejected'
+    req.reviewed_at = datetime.utcnow()
+    req.reviewed_by = current_user.id
+    
+    # Удаляем пользователя
+    db.session.delete(user)
+    
+    db.session.commit()
+    
+    flash(f'❌ Заявка {req.full_name} отклонена. Аккаунт удалён.', 'success')
+    return redirect(url_for('main.admin_registration_requests'))
 
 
 # ==================== Генерация отчётов для преподавателя ====================

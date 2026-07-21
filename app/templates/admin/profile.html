@@ -1,40 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
 {% extends "admin/base.html" %}
 
+{% block title %}Профиль администратора{% endblock %}
+
 {% block admin_content %}
-<h2>👤 Профиль администратора</h2>
+<h2>Профиль администратора</h2>
 
 <form method="POST">
     {{ form.hidden_tag() }}
-
-    <div style="max-width: 500px; margin: 0 auto;">
-        <div style="margin-bottom: 15px;">
-            <label>Логин</label><br>
-            {{ form.username(size=40) }}
-        </div>
-        <div style="margin-bottom: 15px;">
-            <label>Email</label><br>
-            {{ form.email(size=40) }}
-        </div>
-        <div style="margin-bottom: 15px;">
-            <label>Новый пароль</label><br>
-            {{ form.password(size=40) }}
-        </div>
-        <div style="margin-bottom: 15px;">
-            <label>Подтвердите пароль</label><br>
-            {{ form.confirm_password(size=40) }}
-        </div>
-        <div>
-            {{ form.submit() }}
-        </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="username" style="font-weight: bold;">Логин:</label>
+        {{ form.username(size=40, style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
     </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="email" style="font-weight: bold;">Email:</label>
+        {{ form.email(size=40, style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="password" style="font-weight: bold;">Новый пароль (оставьте пустым, если не хотите менять):</label>
+        {{ form.password(size=40, style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+    </div>
+    
+    <button type="submit" style="background: #003366; color: white; padding: 10px 25px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+        Сохранить
+    </button>
 </form>
 {% endblock %}
-</body>
-</html>

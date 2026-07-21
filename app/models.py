@@ -13,7 +13,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(20), default='student')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    is_active = db.Column(db.Boolean, default=False)
+    
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -290,21 +290,3 @@ class Notification(db.Model):
     link = db.Column(db.String(200))  # Ссылка на страницу (например, работы)
 
     user = db.relationship('User', backref='notifications')
-
-# Таблица 14: Заявки на регистрацию
-class RegistrationRequest(db.Model):
-    __tablename__ = 'registration_requests'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    full_name = db.Column(db.String(150), nullable=False)
-    group_name = db.Column(db.String(50), nullable=False)
-    course = db.Column(db.Integer, nullable=False)
-    phone = db.Column(db.String(20))
-    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    reviewed_at = db.Column(db.DateTime)
-    reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'))
-    review_comment = db.Column(db.Text)
-
-    user = db.relationship('User', foreign_keys=[user_id], backref='registration_request')
-    reviewer = db.relationship('User', foreign_keys=[reviewed_by])
