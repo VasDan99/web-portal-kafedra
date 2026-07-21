@@ -40,10 +40,7 @@
                         <i class="fas fa-check-circle"></i> Проверить
                     </a>
                 {% endif %}
-                <a href="{{ url_for('main.teacher_send_email', student_id=report.student.id, discipline_id=report.discipline.id) }}" 
-   style="background: #28a745; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block; margin: 2px;">
-    <i class="fas fa-pen"></i> Написать
-</a>
+                <!-- КНОПКА НАПОМНИТЬ УДАЛЕНА -->
             </td>
         </tr>
         {% endfor %}
