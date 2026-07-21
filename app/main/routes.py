@@ -246,13 +246,13 @@ def student_works():
         abort(403)
     student = Student.query.filter_by(user_id=current_user.id).first()
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
-    
+
     print("=== student_works ===")
     print("Текущий пользователь ID:", current_user.id)
     print("Найдено работ:", len(works))
     for w in works:
         print(f"  ID: {w.id}, Название: {w.title}, Статус: {w.status}")
-    
+
     form = WorkUploadForm()
     disciplines = Discipline.query.all()
     form.discipline_id.choices = [(d.id, d.name) for d in disciplines]
@@ -266,7 +266,7 @@ def student_works_upload():
     print("=== НАЧАЛО student_works_upload ===")
     print("Метод:", request.method)
     print("Текущий пользователь ID:", current_user.id)
-    
+
     if current_user.role != 'student':
         abort(403)
     student = Student.query.filter_by(user_id=current_user.id).first()
@@ -280,7 +280,7 @@ def student_works_upload():
         print("Название:", form.title.data)
         print("Дисциплина ID:", form.discipline_id.data)
         print("Файл:", form.file.data.filename if form.file.data else 'Нет файла')
-        
+
         file = form.file.data
         filename = f'work_{current_user.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
         os.makedirs('app/static/uploads/works', exist_ok=True)
@@ -650,27 +650,28 @@ def teacher_reports():
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     return render_template('cabinet/teacher/reports.html', breadcrumb_title='Отчёты', teacher=teacher)
 
+
 @bp.route('/cabinet/teacher/incomplete-reports')
 @login_required
 def teacher_incomplete_reports():
     """Список незавершённых отчётов (FR-03)"""
     if current_user.role != 'teacher':
         abort(403)
-    
+
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     if not teacher:
         flash('Профиль преподавателя не найден', 'danger')
         return redirect(url_for('main.teacher_profile'))
-    
+
     # Получаем дисциплины преподавателя
     disciplines = Discipline.query.filter_by(teacher_id=teacher.id).all()
-    
+
     # Собираем всех студентов
     all_students = Student.query.all()
-    
+
     # Формируем отчёт
     incomplete_reports = []
-    
+
     for discipline in disciplines:
         for student in all_students:
             # Проверяем, есть ли у студента работа по этой дисциплине
@@ -678,12 +679,12 @@ def teacher_incomplete_reports():
                 uploaded_by=student.user_id,
                 discipline_id=discipline.id
             ).first()
-            
+
             if work:
                 status = work.status if work.status else 'pending'
             else:
                 status = 'not_submitted'  # Работа не загружена
-            
+
             # Добавляем в список только если работа не сдана (не 'approved')
             if status != 'approved':
                 incomplete_reports.append({
@@ -692,11 +693,72 @@ def teacher_incomplete_reports():
                     'status': status,
                     'work': work
                 })
-    
+
     return render_template('cabinet/teacher/incomplete_reports.html',
                            teacher=teacher,
                            incomplete_reports=incomplete_reports,
                            disciplines=disciplines)
+
+
+@bp.route('/cabinet/teacher/send-email/<int:student_id>/<int:discipline_id>', methods=['GET', 'POST'])
+@login_required
+def teacher_send_email(student_id, discipline_id):
+    """Отправка персонализированного письма студенту"""
+    if current_user.role != 'teacher':
+        abort(403)
+
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    if not teacher:
+        flash('Профиль преподавателя не найден', 'danger')
+        return redirect(url_for('main.teacher_incomplete_reports'))
+
+    student = Student.query.get_or_404(student_id)
+    discipline = Discipline.query.get_or_404(discipline_id)
+
+    # Проверяем, что преподаватель ведёт эту дисциплину
+    if discipline.teacher_id != teacher.id:
+        abort(403)
+
+    form = SendEmailForm()
+
+    # Заполняем поля по умолчанию
+    if request.method == 'GET':
+        form.student_email.data = student.user.email
+        form.subject.data = f'Напоминание о сдаче работы по дисциплине {discipline.name}'
+        form.message.data = f'''Здравствуйте, {student.full_name}!
+
+Преподаватель {teacher.full_name} напоминает вам о необходимости сдать работу по дисциплине "{discipline.name}".
+
+Пожалуйста, зайдите в личный кабинет и загрузите работу:
+{url_for('main.student_works', _external=True)}
+
+С уважением,
+Кафедра информационных систем
+Московский университет имени Витте'''
+
+    if form.validate_on_submit():
+        try:
+            msg = Message(
+                subject=form.subject.data,
+                recipients=[form.student_email.data],
+                body=form.message.data
+            )
+            mail.send(msg)
+            flash(f'✅ Письмо отправлено на {form.student_email.data}', 'success')
+            return redirect(url_for('main.teacher_incomplete_reports'))
+        except Exception as e:
+            flash(f'❌ Ошибка при отправке: {str(e)}', 'danger')
+    else:
+        # Выводим ошибки формы
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Ошибка в поле {field}: {error}', 'danger')
+
+    return render_template('cabinet/teacher/send_email.html',
+                           form=form,
+                           student=student,
+                           discipline=discipline,
+                           teacher=teacher)
 
 
 @bp.route('/cabinet/teacher/remind/<int:student_id>/<int:discipline_id>')
@@ -705,19 +767,19 @@ def teacher_remind_student(student_id, discipline_id):
     """Отправка напоминания студенту по email"""
     if current_user.role != 'teacher':
         abort(403)
-    
+
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     if not teacher:
         flash('Профиль преподавателя не найден', 'danger')
         return redirect(url_for('main.teacher_incomplete_reports'))
-    
+
     student = Student.query.get_or_404(student_id)
     discipline = Discipline.query.get_or_404(discipline_id)
-    
+
     # Проверяем, что преподаватель ведёт эту дисциплину
     if discipline.teacher_id != teacher.id:
         abort(403)
-    
+
     try:
         # Создаём письмо
         msg = Message(
@@ -735,68 +797,13 @@ def teacher_remind_student(student_id, discipline_id):
 Московский университет имени Витте
 '''
         )
-        
+
         mail.send(msg)
         flash(f'✅ Напоминание отправлено студенту {student.full_name} на email {student.user.email}', 'success')
     except Exception as e:
         flash(f'❌ Ошибка при отправке: {str(e)}', 'danger')
-    
+
     return redirect(url_for('main.teacher_incomplete_reports'))
-
-@bp.route('/cabinet/teacher/send-email/<int:student_id>/<int:discipline_id>', methods=['GET', 'POST'])
-@login_required
-def teacher_send_email(student_id, discipline_id):
-    """Отправка персонализированного письма студенту"""
-    if current_user.role != 'teacher':
-        abort(403)
-    
-    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
-    if not teacher:
-        flash('Профиль преподавателя не найден', 'danger')
-        return redirect(url_for('main.teacher_incomplete_reports'))
-    
-    student = Student.query.get_or_404(student_id)
-    discipline = Discipline.query.get_or_404(discipline_id)
-    
-    # Проверяем, что преподаватель ведёт эту дисциплину
-    if discipline.teacher_id != teacher.id:
-        abort(403)
-    
-    form = SendEmailForm()
-    
-    # Заполняем поля по умолчанию
-    if request.method == 'GET':
-        form.student_email.data = student.user.email
-        form.subject.data = f'Напоминание о сдаче работы по дисциплине {discipline.name}'
-        form.message.data = f'''Здравствуйте, {student.full_name}!
-
-Преподаватель {teacher.full_name} напоминает вам о необходимости сдать работу по дисциплине "{discipline.name}".
-
-Пожалуйста, зайдите в личный кабинет и загрузите работу:
-{url_for('main.student_works', _external=True)}
-
-С уважением,
-Кафедра информационных систем
-Московский университет имени Витте'''
-    
-    if form.validate_on_submit():
-        try:
-            msg = Message(
-                subject=form.subject.data,
-                recipients=[form.student_email.data],
-                body=form.message.data
-            )
-            mail.send(msg)
-            flash(f'✅ Письмо отправлено на {form.student_email.data}', 'success')
-            return redirect(url_for('main.teacher_incomplete_reports'))
-        except Exception as e:
-            flash(f'❌ Ошибка при отправке: {str(e)}', 'danger')
-    
-    return render_template('cabinet/teacher/send_email.html',
-                           form=form,
-                           student=student,
-                           discipline=discipline,
-                           teacher=teacher)
 
 
 @bp.route('/cabinet/teacher/profile/edit', methods=['GET', 'POST'])
@@ -901,7 +908,11 @@ def teacher_review_work(work_id):
                            student=student,
                            discipline=discipline)
 
-
+    return render_template('cabinet/teacher/review_work.html',
+                           work=work,
+                           teacher=teacher,
+                           student=student,
+                           discipline=discipline)
 # ==================== Чат по работам ====================
 
 @bp.route('/cabinet/teacher/work/<int:work_id>/chat', methods=['GET', 'POST'])
@@ -1433,9 +1444,6 @@ def admin_feedback_reply(feedback_id):
             db.session.commit()
             flash('Ответ отправлен!', 'success')
 
-            # Здесь можно добавить отправку email пользователю
-            # send_mail(feedback.email, f'Ответ на ваше обращение: {feedback.subject}', reply)
-
             return redirect(url_for('main.admin_feedback'))
 
     return render_template('admin/feedback_reply.html', breadcrumb_title='Ответ на сообщение', feedback=feedback)
@@ -1445,7 +1453,6 @@ def admin_feedback_reply(feedback_id):
 def news_detail(news_id):
     news_item = News.query.get_or_404(news_id)
     breadcrumb_title = news_item.title
-    # Преобразуем Markdown в HTML
     news_item.content_html = markdown.markdown(news_item.content, extensions=['extra'])
     return render_template('news_detail.html', breadcrumb_title=breadcrumb_title, news=news_item)
 
@@ -1456,10 +1463,7 @@ def admin_all_messages():
     if current_user.role != 'admin':
         abort(403)
 
-    # Сообщения из обратной связи (от гостей)
     feedback_messages = Feedback.query.order_by(Feedback.created_at.desc()).all()
-
-    # Личные сообщения пользователей (студентов и преподавателей)
     personal_messages = WorkMessage.query.filter(
         WorkMessage.to_user_id == current_user.id,
         WorkMessage.work_id.is_(None)
@@ -1545,7 +1549,6 @@ def teacher_generate_grades_docx():
         doc.add_heading(f'Дисциплина: {discipline.name}', level=1)
         doc.add_paragraph(f'Код: {discipline.code}, Часов: {discipline.hours}')
 
-        # Получаем оценки по дисциплине
         grades = Grade.query.filter_by(discipline_id=discipline.id).all()
 
         if grades:
@@ -1594,7 +1597,6 @@ def teacher_generate_students_xlsx():
     ws = wb.active
     ws.title = "Студенты"
 
-    # Заголовки
     headers = ['ID', 'ФИО', 'Группа', 'Курс', 'Email', 'Телефон']
     header_fill = PatternFill(start_color="003366", end_color="003366", fill_type="solid")
     header_font = Font(color="FFFFFF", bold=True)
@@ -1605,7 +1607,6 @@ def teacher_generate_students_xlsx():
         cell.font = header_font
         cell.alignment = Alignment(horizontal='center')
 
-    # Данные
     for row, student in enumerate(students, 2):
         ws.cell(row=row, column=1, value=student.id)
         ws.cell(row=row, column=2, value=student.full_name)
@@ -1614,7 +1615,6 @@ def teacher_generate_students_xlsx():
         ws.cell(row=row, column=5, value=student.user.email if student.user else '—')
         ws.cell(row=row, column=6, value=student.phone or '—')
 
-    # Автоширина колонок
     for col in ws.columns:
         max_length = 0
         col_letter = col[0].column_letter
@@ -1650,7 +1650,6 @@ def teacher_generate_grades_xlsx():
     ws = wb.active
     ws.title = "Оценки"
 
-    # Заголовки
     headers = ['ID', 'Студент', 'Группа', 'Дисциплина', 'Оценка', 'Тип', 'Дата']
     header_fill = PatternFill(start_color="003366", end_color="003366", fill_type="solid")
     header_font = Font(color="FFFFFF", bold=True)
@@ -1661,7 +1660,6 @@ def teacher_generate_grades_xlsx():
         cell.font = header_font
         cell.alignment = Alignment(horizontal='center')
 
-    # Данные
     for row, grade in enumerate(grades, 2):
         student = Student.query.get(grade.student_id)
         discipline = Discipline.query.get(grade.discipline_id)
@@ -1674,7 +1672,6 @@ def teacher_generate_grades_xlsx():
         ws.cell(row=row, column=6, value=grade.grade_type or '—')
         ws.cell(row=row, column=7, value=grade.date.strftime('%d.%m.%Y') if grade.date else '—')
 
-    # Автоширина колонок
     for col in ws.columns:
         max_length = 0
         col_letter = col[0].column_letter
@@ -1723,10 +1720,8 @@ def admin_settings():
         settings.accent_color = form.accent_color.data
         settings.about_text = form.about_text.data
 
-        # Обработка загрузки логотипа
         logo_file = request.files.get('logo')
         if logo_file and logo_file.filename:
-            # Проверяем расширение файла
             allowed_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.svg'}
             file_ext = os.path.splitext(logo_file.filename)[1].lower()
             if file_ext in allowed_extensions:
@@ -1744,7 +1739,6 @@ def admin_settings():
         flash('Настройки сохранены!', 'success')
         return redirect(url_for('main.admin_settings'))
 
-    # Заполняем форму текущими данными
     form.site_title.data = settings.site_title
     form.site_description.data = settings.site_description
     form.email.data = settings.email
