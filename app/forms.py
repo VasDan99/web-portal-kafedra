@@ -109,3 +109,10 @@ class AdminProfileForm(FlaskForm):
     password = PasswordField('Новый пароль (оставьте пустым, чтобы не менять)')
     confirm_password = PasswordField('Подтвердите пароль', validators=[EqualTo('password')])
     submit = SubmitField('Сохранить профиль')
+
+# Форма для отправки письма студенту
+class SendEmailForm(FlaskForm):
+    student_email = StringField('Email студента', validators=[DataRequired(), Email()])
+    subject = StringField('Тема', validators=[DataRequired()])
+    message = TextAreaField('Сообщение', validators=[DataRequired()])
+    submit = SubmitField('Отправить')

@@ -1,0 +1,50 @@
+{% extends "cabinet/teacher/teacher_base.html" %}
+
+{% block title %}Отправить письмо{% endblock %}
+
+{% block teacher_content %}
+<h2>Отправить письмо студенту</h2>
+
+<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Студент:</strong> {{ student.full_name }}</p>
+    <p><strong>Группа:</strong> {{ student.group_name }}</p>
+    <p><strong>Дисциплина:</strong> {{ discipline.name }}</p>
+</div>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    
+    <div style="margin-bottom: 15px;">
+        <label for="student_email" style="font-weight: bold;">Email студента:</label>
+        {{ form.student_email(class="form-control", style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+        {% for error in form.student_email.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="subject" style="font-weight: bold;">Тема:</label>
+        {{ form.subject(class="form-control", style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+        {% for error in form.subject.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="message" style="font-weight: bold;">Сообщение:</label>
+        {{ form.message(class="form-control", rows=8, style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;") }}
+        {% for error in form.message.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </div>
+    
+    <div style="display: flex; gap: 10px;">
+        <button type="submit" style="background: #28a745; color: white; padding: 10px 25px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            <i class="fas fa-paper-plane"></i> Отправить
+        </button>
+        <a href="{{ url_for('main.teacher_incomplete_reports') }}" style="background: #6c757d; color: white; padding: 10px 25px; border: none; border-radius: 4px; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> Назад
+        </a>
+    </div>
+</form>
+{% endblock %}

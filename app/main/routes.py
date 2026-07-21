@@ -1,3 +1,4 @@
+from app.forms import SendEmailForm
 from flask import render_template, redirect, url_for, flash, abort, request, send_file, session
 from flask_login import login_required, current_user
 from flask_mail import Message
@@ -741,6 +742,61 @@ def teacher_remind_student(student_id, discipline_id):
         flash(f'❌ Ошибка при отправке: {str(e)}', 'danger')
     
     return redirect(url_for('main.teacher_incomplete_reports'))
+
+@bp.route('/cabinet/teacher/send-email/<int:student_id>/<int:discipline_id>', methods=['GET', 'POST'])
+@login_required
+def teacher_send_email(student_id, discipline_id):
+    """Отправка персонализированного письма студенту"""
+    if current_user.role != 'teacher':
+        abort(403)
+    
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    if not teacher:
+        flash('Профиль преподавателя не найден', 'danger')
+        return redirect(url_for('main.teacher_incomplete_reports'))
+    
+    student = Student.query.get_or_404(student_id)
+    discipline = Discipline.query.get_or_404(discipline_id)
+    
+    # Проверяем, что преподаватель ведёт эту дисциплину
+    if discipline.teacher_id != teacher.id:
+        abort(403)
+    
+    form = SendEmailForm()
+    
+    # Заполняем поля по умолчанию
+    if request.method == 'GET':
+        form.student_email.data = student.user.email
+        form.subject.data = f'Напоминание о сдаче работы по дисциплине {discipline.name}'
+        form.message.data = f'''Здравствуйте, {student.full_name}!
+
+Преподаватель {teacher.full_name} напоминает вам о необходимости сдать работу по дисциплине "{discipline.name}".
+
+Пожалуйста, зайдите в личный кабинет и загрузите работу:
+{url_for('main.student_works', _external=True)}
+
+С уважением,
+Кафедра информационных систем
+Московский университет имени Витте'''
+    
+    if form.validate_on_submit():
+        try:
+            msg = Message(
+                subject=form.subject.data,
+                recipients=[form.student_email.data],
+                body=form.message.data
+            )
+            mail.send(msg)
+            flash(f'✅ Письмо отправлено на {form.student_email.data}', 'success')
+            return redirect(url_for('main.teacher_incomplete_reports'))
+        except Exception as e:
+            flash(f'❌ Ошибка при отправке: {str(e)}', 'danger')
+    
+    return render_template('cabinet/teacher/send_email.html',
+                           form=form,
+                           student=student,
+                           discipline=discipline,
+                           teacher=teacher)
 
 
 @bp.route('/cabinet/teacher/profile/edit', methods=['GET', 'POST'])
