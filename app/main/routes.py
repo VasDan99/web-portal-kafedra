@@ -1,8 +1,7 @@
-from app.forms import SendEmailForm
+from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News, User, \
+    SiteSettings, Notification
 from flask import render_template, redirect, url_for, flash, abort, request, send_file, session
 from flask_login import login_required, current_user
-from flask_mail import Message
-from app import mail
 from app.main import bp
 from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, \
     ChangePasswordForm, WorkMessageForm, SiteSettingsForm, AdminProfileForm
@@ -700,65 +699,76 @@ def teacher_incomplete_reports():
                            disciplines=disciplines)
 
 
-@bp.route('/cabinet/teacher/send-email/<int:student_id>/<int:discipline_id>', methods=['GET', 'POST'])
-@login_required
-def teacher_send_email(student_id, discipline_id):
-    """Отправка персонализированного письма студенту"""
-    if current_user.role != 'teacher':
-        abort(403)
-
-    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
-    if not teacher:
-        flash('Профиль преподавателя не найден', 'danger')
-        return redirect(url_for('main.teacher_incomplete_reports'))
-
-    student = Student.query.get_or_404(student_id)
-    discipline = Discipline.query.get_or_404(discipline_id)
-
-    # Проверяем, что преподаватель ведёт эту дисциплину
-    if discipline.teacher_id != teacher.id:
-        abort(403)
-
-    form = SendEmailForm()
-
-    # Заполняем поля по умолчанию
-    if request.method == 'GET':
-        form.student_email.data = student.user.email
-        form.subject.data = f'Напоминание о сдаче работы по дисциплине {discipline.name}'
-        form.message.data = f'''Здравствуйте, {student.full_name}!
-
-Преподаватель {teacher.full_name} напоминает вам о необходимости сдать работу по дисциплине "{discipline.name}".
-
-Пожалуйста, зайдите в личный кабинет и загрузите работу:
-{url_for('main.student_works', _external=True)}
-
-С уважением,
-Кафедра информационных систем
-Московский университет имени Витте'''
-
-    if form.validate_on_submit():
-        try:
-            msg = Message(
-                subject=form.subject.data,
-                recipients=[form.student_email.data],
-                body=form.message.data
-            )
-            mail.send(msg)
-            flash(f'✅ Письмо отправлено на {form.student_email.data}', 'success')
-            return redirect(url_for('main.teacher_incomplete_reports'))
-        except Exception as e:
-            flash(f'❌ Ошибка при отправке: {str(e)}', 'danger')
-    else:
-        # Выводим ошибки формы
-        for field, errors in form.errors.items():
-            for error in errors:
-                flash(f'Ошибка в поле {field}: {error}', 'danger')
-
-    return render_template('cabinet/teacher/send_email.html',
-                           form=form,
-                           student=student,
-                           discipline=discipline,
-                           teacher=teacher)
+# ===== МАРШРУТ ОТПРАВКИ EMAIL (ВРЕМЕННО ЗАКОММЕНТИРОВАН) =====
+# @bp.route('/cabinet/teacher/send-email/<int:student_id>/<int:discipline_id>', methods=['GET', 'POST'])
+# @login_required
+# def teacher_send_email(student_id, discipline_id):
+#     """Отправка персонализированного письма студенту"""
+#     if current_user.role != 'teacher':
+#         abort(403)
+#
+#     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+#     if not teacher:
+#         flash('Профиль преподавателя не найден', 'danger')
+#         return redirect(url_for('main.teacher_incomplete_reports'))
+#
+#     # === ПРОВЕРКА: ЕСЛИ У ПРЕПОДАВАТЕЛЯ НЕТ EMAIL ===
+#     if not teacher.user or not teacher.user.email:
+#         flash('❌ У преподавателя не указан email в профиле', 'danger')
+#         return redirect(url_for('main.teacher_incomplete_reports'))
+#
+#     student = Student.query.get_or_404(student_id)
+#     discipline = Discipline.query.get_or_404(discipline_id)
+#
+#     if discipline.teacher_id != teacher.id:
+#         abort(403)
+#
+#     form = SendEmailForm()
+#
+#     if request.method == 'GET':
+#         form.student_email.data = student.user.email
+#         form.subject.data = f'Напоминание о сдаче работы по дисциплине {discipline.name}'
+#         form.message.data = f'''Здравствуйте, {student.full_name}!
+#
+# Преподаватель {teacher.full_name} напоминает вам о необходимости сдать работу по дисциплине "{discipline.name}".
+#
+# Пожалуйста, зайдите в личный кабинет и загрузите работу:
+# {url_for('main.student_works', _external=True)}
+#
+# С уважением,
+# {teacher.full_name}
+# Кафедра информационных систем
+# Московский университет имени Витте'''
+#
+#     if form.validate_on_submit():
+#         try:
+#             sender_email = teacher.user.email if teacher.user else app.config['MAIL_DEFAULT_SENDER']
+#
+#             print("=== ОТПРАВКА ПИСЬМА ===")
+#             print(f"От: {sender_email}")
+#             print(f"Кому: {form.student_email.data}")
+#
+#             msg = Message(
+#                 subject=form.subject.data,
+#                 recipients=[form.student_email.data],
+#                 body=form.message.data,
+#                 sender=sender_email
+#             )
+#             mail.send(msg)
+#             flash(f'✅ Письмо отправлено от {sender_email} на {form.student_email.data}', 'success')
+#             return redirect(url_for('main.teacher_incomplete_reports'))
+#         except Exception as e:
+#             flash(f'❌ Ошибка при отправке: {str(e)}', 'danger')
+#     else:
+#         for field, errors in form.errors.items():
+#             for error in errors:
+#                 flash(f'Ошибка в поле {field}: {error}', 'danger')
+#
+#     return render_template('cabinet/teacher/send_email.html',
+#                            form=form,
+#                            student=student,
+#                            discipline=discipline,
+#                            teacher=teacher)
 
 
 @bp.route('/cabinet/teacher/remind/<int:student_id>/<int:discipline_id>')
@@ -901,12 +911,6 @@ def teacher_review_work(work_id):
             return redirect(url_for('main.teacher_students_works'))
         else:
             flash('Неверный статус работы', 'danger')
-
-    return render_template('cabinet/teacher/review_work.html',
-                           work=work,
-                           teacher=teacher,
-                           student=student,
-                           discipline=discipline)
 
     return render_template('cabinet/teacher/review_work.html',
                            work=work,

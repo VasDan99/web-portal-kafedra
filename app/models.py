@@ -276,3 +276,16 @@ class SiteSettings(db.Model):
     logo_path = db.Column(db.String(200), default='/static/images/logo.png')
     about_text = db.Column(db.Text, default='')
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# Таблица 13: Уведомления
+class Notification(db.Model):
+    __tablename__ = 'notifications'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    link = db.Column(db.String(200))  # Ссылка на страницу (например, работы)
+
+    user = db.relationship('User', backref='notifications')
