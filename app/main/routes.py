@@ -647,6 +647,55 @@ def teacher_reports():
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     return render_template('cabinet/teacher/reports.html', breadcrumb_title='Отчёты', teacher=teacher)
 
+@bp.route('/cabinet/teacher/incomplete-reports')
+@login_required
+def teacher_incomplete_reports():
+    """Список незавершённых отчётов (FR-03)"""
+    if current_user.role != 'teacher':
+        abort(403)
+    
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    if not teacher:
+        flash('Профиль преподавателя не найден', 'danger')
+        return redirect(url_for('main.teacher_profile'))
+    
+    # Получаем дисциплины преподавателя
+    disciplines = Discipline.query.filter_by(teacher_id=teacher.id).all()
+    
+    # Собираем всех студентов
+    all_students = Student.query.all()
+    
+    # Формируем отчёт
+    incomplete_reports = []
+    
+    for discipline in disciplines:
+        for student in all_students:
+            # Проверяем, есть ли у студента работа по этой дисциплине
+            work = Document.query.filter_by(
+                uploaded_by=student.user_id,
+                discipline_id=discipline.id
+            ).first()
+            
+            if work:
+                status = work.status if work.status else 'pending'
+            else:
+                status = 'not_submitted'  # Работа не загружена
+            
+            # Добавляем в список только если работа не сдана (не 'approved')
+            if status != 'approved':
+                incomplete_reports.append({
+                    'student': student,
+                    'discipline': discipline,
+                    'status': status,
+                    'work': work
+                })
+    
+    return render_template('cabinet/teacher/incomplete_reports.html',
+                           teacher=teacher,
+                           incomplete_reports=incomplete_reports,
+                           disciplines=disciplines)
+
+
 
 @bp.route('/cabinet/teacher/profile/edit', methods=['GET', 'POST'])
 @login_required
