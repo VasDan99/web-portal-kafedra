@@ -1,5 +1,7 @@
 from flask import render_template, redirect, url_for, flash, abort, request, send_file, session
 from flask_login import login_required, current_user
+from flask_mail import Message
+from app import mail
 from app.main import bp
 from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, \
     ChangePasswordForm, WorkMessageForm, SiteSettingsForm, AdminProfileForm
@@ -695,6 +697,50 @@ def teacher_incomplete_reports():
                            incomplete_reports=incomplete_reports,
                            disciplines=disciplines)
 
+
+@bp.route('/cabinet/teacher/remind/<int:student_id>/<int:discipline_id>')
+@login_required
+def teacher_remind_student(student_id, discipline_id):
+    """Отправка напоминания студенту по email"""
+    if current_user.role != 'teacher':
+        abort(403)
+    
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    if not teacher:
+        flash('Профиль преподавателя не найден', 'danger')
+        return redirect(url_for('main.teacher_incomplete_reports'))
+    
+    student = Student.query.get_or_404(student_id)
+    discipline = Discipline.query.get_or_404(discipline_id)
+    
+    # Проверяем, что преподаватель ведёт эту дисциплину
+    if discipline.teacher_id != teacher.id:
+        abort(403)
+    
+    try:
+        # Создаём письмо
+        msg = Message(
+            subject=f'Напоминание о сдаче работы по дисциплине {discipline.name}',
+            recipients=[student.user.email],
+            body=f'''Здравствуйте, {student.full_name}!
+
+Преподаватель {teacher.full_name} напоминает вам о необходимости сдать работу по дисциплине "{discipline.name}".
+
+Пожалуйста, зайдите в личный кабинет и загрузите работу:
+{url_for('main.student_works', _external=True)}
+
+С уважением,
+Кафедра информационных систем
+Московский университет имени Витте
+'''
+        )
+        
+        mail.send(msg)
+        flash(f'✅ Напоминание отправлено студенту {student.full_name} на email {student.user.email}', 'success')
+    except Exception as e:
+        flash(f'❌ Ошибка при отправке: {str(e)}', 'danger')
+    
+    return redirect(url_for('main.teacher_incomplete_reports'))
 
 
 @bp.route('/cabinet/teacher/profile/edit', methods=['GET', 'POST'])
