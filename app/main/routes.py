@@ -127,6 +127,163 @@ def admin():
         abort(403)
     return redirect(url_for('main.admin_dashboard'))
 
+# =====================Регистрация ====================================
+@bp.route('/auth/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    
+    form = RegistrationForm()
+    
+    if form.validate_on_submit():
+        # Проверяем, не занят ли логин
+        if User.query.filter_by(username=form.username.data).first():
+            flash('Этот логин уже занят', 'danger')
+            return render_template('auth/register.html', form=form)
+        
+        if User.query.filter_by(email=form.email.data).first():
+            flash('Этот email уже зарегистрирован', 'danger')
+            return render_template('auth/register.html', form=form)
+        
+        # Создаём пользователя (неактивного)
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            role='student',
+            is_active=False
+        )
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.flush()
+        
+        # Создаём заявку на регистрацию
+        request = RegistrationRequest(
+            user_id=user.id,
+            full_name=form.full_name.data,
+            group_name=form.group_name.data,
+            course=int(form.course.data),
+            phone=form.phone.data,
+            status='pending'
+        )
+        db.session.add(request)
+        db.session.commit()
+        
+        flash('✅ Ваша заявка отправлена на рассмотрение администратору. Ожидайте подтверждения.', 'info')
+        return redirect(url_for('auth.waiting_for_approval'))
+    
+    return render_template('auth/register.html', form=form)
+
+@bp.route('/auth/waiting-for-approval')
+def waiting_for_approval():
+    return render_template('auth/waiting_for_approval.html')
+
+
+@bp.route('/admin/registration-requests')
+@login_required
+def admin_registration_requests():
+    if current_user.role != 'admin':
+        abort(403)
+    
+    requests = RegistrationRequest.query.order_by(RegistrationRequest.created_at.desc()).all()
+    return render_template('admin/registration_requests.html', requests=requests)
+
+@bp.route('/admin/approve-request/<int:request_id>')
+@login_required
+def admin_approve_request(request_id):
+    if current_user.role != 'admin':
+        abort(403)
+    
+    req = RegistrationRequest.query.get_or_404(request_id)
+    if req.status != 'pending':
+        flash('Эта заявка уже обработана', 'warning')
+        return redirect(url_for('main.admin_registration_requests'))
+    
+    # Активируем пользователя
+    user = User.query.get(req.user_id)
+    user.is_active = True
+    
+    # Создаём студента
+    student = Student(
+        user_id=user.id,
+        full_name=req.full_name,
+        group_name=req.group_name,
+        course=req.course,
+        phone=req.phone
+    )
+    db.session.add(student)
+    
+    # Обновляем заявку
+    req.status = 'approved'
+    req.reviewed_at = datetime.utcnow()
+    req.reviewed_by = current_user.id
+    
+    db.session.commit()
+    
+    # Создаём уведомление для студента
+    notification = Notification(
+        user_id=user.id,
+        title='Аккаунт активирован!',
+        message=f'Ваш аккаунт был утверждён администратором. Теперь вы можете войти в свой личный кабинет.',
+        link=url_for('auth.login', _external=True)
+    )
+    db.session.add(notification)
+    db.session.commit()
+    
+    flash(f'✅ Заявка {req.full_name} утверждена. Аккаунт активирован.', 'success')
+    return redirect(url_for('main.admin_registration_requests'))
+
+
+@bp.route('/admin/reject-request/<int:request_id>')
+@login_required
+def admin_reject_request(request_id):
+    if current_user.role != 'admin':
+        abort(403)
+    
+    req = RegistrationRequest.query.get_or_404(request_id)
+    if req.status != 'pending':
+        flash('Эта заявка уже обработана', 'warning')
+        return redirect(url_for('main.admin_registration_requests'))
+    
+    user = User.query.get(req.user_id)
+    
+    # Обновляем заявку
+    req.status = 'rejected'
+    req.reviewed_at = datetime.utcnow()
+    req.reviewed_by = current_user.id
+    
+    # Удаляем пользователя
+    db.session.delete(user)
+    
+    db.session.commit()
+    
+    flash(f'❌ Заявка {req.full_name} отклонена. Аккаунт удалён.', 'success')
+    return redirect(url_for('main.admin_registration_requests'))
+
+
+@bp.route('/auth/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter(
+            (User.username == form.username.data) | (User.email == form.username.data)
+        ).first()
+        
+        if user and user.check_password(form.password.data):
+            if not user.is_active:
+                flash('⚠️ Ваш аккаунт ещё не активирован. Дождитесь подтверждения администратором.', 'warning')
+                return redirect(url_for('auth.login'))
+            
+            login_user(user)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('main.index'))
+        else:
+            flash('Неверный логин или пароль', 'danger')
+    
+    return render_template('auth/login.html', form=form)
+
 
 # ==================== Личный кабинет студента ====================
 

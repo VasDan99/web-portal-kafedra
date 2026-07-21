@@ -12,12 +12,16 @@ class FeedbackForm(FlaskForm):
     submit = SubmitField('Отправить')
 
 
-# Форма регистрации
+# Форма регистрации (расширенная для самостоятельной регистрации)
 class RegistrationForm(FlaskForm):
     username = StringField('Логин', validators=[DataRequired(), Length(min=3, max=80)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Пароль', validators=[DataRequired(), Length(min=6)])
     password2 = PasswordField('Повторите пароль', validators=[DataRequired(), EqualTo('password')])
+    full_name = StringField('ФИО', validators=[DataRequired(), Length(min=2, max=150)])
+    group_name = StringField('Группа', validators=[DataRequired(), Length(min=2, max=50)])
+    course = SelectField('Курс', choices=[('1', '1 курс'), ('2', '2 курс'), ('3', '3 курс'), ('4', '4 курс')], validators=[DataRequired()])
+    phone = StringField('Телефон', validators=[Optional(), Length(max=20)])
     role = SelectField('Роль', choices=[('student', 'Студент'), ('teacher', 'Преподаватель')])
     submit = SubmitField('Зарегистрироваться')
 
@@ -118,7 +122,7 @@ class SendEmailForm(FlaskForm):
     submit = SubmitField('Отправить')
 
 
-# Форма отправки напоминания студенту
+# ========== ФОРМА ОТПРАВКИ НАПОМИНАНИЯ СТУДЕНТУ ==========
 class ReminderForm(FlaskForm):
     message = TextAreaField('Сообщение', validators=[DataRequired(), Length(min=5, max=1000)])
     submit = SubmitField('Отправить')
