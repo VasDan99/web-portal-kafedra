@@ -93,7 +93,7 @@ class SiteSettingsForm(FlaskForm):
     work_hours = StringField('Часы работы', validators=[Optional()])
     vk_url = StringField('ВКонтакте', validators=[Optional()])
     telegram_url = StringField('Telegram', validators=[Optional()])
-    max_url = StringField('MAX', validators=[Optional()])  # ← ДОБАВИТЬ ЭТУ СТРОКУ
+    max_url = StringField('MAX', validators=[Optional()])
     primary_color = StringField('Основной цвет', validators=[Optional()])
     secondary_color = StringField('Вторичный цвет', validators=[Optional()])
     accent_color = StringField('Акцентный цвет', validators=[Optional()])
@@ -102,17 +102,17 @@ class SiteSettingsForm(FlaskForm):
     submit = SubmitField('Сохранить настройки')
 
 
-# Форма профиля администратора
+# ========== ФОРМА ПРОФИЛЯ АДМИНИСТРАТОРА ==========
 class AdminProfileForm(FlaskForm):
-    username = StringField('Логин', validators=[DataRequired(), Length(min=3, max=80)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Новый пароль (оставьте пустым, чтобы не менять)')
-    confirm_password = PasswordField('Подтвердите пароль', validators=[EqualTo('password')])
-    submit = SubmitField('Сохранить профиль')
+    username = StringField('Логин', validators=[Optional(), Length(min=3, max=80)])
+    email = StringField('Email', validators=[Optional(), Email()])
+    password = PasswordField('Новый пароль', validators=[Optional(), Length(min=6)])
+    submit = SubmitField('Сохранить изменения')
 
-# Форма для отправки письма студенту
+
+# ========== ФОРМА ОТПРАВКИ EMAIL СТУДЕНТУ ==========
 class SendEmailForm(FlaskForm):
     student_email = StringField('Email студента', validators=[DataRequired(), Email()])
-    subject = StringField('Тема', validators=[DataRequired()])
-    message = TextAreaField('Сообщение', validators=[DataRequired()])
+    subject = StringField('Тема', validators=[DataRequired(), Length(min=3, max=200)])
+    message = TextAreaField('Сообщение', validators=[DataRequired(), Length(min=10, max=2000)])
     submit = SubmitField('Отправить')
