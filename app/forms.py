@@ -116,3 +116,9 @@ class SendEmailForm(FlaskForm):
     subject = StringField('Тема', validators=[DataRequired(), Length(min=3, max=200)])
     message = TextAreaField('Сообщение', validators=[DataRequired(), Length(min=10, max=2000)])
     submit = SubmitField('Отправить')
+
+
+# Форма отправки напоминания студенту
+class ReminderForm(FlaskForm):
+    message = TextAreaField('Сообщение', validators=[DataRequired(), Length(min=5, max=1000)])
+    submit = SubmitField('Отправить')

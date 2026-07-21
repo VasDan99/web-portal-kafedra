@@ -1,12 +1,10 @@
-from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News, User, \
-    SiteSettings, Notification
 from flask import render_template, redirect, url_for, flash, abort, request, send_file, session
 from flask_login import login_required, current_user
 from app.main import bp
 from app.forms import FeedbackForm, StudentProfileForm, TeacherProfileForm, WorkUploadForm, DocumentUploadForm, \
-    ChangePasswordForm, WorkMessageForm, SiteSettingsForm, AdminProfileForm
+    ChangePasswordForm, WorkMessageForm, SiteSettingsForm, AdminProfileForm, ReminderForm
 from app.models import Feedback, Student, Teacher, Discipline, Grade, Schedule, Document, WorkMessage, News, User, \
-    SiteSettings
+    SiteSettings, Notification
 from app import db
 import os
 from datetime import datetime
@@ -14,7 +12,6 @@ from io import BytesIO
 from docx import Document as DocxDocument
 from werkzeug.utils import secure_filename
 import markdown
-
 
 # ==================== Публичные страницы ====================
 
@@ -527,6 +524,27 @@ def student_settings():
     return render_template('cabinet/student_settings.html', breadcrumb_title='Настройки',
                            student=student, profile_form=profile_form, password_form=password_form)
 
+@bp.route('/cabinet/student/notifications')
+@login_required
+def student_notifications():
+    if current_user.role != 'student':
+        abort(403)
+    
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+    
+    # Отмечаем все как прочитанные
+    for n in notifications:
+        n.is_read = True
+    db.session.commit()
+    
+    # Получаем количество непрочитанных для отображения в шаблоне
+    unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    
+    return render_template('cabinet/student_notifications.html', 
+                           notifications=notifications,
+                           unread_notifications=unread_count,
+                           breadcrumb_title='Уведомления')
+
 
 # ==================== Личный кабинет преподавателя ====================
 
@@ -653,6 +671,46 @@ def teacher_reports():
 @bp.route('/cabinet/teacher/incomplete-reports')
 @login_required
 def teacher_incomplete_reports():
+@bp.route('/cabinet/teacher/send-reminder/<int:student_id>/<int:discipline_id>', methods=['GET', 'POST'])
+@login_required
+def teacher_send_reminder(student_id, discipline_id):
+    """Отправка личного напоминания студенту"""
+    if current_user.role != 'teacher':
+        abort(403)
+
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    if not teacher:
+        flash('Профиль преподавателя не найден', 'danger')
+        return redirect(url_for('main.teacher_incomplete_reports'))
+
+    student = Student.query.get_or_404(student_id)
+    discipline = Discipline.query.get_or_404(discipline_id)
+
+    if discipline.teacher_id != teacher.id:
+        abort(403)
+
+    form = ReminderForm()
+
+    if form.validate_on_submit():
+        # Создаём уведомление для студента
+        notification = Notification(
+            user_id=student.user_id,
+            title=f'Напоминание от преподавателя {teacher.full_name}',
+            message=form.message.data,
+            link=url_for('main.student_works', _external=True)
+        )
+        db.session.add(notification)
+        db.session.commit()
+
+        flash(f'✅ Напоминание отправлено студенту {student.full_name}', 'success')
+        return redirect(url_for('main.teacher_incomplete_reports'))
+
+    return render_template('cabinet/teacher/send_reminder.html',
+                           form=form,
+                           student=student,
+                           discipline=discipline,
+                           teacher=teacher)
+
     """Список незавершённых отчётов (FR-03)"""
     if current_user.role != 'teacher':
         abort(403)
