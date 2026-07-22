@@ -524,6 +524,28 @@ def student_settings():
     return render_template('cabinet/student_settings.html', breadcrumb_title='Настройки',
                            student=student, profile_form=profile_form, password_form=password_form)
 
+@bp.route('/cabinet/student/notifications')
+@login_required
+def student_notifications():
+    if current_user.role != 'student':
+        abort(403)
+    
+    student = Student.query.filter_by(user_id=current_user.id).first()
+    if not student:
+        flash('Профиль студента не найден', 'danger')
+        return redirect(url_for('main.student_profile'))
+    
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+    
+    for n in notifications:
+        n.is_read = True
+    db.session.commit()
+    
+    return render_template('cabinet/student_notifications.html', 
+                           notifications=notifications,
+                           student=student,
+                           breadcrumb_title='Уведомления')
+
 
 
 # ==================== Личный кабинет преподавателя ====================
