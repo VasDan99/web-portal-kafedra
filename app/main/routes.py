@@ -1757,3 +1757,67 @@ def admin_profile():
     form.email.data = current_user.email
 
     return render_template('admin/profile.html', breadcrumb_title='Профиль администратора', form=form)
+
+
+# Отчёты преподавателя
+@bp.route('/cabinet/teacher/reports')
+@login_required
+def teacher_reports():
+    if current_user.role != 'teacher':
+        abort(403)
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    reports = Report.query.filter_by(teacher_id=current_user.id).order_by(Report.created_at.desc()).all()
+    return render_template('cabinet/teacher/reports.html',
+                           breadcrumb_title='Отчёты',
+                           teacher=teacher,
+                           reports=reports)
+
+
+# Создание отчёта
+@bp.route('/cabinet/teacher/report/create', methods=['POST'])
+@login_required
+def teacher_create_report():
+    if current_user.role != 'teacher':
+        abort(403)
+
+    discipline_id = request.form.get('discipline_id')
+    group_name = request.form.get('group_name')
+
+    report = Report(
+        teacher_id=current_user.id,
+        discipline_id=discipline_id,
+        group_name=group_name,
+        status='draft'
+    )
+    db.session.add(report)
+    db.session.commit()
+
+    flash('Отчёт создан', 'success')
+    return redirect(url_for('main.teacher_reports'))
+
+
+# Отправка на проверку
+@bp.route('/cabinet/teacher/report/submit/<int:report_id>')
+@login_required
+def teacher_submit_report(report_id):
+    if current_user.role != 'teacher':
+        abort(403)
+
+    report = Report.query.get_or_404(report_id)
+    if report.teacher_id != current_user.id:
+        abort(403)
+
+    old_status = report.status
+    report.status = 'on_review'
+
+    log = ReportStatusLog(
+        report_id=report.id,
+        old_status=old_status,
+        new_status='on_review',
+        user_id=current_user.id
+    )
+    db.session.add(log)
+    db.session.commit()
+
+    flash('Отчёт отправлен на проверку', 'success')
+    return redirect(url_for('main.teacher_reports'))
