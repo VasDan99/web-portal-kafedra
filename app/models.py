@@ -13,7 +13,6 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(20), default='student')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -63,14 +62,11 @@ class Student(db.Model):
 
     def get_attendance_stats(self):
         """Статистика по дисциплинам: сдано/не сдано"""
-        # Получаем все дисциплины
         all_disciplines = Discipline.query.all()
         stats = {}
-
         for disc in all_disciplines:
             grades = Grade.query.filter_by(student_id=self.id, discipline_id=disc.id).all()
             if grades:
-                # Если есть хотя бы одна оценка — считаем, что дисциплина сдана
                 stats[disc.name] = {
                     'status': 'Сдана',
                     'grades': [g.grade_value for g in grades],
@@ -184,13 +180,11 @@ class Document(db.Model):
     discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'))
     is_public = db.Column(db.Boolean, default=False)
 
-    # ===== НОВЫЕ ПОЛЯ ДЛЯ ПРОВЕРКИ РАБОТ =====
-    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
-    review_comment = db.Column(db.Text)  # Комментарий преподавателя
-    reviewed_at = db.Column(db.DateTime)  # Дата проверки
-    reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'))  # Кто проверил
+    status = db.Column(db.String(20), default='pending')
+    review_comment = db.Column(db.Text)
+    reviewed_at = db.Column(db.DateTime)
+    reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    # Связи
     reviewer = db.relationship('User', foreign_keys=[reviewed_by], backref='reviewed_documents')
 
 
@@ -278,6 +272,7 @@ class SiteSettings(db.Model):
     about_text = db.Column(db.Text, default='')
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
 # Таблица 13: Уведомления
 class Notification(db.Model):
     __tablename__ = 'notifications'
@@ -287,6 +282,63 @@ class Notification(db.Model):
     message = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    link = db.Column(db.String(200))  # Ссылка на страницу (например, работы)
+    link = db.Column(db.String(200))
 
     user = db.relationship('User', backref='notifications')
+
+
+# ==================== НОВЫЕ МОДЕЛИ ДЛЯ ОТЧЁТНОСТИ ====================
+
+# Таблица 14: Отчёты по успеваемости
+class Report(db.Model):
+    __tablename__ = 'reports'
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'), nullable=False)
+    group_name = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='draft')  # draft, on_review, approved, rejected
+    average_score = db.Column(db.Float)
+    success_rate = db.Column(db.Float)
+    debt_count = db.Column(db.Integer, default=0)
+
+    teacher = db.relationship('User', foreign_keys=[teacher_id], backref='reports')
+    discipline = db.relationship('Discipline', backref='reports')
+
+
+# Таблица 15: Журнал изменений статусов отчётов
+class ReportStatusLog(db.Model):
+    __tablename__ = 'report_status_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    report_id = db.Column(db.Integer, db.ForeignKey('reports.id'), nullable=False)
+    old_status = db.Column(db.String(20))
+    new_status = db.Column(db.String(20), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    changed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    report = db.relationship('Report', backref='status_logs')
+    user = db.relationship('User', backref='status_changes')
+
+
+# Таблица 16: Комментарии к отчётам
+class ReportComment(db.Model):
+    __tablename__ = 'report_comments'
+    id = db.Column(db.Integer, primary_key=True)
+    report_id = db.Column(db.Integer, db.ForeignKey('reports.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    report = db.relationship('Report', backref='comments')
+    user = db.relationship('User', backref='report_comments')
+
+
+# Таблица 17: Связь преподавателей и дисциплин (многие ко многим)
+class TeacherDiscipline(db.Model):
+    __tablename__ = 'teacher_disciplines'
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    discipline_id = db.Column(db.Integer, db.ForeignKey('disciplines.id'), nullable=False)
+
+    teacher = db.relationship('User', backref='teacher_disciplines')
+    discipline = db.relationship('Discipline', backref='teacher_disciplines')
