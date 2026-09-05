@@ -13,6 +13,7 @@ from docx import Document as DocxDocument
 from werkzeug.utils import secure_filename
 import markdown
 
+
 # ==================== Публичные страницы ====================
 
 @bp.route('/')
@@ -126,11 +127,6 @@ def admin():
     if current_user.role != 'admin':
         abort(403)
     return redirect(url_for('main.admin_dashboard'))
-
-
-# ==================== Регистрация и заявки ====================
-
-
 
 
 # ==================== Личный кабинет студента ====================
@@ -312,7 +308,7 @@ def student_works_upload():
 
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
     return render_template('cabinet/student_works.html', breadcrumb_title='Мои работы',
-                         student=student, form=form, works=works, disciplines=disciplines)
+                           student=student, form=form, works=works, disciplines=disciplines)
 
 
 @bp.route('/cabinet/student/work/delete/<int:work_id>')
@@ -524,28 +520,28 @@ def student_settings():
     return render_template('cabinet/student_settings.html', breadcrumb_title='Настройки',
                            student=student, profile_form=profile_form, password_form=password_form)
 
+
 @bp.route('/cabinet/student/notifications')
 @login_required
 def student_notifications():
     if current_user.role != 'student':
         abort(403)
-    
+
     student = Student.query.filter_by(user_id=current_user.id).first()
     if not student:
         flash('Профиль студента не найден', 'danger')
         return redirect(url_for('main.student_profile'))
-    
+
     notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
-    
+
     for n in notifications:
         n.is_read = True
     db.session.commit()
-    
-    return render_template('cabinet/student_notifications.html', 
+
+    return render_template('cabinet/student_notifications.html',
                            notifications=notifications,
                            student=student,
                            breadcrumb_title='Уведомления')
-
 
 
 # ==================== Личный кабинет преподавателя ====================
@@ -601,7 +597,8 @@ def teacher_students_works():
         student = Student.query.get(work.uploaded_by)
         discipline = Discipline.query.get(work.discipline_id)
 
-        print(f"DEBUG: work.id={work.id}, uploaded_by={work.uploaded_by}, student.full_name={student.full_name if student else 'None'}")
+        print(
+            f"DEBUG: work.id={work.id}, uploaded_by={work.uploaded_by}, student.full_name={student.full_name if student else 'None'}")
 
         status = work.status if hasattr(work, 'status') and work.status else 'pending'
 
@@ -666,7 +663,11 @@ def teacher_reports():
     if current_user.role != 'teacher':
         abort(403)
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
-    return render_template('cabinet/teacher/reports.html', breadcrumb_title='Отчёты', teacher=teacher)
+    reports = Report.query.filter_by(teacher_id=current_user.id).order_by(Report.created_at.desc()).all()
+    return render_template('cabinet/teacher/reports.html',
+                           breadcrumb_title='Отчёты',
+                           teacher=teacher,
+                           reports=reports)
 
 
 @bp.route('/cabinet/teacher/incomplete-reports')
@@ -1757,67 +1758,3 @@ def admin_profile():
     form.email.data = current_user.email
 
     return render_template('admin/profile.html', breadcrumb_title='Профиль администратора', form=form)
-
-
-# Отчёты преподавателя
-@bp.route('/cabinet/teacher/reports')
-@login_required
-def teacher_reports():
-    if current_user.role != 'teacher':
-        abort(403)
-    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
-    reports = Report.query.filter_by(teacher_id=current_user.id).order_by(Report.created_at.desc()).all()
-    return render_template('cabinet/teacher/reports.html',
-                           breadcrumb_title='Отчёты',
-                           teacher=teacher,
-                           reports=reports)
-
-
-# Создание отчёта
-@bp.route('/cabinet/teacher/report/create', methods=['POST'])
-@login_required
-def teacher_create_report():
-    if current_user.role != 'teacher':
-        abort(403)
-
-    discipline_id = request.form.get('discipline_id')
-    group_name = request.form.get('group_name')
-
-    report = Report(
-        teacher_id=current_user.id,
-        discipline_id=discipline_id,
-        group_name=group_name,
-        status='draft'
-    )
-    db.session.add(report)
-    db.session.commit()
-
-    flash('Отчёт создан', 'success')
-    return redirect(url_for('main.teacher_reports'))
-
-
-# Отправка на проверку
-@bp.route('/cabinet/teacher/report/submit/<int:report_id>')
-@login_required
-def teacher_submit_report(report_id):
-    if current_user.role != 'teacher':
-        abort(403)
-
-    report = Report.query.get_or_404(report_id)
-    if report.teacher_id != current_user.id:
-        abort(403)
-
-    old_status = report.status
-    report.status = 'on_review'
-
-    log = ReportStatusLog(
-        report_id=report.id,
-        old_status=old_status,
-        new_status='on_review',
-        user_id=current_user.id
-    )
-    db.session.add(log)
-    db.session.commit()
-
-    flash('Отчёт отправлен на проверку', 'success')
-    return redirect(url_for('main.teacher_reports'))
