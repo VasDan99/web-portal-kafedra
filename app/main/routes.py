@@ -241,12 +241,6 @@ def student_works():
     student = Student.query.filter_by(user_id=current_user.id).first()
     works = Document.query.filter_by(uploaded_by=current_user.id).all()
 
-    print("=== student_works ===")
-    print("Текущий пользователь ID:", current_user.id)
-    print("Найдено работ:", len(works))
-    for w in works:
-        print(f"  ID: {w.id}, Название: {w.title}, Статус: {w.status}")
-
     form = WorkUploadForm()
     disciplines = Discipline.query.all()
     form.discipline_id.choices = [(d.id, d.name) for d in disciplines]
@@ -257,10 +251,6 @@ def student_works():
 @bp.route('/cabinet/student/works/upload', methods=['GET', 'POST'])
 @login_required
 def student_works_upload():
-    print("=== НАЧАЛО student_works_upload ===")
-    print("Метод:", request.method)
-    print("Текущий пользователь ID:", current_user.id)
-
     if current_user.role != 'student':
         abort(403)
     student = Student.query.filter_by(user_id=current_user.id).first()
@@ -270,22 +260,21 @@ def student_works_upload():
     form.discipline_id.choices = [(d.id, d.name) for d in disciplines]
 
     if form.validate_on_submit():
-        print("=== ФОРМА ВАЛИДНА ===")
-        print("Название:", form.title.data)
-        print("Дисциплина ID:", form.discipline_id.data)
-        print("Файл:", form.file.data.filename if form.file.data else 'Нет файла')
-
         file = form.file.data
-        filename = f'work_{current_user.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+
+        # Берём расширение из ОРИГИНАЛЬНОГО имени (secure_filename ломает кириллицу)
+        file_ext = os.path.splitext(file.filename)[1].lower()
+
+        if file_ext not in ['.pdf', '.docx', '.xlsx']:
+            flash(f'Недопустимый формат файла: {file_ext}. Разрешены только PDF, DOCX, XLSX.', 'danger')
+            return redirect(url_for('main.student_works'))
+
+        filename = f'work_{current_user.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}{file_ext}'
         os.makedirs('app/static/uploads/works', exist_ok=True)
         filepath = os.path.join('app/static/uploads/works', filename)
         file.save(filepath)
 
-        file_type = 'pdf'
-        if filename.endswith('.docx'):
-            file_type = 'docx'
-        elif filename.endswith('.xlsx'):
-            file_type = 'xlsx'
+        file_type = file_ext.lstrip('.')   # 'pdf' / 'docx' / 'xlsx'
 
         work = Document(
             title=form.title.data,
@@ -299,7 +288,6 @@ def student_works_upload():
         )
         db.session.add(work)
         db.session.commit()
-        print("=== РАБОТА СОХРАНЕНА! ID:", work.id)
         flash('Работа успешно загружена!', 'success')
         return redirect(url_for('main.student_works'))
     else:
@@ -327,6 +315,53 @@ def student_work_delete(work_id):
     return redirect(url_for('main.student_works'))
 
 
+# ==================== Принудительное скачивание ====================
+
+@bp.route('/cabinet/download/<int:doc_id>')
+@login_required
+def download_document(doc_id):
+    """Принудительное скачивание файла (attachment, а не inline)"""
+    doc = Document.query.get_or_404(doc_id)
+
+    # --- Проверка прав ---
+    can_download = False
+
+    if current_user.role == 'admin':
+        can_download = True
+    elif doc.uploaded_by == current_user.id:
+        can_download = True
+    elif current_user.role == 'teacher':
+        teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+        if teacher:
+            if doc.discipline_id:
+                discipline = Discipline.query.get(doc.discipline_id)
+                if discipline and discipline.teacher_id == teacher.id:
+                    can_download = True
+            else:
+                # Личный документ студента — преподаватель тоже может скачать
+                can_download = True
+
+    if not can_download:
+        abort(403)
+
+    # --- Безопасное формирование пути (защита от path traversal) ---
+    base_dir = os.path.abspath(os.path.join('app', 'static', 'uploads'))
+    filepath = os.path.abspath(os.path.join('app', doc.file_path.lstrip('/')))
+
+    if not filepath.startswith(base_dir):
+        abort(403)
+
+    if not os.path.exists(filepath):
+        flash('Файл не найден на сервере', 'danger')
+        return redirect(url_for('main.index'))
+
+    return send_file(
+        filepath,
+        as_attachment=True,
+        download_name=doc.filename
+    )
+
+
 @bp.route('/cabinet/student/achievements')
 @login_required
 def student_achievements():
@@ -345,7 +380,7 @@ def student_teachers():
     student = Student.query.filter_by(user_id=current_user.id).first()
     if not student:
         flash('Профиль студента не найден', 'danger')
-        return redirect(url_for('main.cabinet'))
+        return redirect(url_for('main.student_profile'))
 
     teachers = Teacher.query.all()
     disciplines = Discipline.query.all()
@@ -409,7 +444,17 @@ def student_documents_upload():
 
     if form.validate_on_submit():
         file = form.file.data
-        filename = f'doc_{current_user.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{file.filename}'
+
+        # Берём расширение из ОРИГИНАЛЬНОГО имени
+        file_ext = os.path.splitext(file.filename)[1].lower()
+
+        if file_ext not in ['.pdf', '.docx', '.xlsx', '.jpg', '.jpeg', '.png']:
+            flash(f'Недопустимый формат файла: {file_ext}', 'danger')
+            return redirect(url_for('main.student_documents'))
+
+        # Безопасное имя БЕЗ кириллицы
+        safe_base = secure_filename(os.path.splitext(file.filename)[0]) or 'document'
+        filename = f'doc_{current_user.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}_{safe_base}{file_ext}'
         os.makedirs('app/static/uploads/documents', exist_ok=True)
         filepath = os.path.join('app/static/uploads/documents', filename)
         file.save(filepath)
@@ -594,11 +639,8 @@ def teacher_students_works():
 
     works_data = []
     for work in works_query:
-        student = Student.query.get(work.uploaded_by)
+        student = Student.query.filter_by(user_id=work.uploaded_by).first()
         discipline = Discipline.query.get(work.discipline_id)
-
-        print(
-            f"DEBUG: work.id={work.id}, uploaded_by={work.uploaded_by}, student.full_name={student.full_name if student else 'None'}")
 
         status = work.status if hasattr(work, 'status') and work.status else 'pending'
 
@@ -799,35 +841,22 @@ def teacher_profile_edit():
     if current_user.role != 'teacher':
         abort(403)
 
-    print("=== ОТЛАДКА ===")
-    print("Метод:", request.method)
-    print("Файлы:", request.files)
-
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
     form = TeacherProfileForm()
 
     if request.method == 'POST':
-        print("Это POST запрос")
         if 'avatar' in request.files:
-            print("Аватар найден в request.files!")
             avatar_file = request.files['avatar']
-            print(f"Имя файла: {avatar_file.filename}")
             if avatar_file.filename:
                 filename = f'teacher_avatar_{current_user.id}.jpg'
                 os.makedirs('app/static/uploads/avatars', exist_ok=True)
                 filepath = os.path.join('app/static/uploads/avatars', filename)
                 avatar_file.save(filepath)
                 teacher.avatar = f'/static/uploads/avatars/{filename}'
-                print(f"Файл сохранён: {filepath}")
                 db.session.commit()
                 flash('Аватар загружен!', 'success')
-            else:
-                print("Имя файла пустое!")
-        else:
-            print("Аватар НЕ найден в request.files!")
 
     if form.validate_on_submit():
-        print("Форма валидна")
         teacher.full_name = form.full_name.data
         teacher.department = form.department.data
         teacher.position = form.position.data
@@ -903,7 +932,7 @@ def teacher_work_chat(work_id):
 
     work = Document.query.get_or_404(work_id)
     teacher = Teacher.query.filter_by(user_id=current_user.id).first()
-    student = Student.query.get(work.uploaded_by)
+    student = Student.query.filter_by(user_id=work.uploaded_by).first()
 
     discipline = Discipline.query.get(work.discipline_id)
     if discipline.teacher_id != teacher.id:
